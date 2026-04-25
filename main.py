@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +9,10 @@ from app import models
 from app.database import engine
 from app.routers import auth, user_profile, ai, nutrition, camera_workout
 from app.routers import habit_reminders
+
+
+# Нужно для Render: создаём static/avatars, если папки нет
+os.makedirs("static/avatars", exist_ok=True)
 
 models.Base.metadata.create_all(bind=engine)
 
