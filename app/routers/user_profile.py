@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ai_engine.scripts import ai_logic
+try:
+    from ai_engine.scripts import ai_logic
+except Exception as e:
+    ai_logic = None
+    print(f"AI logic import disabled: {e}")
 from app import models, schemas
 from app.database import get_db
 from datetime import date
