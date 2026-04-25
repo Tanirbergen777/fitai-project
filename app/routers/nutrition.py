@@ -1,15 +1,70 @@
 from datetime import date, datetime
-from ai_engine.scripts.nutrition_ml import predict_food_probability, build_feature_row
+try:
+    from ai_engine.scripts.nutrition_ml import predict_food_probability, build_feature_row
+except Exception as e:
+    predict_food_probability = None
+    build_feature_row = None
+    print(f"Nutrition ML import disabled: {e}")
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
-from ai_engine.scripts.nutrition_catalog import (
-    NUTRITION_CATALOG,
-    get_current_meal_slot,
-    parse_csv,
-)
+try:
+    from ai_engine.scripts.nutrition_catalog import (
+        NUTRITION_CATALOG,
+        get_current_meal_slot,
+        parse_csv,
+    )
+except Exception as e:
+    print(f"Nutrition catalog import disabled: {e}")
+
+    NUTRITION_CATALOG = [
+        {
+            "id": 1,
+            "name": "Овсянка с бананом",
+            "calories": 350,
+            "protein": 10,
+            "fat": 7,
+            "carbs": 60,
+            "meal_slots": ["breakfast", "snack"],
+            "preference_tags": ["healthy", "budget"],
+            "allergens": [],
+            "reason": "Жеңіл әрі пайдалы таңғы ас.",
+        },
+        {
+            "id": 2,
+            "name": "Курица с рисом",
+            "calories": 520,
+            "protein": 38,
+            "fat": 12,
+            "carbs": 65,
+            "meal_slots": ["lunch", "dinner"],
+            "preference_tags": ["protein", "fitness"],
+            "allergens": [],
+            "reason": "Ақуызға бай, жаттығудан кейін жақсы келеді.",
+        },
+        {
+            "id": 3,
+            "name": "Творог с ягодами",
+            "calories": 280,
+            "protein": 24,
+            "fat": 6,
+            "carbs": 30,
+            "meal_slots": ["snack", "late"],
+            "preference_tags": ["protein", "light"],
+            "allergens": ["milk"],
+            "reason": "Жеңіл snack және ақуыз көзі.",
+        },
+    ]
+
+    def parse_csv(value):
+        if not value:
+            return []
+        return [item.strip() for item in value.split(",") if item.strip()]
+
+    def get_current_meal_slot(profile):
+        return "snack"
 router = APIRouter(prefix="/nutrition", tags=["Nutrition"])
 
 
