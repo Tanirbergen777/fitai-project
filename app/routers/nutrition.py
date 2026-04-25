@@ -2,9 +2,39 @@ from datetime import date, datetime
 try:
     from ai_engine.scripts.nutrition_ml import predict_food_probability, build_feature_row
 except Exception as e:
-    predict_food_probability = None
-    build_feature_row = None
     print(f"Nutrition ML import disabled: {e}")
+
+    def build_feature_row(
+        food,
+        goal,
+        meal_slot,
+        budget,
+        late_meals,
+        cooking_mode,
+        meals_per_day,
+        preference,
+        allergy,
+        already_selected_today,
+    ):
+        return {
+            "food_id": food.get("id"),
+            "goal": goal,
+            "meal_slot": meal_slot,
+            "budget": budget,
+            "late_meals": late_meals,
+            "cooking_mode": cooking_mode,
+            "meals_per_day": meals_per_day,
+            "preference": preference,
+            "allergy": allergy,
+            "already_selected_today": already_selected_today,
+            "calories": food.get("calories", 0),
+            "protein": food.get("protein", 0),
+            "fat": food.get("fat", 0),
+            "carbs": food.get("carbs", 0),
+        }
+
+    def predict_food_probability(feature_row):
+        return 0.5
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
@@ -28,8 +58,10 @@ except Exception as e:
             "fat": 7,
             "carbs": 60,
             "meal_slots": ["breakfast", "snack"],
+            "goal_tags": ["lose_weight", "gain_mass", "healthy", "maintain", "general", "lose", "mass"],
             "preference_tags": ["healthy", "budget"],
             "allergens": [],
+            "recipe": "Овсянканы сүтпен немесе сумен пісіріп, үстіне банан қос.",
             "reason": "Жеңіл әрі пайдалы таңғы ас.",
         },
         {
@@ -40,8 +72,10 @@ except Exception as e:
             "fat": 12,
             "carbs": 65,
             "meal_slots": ["lunch", "dinner"],
+            "goal_tags": ["lose_weight", "gain_mass", "healthy", "maintain", "general", "lose", "mass"],
             "preference_tags": ["protein", "fitness"],
             "allergens": [],
+            "recipe": "Күрішті пісіріп, тауық етін қайнатып немесе қуырып дайында.",
             "reason": "Ақуызға бай, жаттығудан кейін жақсы келеді.",
         },
         {
@@ -52,8 +86,10 @@ except Exception as e:
             "fat": 6,
             "carbs": 30,
             "meal_slots": ["snack", "late"],
+            "goal_tags": ["lose_weight", "gain_mass", "healthy", "maintain", "general", "lose", "mass"],
             "preference_tags": ["protein", "light"],
             "allergens": ["milk"],
+            "recipe": "Творогқа жидек қосып, жеңіл snack ретінде жеуге болады.",
             "reason": "Жеңіл snack және ақуыз көзі.",
         },
     ]
