@@ -1,0 +1,1986 @@
+{
+  "menu": {
+    "main": "Home",
+    "profile": "Profile",
+    "knowledge": "Knowledge",
+    "nutrition": "Nutrition",
+    "training": "Training",
+    "ai": "AI Assistant",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "subtitle": "Where do we begin?.",
+    "nutrition_desc": "Your diet and macros",
+    "training_desc": "Workout plan for today",
+    "knowledge_desc": "Articles and video lessons",
+    "ai_desc": "Ask a question to the coach",
+    "current_status": "Your current status",
+    "analyzing": "Analyzing..."
+  },
+  "nutritionPage": {
+    "badge": "Nutrition Hub",
+    "title": "Nutrition",
+    "subtitle": "Choose the section you need: mass gain, weight loss, maintaining shape, or AI food selection.",
+    "cards": {
+      "gain": {
+        "title": "Food for mass gain",
+        "text": "Calorie-dense and healthy meals for muscle growth and energy."
+      },
+      "lose": {
+        "title": "Food for weight loss",
+        "text": "Light meals with calorie control for losing weight."
+      },
+      "healthy": {
+        "title": "Nutrition for maintaining shape",
+        "text": "Balanced food options for every day."
+      },
+      "ai": {
+        "title": "Pick food through AI",
+        "text": "Personalized food suggestions based on your goal, time, and profile."
+      }
+    }
+  },
+  "profile": {
+    "edit_profile_title": "Edit Profile",
+    "label_username": "Username",
+    "placeholder_name": "Enter name",
+    "label_birthdate": "Birth date",
+    "save_changes": "SAVE CHANGES",
+    "streak": "Streak Mode",
+    "rating": "Experience Points",
+    "your_current_goal": "YOUR CURRENT GOAL",
+    "edit_profile": "EDIT PROFILE",
+    "stats": "Statistics",
+    "gender_male": "Male",
+    "gender_female": "Female",
+    "gender_not_specified": "Not specified",
+    "age_not_specified": "Age not specified",
+    "years_count": "years",
+    "followings": "followings",
+    "followers": "followers",
+    "add_friends_title": "Add Friends",
+    "add_friends_desc": "Add friends to compete together!",
+    "find_friends": "Find friends",
+    "invite_friends": "Invite friends"
+  },
+  "auth": {
+    "back_to_main": "Back to Home",
+    "status_loading": "Loading...",
+    "status_error": "Connection error",
+    "login_title": "Sign In",
+    "email_placeholder": "Enter your email",
+    "login_submit": "Login",
+    "register_title": "Registration",
+    "first_name_placeholder": "First name",
+    "last_name_placeholder": "Last name",
+    "email_label": "Email",
+    "birth_date_label": "Date of birth",
+    "day_placeholder": "Day",
+    "month_placeholder": "Month",
+    "year_placeholder": "Year",
+    "gender_label": "Gender",
+    "gender_select": "Select gender",
+    "gender_male": "Male",
+    "gender_female": "Female",
+    "password_label": "Password",
+    "password_placeholder": "Password",
+    "password_requirements": "Minimum 8 characters, 1 digit and 1 special symbol",
+    "confirm_password_label": "Confirm password",
+    "confirm_password_placeholder": "Repeat password",
+    "register_submit": "Create account",
+    "have_account": "I already have an account",
+    "no_account": "No account? Sign up",
+    "password_error_short": "Password must be at least 8 characters long",
+    "password_error_letter": "Password must contain at least one letter",
+    "password_error_digit": "Password must contain at least one digit",
+    "password_error_special": "Password must contain at least one special symbol",
+    "password_mismatch": "Passwords do not match",
+    "birth_date_required": "Please select your full date of birth",
+    "register_error": "Registration error",
+    "code_sent_email": "Code sent to your email!",
+    "error_prefix": "Error",
+    "status_analyzing": "AI is analyzing your parameters...",
+    "profile_created": "Profile created!",
+    "status_signing_in": "Signing in...",
+    "welcome_back": "Welcome back",
+    "server_error": "Server connection error",
+    "status_sending_code": "Sending code...",
+    "send_code_error": "Error sending code",
+    "password_reset_success": "Password changed successfully",
+    "reset_error": "Password reset error",
+    "status_verifying": "Verifying code...",
+    "email_verified": "Email verified! Please sign in.",
+    "verify_error": "Verification error",
+    "forgot_password": "Forgot password?",
+    "forgot_title": "Password recovery",
+    "forgot_description": "Enter your email and we will send a reset code.",
+    "send_code": "Send code",
+    "back_to_login": "Back to login",
+    "reset_title": "Reset password",
+    "reset_description": "We sent a code to",
+    "reset_code_placeholder": "Enter 6-digit code",
+    "new_password_placeholder": "New password",
+    "reset_submit": "Save new password",
+    "verify_title": "Verification",
+    "verify_description": "We sent a code to",
+    "verify_code_placeholder": "Enter 6-digit code",
+    "verify_submit": "Verify email",
+    "spam_hint": "Didn't get the email? Check your Spam folder.",
+    "month_january": "January",
+    "month_february": "February",
+    "month_march": "March",
+    "month_april": "April",
+    "month_may": "May",
+    "month_june": "June",
+    "month_july": "July",
+    "month_august": "August",
+    "month_september": "September",
+    "month_october": "October",
+    "month_november": "November",
+    "month_december": "December"
+  },
+  "landing": {
+    "title": "Your personal path to the ideal body",
+    "subtitle": "Use the power of artificial intelligence to create personalized workout and nutrition plans. Start changing today.",
+    "register_btn": "Register",
+    "login_btn": "I already have an account",
+    "footer": "© 2026 FitAI Assistant. Made with care for your health."
+  },
+  "modal": {
+    "delete_title": "Delete this chat?",
+    "delete_desc": "This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "success": "Success!",
+    "back": "Back",
+    "start": "Start",
+    "confirm": "Confirm",
+    "complete": "Execute",
+    "cancel": "Cancel"
+  },
+  "nutrition": {
+    "labels": {
+      "calories": "Calories",
+      "protein": "Protein",
+      "fat": "Fat",
+      "carbs": "Carbs",
+      "grams": "g",
+      "kcal": "kcal"
+    },
+    "massGain": {
+      "title": "Food for mass gain",
+      "subtitle": "Higher-calorie meal options with a solid balance of protein and carbohydrates.",
+      "selectButton": "Select",
+      "mealTimes": {
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "snack": "Snack"
+      },
+      "messages": {
+        "userNotFound": "User ID was not found.",
+        "selected": "You selected: {{name}}",
+        "alreadySelected": "You already selected \"{{name}}\" today. For mass gain, it is better to rotate meals sometimes so the diet stays more varied.",
+        "saveError": "Error while saving the selected meal."
+      },
+      "foods": {
+        "oatmeal_banana_nuts": {
+          "name": "Oatmeal with banana and nuts",
+          "recipe": "Cook oatmeal, add banana, nuts, and a little honey."
+        },
+        "rice_chicken": {
+          "name": "Rice with chicken",
+          "recipe": "Boil rice, cook chicken, and add vegetables."
+        },
+        "pasta_beef": {
+          "name": "Pasta with beef",
+          "recipe": "Boil pasta and serve it with cooked beef."
+        },
+        "buckwheat_eggs": {
+          "name": "Buckwheat with eggs",
+          "recipe": "Boil buckwheat and add boiled or fried eggs."
+        },
+        "cottage_cheese_banana": {
+          "name": "Cottage cheese with banana",
+          "recipe": "Mix cottage cheese with banana and add a little honey if you want."
+        },
+        "potato_turkey": {
+          "name": "Potatoes with turkey",
+          "recipe": "Bake potatoes and turkey, then serve with greens."
+        }
+      }
+    },
+    "loseWeight": {
+      "title": "Food for weight loss",
+      "subtitle": "Lighter meal options with calorie control and good satiety.",
+      "selectButton": "Select",
+      "mealTimes": {
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "snack": "Snack"
+      },
+      "messages": {
+        "userNotFound": "User ID was not found.",
+        "selected": "You selected: {{name}}",
+        "alreadySelected": "You already selected \"{{name}}\" today. For a more balanced diet, it is better not to repeat the same meal too often.",
+        "saveError": "Error while saving the selected meal."
+      },
+      "foods": {
+        "omelet_vegetables": {
+          "name": "Omelet with vegetables",
+          "recipe": "Make an omelet from 2 eggs and add tomatoes, spinach, and pepper."
+        },
+        "chicken_salad": {
+          "name": "Chicken with salad",
+          "recipe": "Bake chicken and serve it with a large vegetable salad."
+        },
+        "cottage_cheese_berries": {
+          "name": "Cottage cheese with berries",
+          "recipe": "Mix cottage cheese with berries without added sugar."
+        },
+        "buckwheat_turkey": {
+          "name": "Buckwheat with turkey",
+          "recipe": "Boil buckwheat and serve it with turkey pieces."
+        },
+        "fish_vegetables": {
+          "name": "Fish with vegetables",
+          "recipe": "Bake fish and add stewed or fresh vegetables."
+        },
+        "yogurt_apple": {
+          "name": "Yogurt and apple",
+          "recipe": "Take natural sugar-free yogurt and an apple."
+        }
+      }
+    },
+    "healthy": {
+      "title": "Nutrition for maintaining shape",
+      "subtitle": "Simple healthy rules and balanced habits for daily life.",
+      "rules": {
+        "balanced_breakfast": {
+          "title": "Balanced breakfast",
+          "text": "Start the day with a normal breakfast so your energy and focus are more stable."
+        },
+        "lunch_energy": {
+          "title": "A proper lunch for energy",
+          "text": "Lunch should support the second half of the day, not make you feel heavy and sleepy."
+        },
+        "light_dinner": {
+          "title": "Light dinner",
+          "text": "Dinner can be satisfying without being too heavy, so the body recovers more calmly."
+        },
+        "healthy_snack": {
+          "title": "Healthy snack",
+          "text": "A small balanced snack helps you avoid chaotic overeating later."
+        },
+        "maintain_shape": {
+          "title": "Keep shape through consistency",
+          "text": "Maintaining shape is usually about consistency, not strict extremes."
+        },
+        "daily_routine": {
+          "title": "Daily nutrition rhythm",
+          "text": "A steady eating rhythm often helps energy, mood, and discipline."
+        }
+      }
+    },
+    "ai": {
+      "badge": "AI Nutrition",
+      "title": "Food selection through AI",
+      "subtitle": "Recommendations are now calculated on the server based on your survey, time, and nutrition history.",
+      "loadingTitle": "Loading nutrition data...",
+      "fitsNow": "Fits now",
+      "reasonLabel": "Why recommended",
+      "todaySelectedTitle": "Already selected today:",
+      "recommendationsTitle": "Recommendations for right now",
+      "recommendationsSubtitle": "The server has identified the current meal window as: {{slot}}.",
+      "selectDishButton": "Select this meal",
+      "goalLabels": {
+        "gain_mass": "Mass gain",
+        "lose_weight": "Weight loss",
+        "keep_fit": "Maintaining shape"
+      },
+      "slotLabels": {
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "snack": "Snack",
+        "dinner": "Dinner",
+        "late": "Late meal"
+      },
+      "budgetLabels": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high"
+      },
+      "summary": {
+        "goal": "Goal",
+        "currentSlot": "Now",
+        "mealsPerDay": "Meals per day",
+        "budget": "Budget",
+        "notSpecified": "Not specified"
+      },
+      "actions": {
+        "editSurvey": "Edit survey",
+        "clearTodayHistory": "Clear today's history"
+      },
+      "messages": {
+        "userNotFound": "User ID was not found.",
+        "profileSaved": "Nutrition survey saved successfully.",
+        "profileSaveError": "Error while saving the survey.",
+        "selected": "Selected: {{name}}",
+        "alreadySelected": "You already selected \"{{name}}\" today. To keep variety, the system will try to suggest another option.",
+        "foodSaveError": "Error while saving the selected meal.",
+        "historyCleared": "Today's nutrition history has been cleared.",
+        "historyClearError": "Could not clear today's nutrition history."
+      },
+      "emptyRecommendations": "No meals could be selected for the current conditions yet."
+    },
+    "survey": {
+      "badge": "AI Nutrition Survey",
+      "title": "Nutrition survey",
+      "subtitle": "Fill out your profile once, and AI will choose meals based on your goal, time, and preferences.",
+      "errors": {
+        "chooseGoal": "Choose your nutrition goal."
+      },
+      "steps": {
+        "goal": {
+          "title": "Your goal",
+          "text": "Choose the main goal so the system understands the nutrition direction."
+        },
+        "preferences": {
+          "title": "Preferences and restrictions",
+          "text": "This data helps avoid unsuitable food suggestions."
+        },
+        "schedule": {
+          "title": "Nutrition schedule",
+          "text": "AI will take your routine and time of day into account."
+        }
+      },
+      "sections": {
+        "preferences": "Food preferences",
+        "allergies": "Allergies or restrictions"
+      },
+      "goalOptions": {
+        "gain_mass": "Gain mass",
+        "lose_weight": "Lose weight",
+        "keep_fit": "Maintain shape"
+      },
+      "budgetOptions": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "preferenceOptions": {
+        "high_protein": "More protein",
+        "balanced": "Balanced",
+        "low_carb": "Fewer carbs",
+        "quick_meals": "Quick meals",
+        "vegetarian": "Vegetarian",
+        "no_sugar": "Less sugar"
+      },
+      "allergyOptions": {
+        "nuts": "Nuts",
+        "milk": "Milk",
+        "eggs": "Eggs",
+        "gluten": "Gluten",
+        "fish": "Fish",
+        "seafood": "Seafood"
+      },
+      "fields": {
+        "mealsPerDay": "How many meals per day",
+        "budget": "Budget",
+        "breakfastTime": "Breakfast time",
+        "lunchTime": "Lunch time",
+        "dinnerTime": "Dinner time",
+        "cookingMode": "How you usually eat",
+        "lateMeals": "Late meals",
+        "dislikedFoods": "What you do not like to eat",
+        "dislikedFoodsPlaceholder": "For example: mushrooms, liver, broccoli..."
+      },
+      "cookingModeOptions": {
+        "cook": "I cook myself",
+        "order": "I mostly order food",
+        "both": "Both"
+      },
+      "lateMealsOptions": {
+        "avoid": "I try to avoid them",
+        "sometimes": "Sometimes I eat late",
+        "okay": "Late meals are okay for me"
+      },
+      "actions": {
+        "next": "Next",
+        "save": "Save survey",
+        "saving": "Saving..."
+      }
+    }
+  },
+  "level": {
+    "medium": "Medium"
+  },
+  "training": {
+    "aiCounterLabel": "AI Counter",
+    "badge": "Your activity",
+    "heroSubtitle": "Choose a goal and start your personal workout",
+    "program": "Program",
+    "programDescription": "A balanced workout plan for today based on your goal",
+    "plan": "Workout plan",
+    "minutes": "min",
+    "duration": "Duration",
+    "volume": "Volume",
+    "intensity": "Intensity",
+    "exercisesCount": "ex.",
+    "currentExercise": "Current exercise",
+    "defaultDescription": "Perform the exercise with proper form and control your breathing.",
+    "skip": "Skip",
+    "done": "Done",
+    "restMode": "Rest mode",
+    "restTitle": "Rest",
+    "seconds": "sec",
+    "nextExercise": "Next exercise",
+    "finish": "Finish",
+    "skipRest": "Skip rest",
+    "loadingTitle": "Preparing exercises",
+    "loadingSubtitle": "Building the best workout for you...",
+    "massGainTitle": "Strength: Mass Gain",
+    "loseWeightTitle": "Cardio: Fat Burn",
+    "generalTitle": "Fitness: General Shape",
+    "bodyParts": {
+      "select": "Select workout area",
+      "full": "Full Body",
+      "chest": "Chest",
+      "abs": "Abs",
+      "arms": "Arms",
+      "legs": "Legs"
+    },
+    "loseSelectTitle": "Choose a fat burn area",
+    "generalSelectTitle": "Choose a general fitness area",
+    "labels": {
+      "abs": "Abs",
+      "core": "Core",
+      "obliques": "Obliques",
+      "lowerAbs": "Lower abs",
+      "chest": "Chest",
+      "triceps": "Triceps",
+      "shoulders": "Shoulders",
+      "noEquipment": "No equipment",
+      "bench": "Bench / Chair",
+      "biceps": "Biceps",
+      "forearms": "Forearms",
+      "chair": "Chair",
+      "mat": "Mat",
+      "legs": "Legs",
+      "cardio": "Cardio",
+      "coordination": "Coordination",
+      "glutes": "Glutes",
+      "quads": "Quadriceps",
+      "quadriceps": "Quadriceps",
+      "hamstrings": "Hamstrings",
+      "calves": "Calves",
+      "arms": "Arms",
+    "back": "Back",
+    "support": "Support"
+    },
+    "lose": {
+      "full": {
+        "armCircles": {
+          "title": "Arm Circles",
+          "desc": "Warm up your shoulders and arms before an active workout."
+        },
+        "jumpingJacks": {
+          "title": "Jumping Jacks",
+          "desc": "A cardio move to raise your heart rate and burn calories."
+        },
+        "highKnees": {
+          "title": "High Knees",
+          "desc": "Active cardio for legs and core."
+        },
+        "squatLegRaise": {
+          "title": "Squat with Leg Raise",
+          "desc": "Dynamic move for glutes, legs, and extra calorie burn."
+        },
+        "lungeTwist": {
+          "title": "Lunge with Twist",
+          "desc": "Combines legs, balance, and core work."
+        },
+        "modifiedBurpees": {
+          "title": "Modified Burpees",
+          "desc": "An intense fat-burning exercise for the whole body."
+        },
+        "plankJacks": {
+          "title": "Plank Jacks",
+          "desc": "Cardio and core in one movement."
+        },
+        "bicycle": {
+          "title": "Bicycle",
+          "desc": "Active work for abs and obliques."
+        },
+        "reverseCrunch": {
+          "title": "Reverse Crunch",
+          "desc": "Finish your abs after the cardio block."
+        },
+        "cobraStretch": {
+          "title": "Cobra Stretch",
+          "desc": "A light finish to relax the torso."
+        }
+      },
+      "abs": {
+        "plankClassic": {
+          "title": "Classic Plank",
+          "desc": "A basic plank for core control."
+        },
+        "mountainClimbers": {
+          "title": "Plank with Leg Lift",
+          "desc": "A harder plank variation with extra ab load."
+        },
+        "sitUps": {
+          "title": "Seated Sit-Up",
+          "desc": "A classic abdominal exercise."
+        },
+        "reverseCrunch": {
+          "title": "Reverse Crunch",
+          "desc": "Lower abs and movement control."
+        },
+        "crunches": {
+          "title": "Crunches",
+          "desc": "Basic abdominal muscle work."
+        },
+        "bicycle": {
+          "title": "Bicycle",
+          "desc": "Intense work for abs and obliques."
+        },
+        "heelTouches": {
+          "title": "Heel Touches",
+          "desc": "Targets the oblique muscles."
+        },
+        "legRaise": {
+          "title": "Leg Raises",
+          "desc": "Focus on the lower abs."
+        },
+        "hollowHold": {
+          "title": "Hollow Hold",
+          "desc": "Static hold for a strong core."
+        },
+        "cobraStretch": {
+          "title": "Cobra Stretch",
+          "desc": "A soft finish for the ab block."
+        }
+      },
+      "legs": {
+        "run": {
+          "title": "High Knees",
+          "desc": "Active cardio for fat burn and legs."
+        },
+        "heel": {
+          "title": "Butt Kicks",
+          "desc": "Warms up your legs and heart rate."
+        },
+        "jump2": {
+          "title": "Jumps",
+          "desc": "Cardio load and quick calorie burn."
+        },
+        "jump1": {
+          "title": "Plank Jumps",
+          "desc": "An intense exercise for legs and core."
+        },
+        "burpee": {
+          "title": "Burpees",
+          "desc": "One of the most energy-demanding exercises."
+        },
+        "squat1": {
+          "title": "Short Squats",
+          "desc": "Fast tempo with focus on quadriceps."
+        },
+        "squat2": {
+          "title": "Deep Squat Hold",
+          "desc": "A more challenging squat variation."
+        },
+        "lunge1": {
+          "title": "Reverse Lunge",
+          "desc": "Legs and glutes with controlled movement."
+        },
+        "lunge2": {
+          "title": "Side Lunges",
+          "desc": "Focus on legs and inner thighs."
+        },
+        "quad1": {
+          "title": "Quadriceps Stretch",
+          "desc": "A calm finish for the leg workout."
+        }
+      },
+      "arms": {
+        "warmup3": {
+          "title": "Jump Without Rope",
+          "desc": "Warm-up and light cardio for the start of the block."
+        },
+        "warmup1": {
+          "title": "Arm Circles Clockwise",
+          "desc": "Warm up shoulders and arms."
+        },
+        "warmup2": {
+          "title": "Arm Circles Counterclockwise",
+          "desc": "Continue warming up arms and shoulders."
+        },
+        "push1": {
+          "title": "Knee Push-Ups",
+          "desc": "A more accessible push-up format with calorie burn."
+        },
+        "push2": {
+          "title": "Military Push-Ups",
+          "desc": "Strength and cardio load for arms and core."
+        },
+        "push3": {
+          "title": "Push-Ups with Rotation",
+          "desc": "A movement for arms and core."
+        },
+        "box": {
+          "title": "Side Punches",
+          "desc": "A cardio move for shoulders and arms."
+        },
+        "arms1": {
+          "title": "Elbow Squeeze",
+          "desc": "Arm and shoulder work at a moderate pace."
+        },
+        "burpee": {
+          "title": "Burpee",
+          "desc": "A high-intensity finisher for calorie burn."
+        },
+        "stretch3": {
+          "title": "Biceps Stretch",
+          "desc": "A calm finish for the arm block."
+        }
+      }
+    },
+    "general": {
+      "full": {
+        "armCircles": {
+          "title": "Arm Circles",
+          "desc": "Warm up your arms and shoulders.",
+          "inchwormPushUp": {
+            "title": "Inchworm push-up",
+            "desc": "Walk your hands forward into a plank, do a light push-up, and return with control."
+          }
+        },
+        "torsoRotation": {
+          "title": "Torso Rotation",
+          "desc": "Prepares your torso for the workout."
+        },
+        "jumpingJacks": {
+          "title": "Jumping Jacks",
+          "desc": "Light cardio for general fitness."
+        },
+        "squatLegRaise": {
+          "title": "Squat with Leg Raise",
+          "desc": "Balance, legs, and glutes."
+        },
+        "inchwormDiamond": {
+          "title": "Inchworm Push-Up",
+          "desc": "An exercise for arms, chest, and core."
+        },
+        "sideBridgeLeft": {
+          "title": "Side Bridge Left",
+          "desc": "Core stabilization."
+        },
+        "sideBridgeRight": {
+          "title": "Side Bridge Right",
+          "desc": "Core stabilization on the other side."
+        },
+        "bicycle": {
+          "title": "Bicycle",
+          "desc": "Moderate ab workload."
+        },
+        "childPose": {
+          "title": "Child Pose",
+          "desc": "A calm finish for the general workout."
+        }
+      },
+      "chest": {
+        "pushUps": {
+          "title": "Push-Ups",
+          "desc": "A basic chest exercise."
+        },
+        "widePushUps": {
+          "title": "Wide Push-Ups",
+          "desc": "Puts more load on the chest muscles."
+        },
+        "kneePushUps": {
+          "title": "Knee Push-Ups",
+          "desc": "An easier push-up variation."
+        },
+        "inclinePushUps": {
+          "title": "Incline Push-Ups",
+          "desc": "A comfortable option for medium difficulty."
+        },
+        "chairDips": {
+          "title": "Chair Dips",
+          "desc": "Focus on triceps and chest."
+        },
+        "chestStretch": {
+          "title": "Chest Stretch",
+          "desc": "Finish the chest block."
+        }
+      },
+      "abs": {
+        "plankClassic": {
+          "title": "Classic Plank",
+          "desc": "A base exercise for abs and core."
+        },
+        "plankLeft": {
+          "title": "Left Side Plank",
+          "desc": "Works the obliques."
+        },
+        "plankRight": {
+          "title": "Right Side Plank",
+          "desc": "Works the obliques on the other side."
+        },
+        "crunches": {
+          "title": "Crunches",
+          "desc": "A classic abdominal exercise."
+        },
+        "reverseCrunch": {
+          "title": "Reverse Crunch",
+          "desc": "Lower abs and core control."
+        },
+        "bicycle": {
+          "title": "Bicycle",
+          "desc": "Balanced workload for the whole abs area."
+        },
+        "cobraStretch": {
+          "title": "Cobra Stretch",
+          "desc": "Final stretch after abs."
+        }
+      },
+      "arms": {
+        "warmup1": {
+          "title": "Arm Circles Clockwise",
+          "desc": "Warm up your arms and shoulders."
+        },
+        "warmup2": {
+          "title": "Arm Circles Counterclockwise",
+          "desc": "Prepare shoulders for work."
+        },
+        "push1": {
+          "title": "Knee Push-Ups",
+          "desc": "Basic load for arms and chest."
+        },
+        "armCirclesClockwise": {
+  "title": "Arm circles clockwise",
+  "desc": "Make controlled forward circles to warm up the shoulders and arms."
+},
+"armCirclesCounterclockwise": {
+  "title": "Arm circles counterclockwise",
+  "desc": "Rotate the arms backward with control to activate the shoulders."
+},
+"kneePushUps": {
+  "title": "Knee push-ups",
+  "desc": "Do light push-ups from the knees to activate chest and triceps."
+},
+"elbowSqueeze": {
+  "title": "Elbow squeeze pulses",
+  "desc": "Keep the elbows bent and squeeze the arms back with control."
+},
+"bicepsLeft": {
+  "title": "Left arm biceps hold",
+  "desc": "Focus on the left arm and keep the movement controlled under tension."
+},
+"bicepsRight": {
+  "title": "Right arm biceps hold",
+  "desc": "Focus on the right arm and keep the movement controlled under tension."
+},
+"tricepsStretch": {
+  "title": "Triceps stretch",
+  "desc": "Stretch the triceps and shoulder area after the working set."
+},
+        "arms1": {
+          "title": "Elbow Squeeze",
+          "desc": "Calm work for arms and shoulders."
+        },
+        "biceps1": {
+          "title": "Biceps Leg Raise Left",
+          "desc": "Extra load for the biceps."
+        },
+        "biceps2": {
+          "title": "Biceps Leg Raise Right",
+          "desc": "Extra load for the biceps."
+        },
+        "stretch1": {
+          "title": "Triceps Stretch",
+          "desc": "Finish the arm block."
+        }
+      },
+      "legs": {
+        "highKnees": {
+  "title": "High knees",
+  "desc": "Run in place while lifting the knees high to activate the legs and cardio."
+},
+"shortSquats": {
+  "title": "Short squats",
+  "desc": "Perform short and controlled squats with a comfortable range of motion."
+},
+"bridgeMarch": {
+  "title": "Glute bridge march",
+  "desc": "Hold the bridge and alternate lifting the legs while keeping the hips stable."
+},
+"reverseLunge": {
+  "title": "Reverse lunges",
+  "desc": "Step one leg back and lower with control to work the legs and glutes."
+},
+"sideLunges": {
+  "title": "Side lunges",
+  "desc": "Step to the side and shift the weight with control to activate the inner thighs and glutes."
+},
+"calfRaise": {
+  "title": "Calf raises",
+  "desc": "Rise onto the toes and lower slowly to work the calves."
+},
+"quadricepsStretch": {
+  "title": "Quadriceps stretch",
+  "desc": "Stretch the front of the thigh after the working exercises."
+},
+        "run": {
+          "title": "High Knees",
+          "desc": "Warm-up and light cardio."
+        },
+        "squat1": {
+          "title": "Short Squats",
+          "desc": "Basic load for the legs."
+        },
+        "bridge": {
+          "title": "Glute Bridge March",
+          "desc": "Calm work for glutes and posterior chain."
+        },
+        "lunge1": {
+          "title": "Reverse Lunge",
+          "desc": "An exercise for legs and balance."
+        },
+        "lunge2": {
+          "title": "Side Lunges",
+          "desc": "Legs and inner thighs."
+        },
+        "calf1": {
+          "title": "Calf Raise",
+          "desc": "Focused work for calves."
+        },
+        "quad1": {
+          "title": "Quadriceps Stretch",
+          "desc": "Final leg stretch."
+        }
+      }
+    },
+    "exercises": {
+      "mass": {
+        "squat": "Barbell Squat",
+        "benchPress": "Barbell Bench Press",
+        "deadlift": "Deadlift",
+        "overheadPress": "Overhead Press",
+        "row": "Bent-Over Row"
+      },
+      "lose": {
+        "burpees": "Burpees",
+        "jumpRope": "Jump Rope",
+        "plank": "Plank",
+        "mountainClimber": "Mountain Climber",
+        "highKnees": "High Knees"
+      },
+      "general": {
+        "pushUps": "Push-Ups",
+        "bodyweightSquats": "Bodyweight Squats",
+        "plank": "Plank",
+        "lunges": "Lunges",
+        "jumpingJacks": "Jumping Jacks"
+      }
+    },
+    "exerciseDescriptions": {
+      "squat": "Keep your back straight and go down to a comfortable depth.",
+      "benchPress": "Lower the bar with control and press without jerking.",
+      "deadlift": "Keep a neutral spine and drive through your legs and core.",
+      "overheadPress": "Press straight overhead and avoid over-arching your lower back.",
+      "row": "Pull the weight toward your waist and squeeze your shoulder blades.",
+      "burpees": "Keep a solid pace but maintain proper form.",
+      "jumpRope": "Stay light on your toes and keep a steady rhythm.",
+      "plank": "Keep your body straight and avoid dropping your hips.",
+      "mountainClimber": "Drive your knees toward your chest quickly and with control.",
+      "highKnees": "Lift your knees high and keep an active pace.",
+      "pushUps": "Keep your body straight and lower yourself with control.",
+      "bodyweightSquats": "Track your knees and squat to a comfortable depth.",
+      "generalPlank": "Tighten your core and glutes, keep the body aligned.",
+      "lunges": "Step confidently and keep your balance.",
+      "jumpingJacks": "Move rhythmically and keep your shoulders relaxed."
+    },
+    "fullbody": {
+      "armCircles": {
+        "title": "Arm Circles",
+        "desc": "Warm up your shoulders and arms."
+      },
+      "jumpingJacks": {
+        "title": "Jumping Jacks",
+        "desc": "Full body cardio warm-up."
+      },
+      "torsoRotation": {
+        "title": "Torso Rotation",
+        "desc": "Spine mobility warm-up."
+      },
+      "squatJumps": {
+        "title": "Squat Jumps",
+        "desc": "Explosive leg movement."
+      },
+      "lungeTwist": {
+        "title": "Lunge with Twist",
+        "desc": "Legs and core activation."
+      }
+    },
+"selection": {
+  "gain": {
+    "title": "Muscle Mass Gain",
+    "desc": "Strength workouts for muscle growth"
+  },
+  "lose": {
+    "title": "Fat Burn",
+    "desc": "Intense cardio for weight loss"
+  },
+  "general": {
+    "title": "General Fitness",
+    "desc": "Maintain tone and overall health"
+  },
+  "ai": {
+    "title": "Pick training through AI",
+    "desc": "Personalized workout plan selection by goal, level, and limitations"
+  }
+},
+"ai": {
+  "badge": "AI Training",
+  "title": "Workout selection through AI",
+  "subtitle": "This interface will later choose workouts based on your goal, training level, workout duration, and limitations.",
+  "cards": {
+    "goal": {
+      "title": "Goal-based planning",
+      "text": "AI will determine whether you need mass gain, fat burn, or general fitness."
+    },
+    "level": {
+      "title": "Training level",
+      "text": "The plan will adapt to beginner, intermediate, or advanced level."
+    },
+    "duration": {
+      "title": "Workout duration",
+      "text": "AI will be able to build a workout for 15, 20, 30, 45, or 60 minutes."
+    },
+    "limitations": {
+      "title": "Limitations",
+      "text": "The system will consider injuries, no-jumping restrictions, knee pain, or back pain."
+    }
+  },
+  "futureTitle": "What comes next",
+  "futureText": "Later this screen will be connected to the survey and backend logic so AI can automatically build a personalized training plan for you."
+},
+    "finishModal": {
+      "title": "You're on fire!",
+      "received": "Received:",
+      "continue": "Continue"
+    },
+    "prepareTitle": "Prepare",
+    "prepareHint": "Get ready. We start in a few seconds.",
+    "skipPrepare": "Start now",
+    "chest": {
+      "pushUps": {
+        "title": "Push-Ups",
+        "desc": "Lift and lower your body using arm strength. Keep your body straight."
+      },
+      "widePushUps": {
+        "title": "Wide Push-Ups",
+        "desc": "Hands wider than shoulders. Control the movement and keep core tight."
+      },
+      "kneePushUps": {
+        "title": "Knee Push-Ups",
+        "desc": "Easier variation. Knees on the floor, body straight."
+      },
+      "inclinePushUps": {
+        "title": "Incline Push-Ups",
+        "desc": "Hands on a bench or chair. Maintain straight posture."
+      },
+      "chairDips": {
+        "title": "Chair Dips",
+        "desc": "Keep your back close to the chair. Bend elbows to 90 degrees."
+      },
+      "chestStretch": {
+        "title": "Chest Stretch",
+        "desc": "Open your chest slowly, relax shoulders and breathe deeply."
+      }
+    },
+    "abs": {
+      "sitUps": {
+        "title": "Sit-ups",
+        "desc": "Lift your torso toward your knees while engaging your abs."
+      },
+      "sideBridgeLeft": {
+        "title": "Side Plank (Left)",
+        "desc": "Keep your body straight and stable."
+      },
+      "sideBridgeRight": {
+        "title": "Side Plank (Right)",
+        "desc": "Activate your oblique muscles."
+      },
+      "plankClassic": {
+        "title": "Plank",
+        "desc": "Keep your body aligned and core tight."
+      },
+      "plankLeft": {
+        "title": "Side Plank Left",
+        "desc": "Maintain balance and control."
+      },
+      "plankRight": {
+        "title": "Side Plank Right",
+        "desc": "Control your breathing."
+      },
+      "bicycle": {
+        "title": "Bicycle Crunch",
+        "desc": "Alternate elbow to opposite knee."
+      },
+      "legRaise": {
+        "title": "Leg Raises",
+        "desc": "Lift legs slowly with control."
+      },
+      "reverseCrunch": {
+        "title": "Reverse Crunch",
+        "desc": "Lift hips upward engaging lower abs."
+      },
+      "heelTouches": {
+        "title": "Heel Touches",
+        "desc": "Targets oblique muscles."
+      },
+      "hollowHold": {
+        "title": "Hollow Hold",
+        "desc": "Hold body in tension."
+      },
+      "mountainClimbers": {
+        "title": "Mountain Climbers",
+        "desc": "Drive knees toward chest quickly."
+      },
+      "cobraStretch": {
+        "title": "Cobra Stretch",
+        "desc": "Stretch abdominal muscles."
+      },
+      "lowerBackRight": {
+        "title": "Lower Back Twist (Right)",
+        "desc": "Perform controlled torso twist to the right."
+      },
+      "lowerBackLeft": {
+        "title": "Lower Back Twist (Left)",
+        "desc": "Perform controlled torso twist to the left."
+      },
+      "pushupRotation": {
+        "title": "Push-up with Rotation",
+        "desc": "Rotate your torso after each push-up."
+      },
+      "crunches": {
+        "title": "Crunches",
+        "desc": "Lift your torso engaging abdominal muscles."
+      }
+    },
+    "arms": {
+      "warmup1": {
+        "title": "Arm Circles (Clockwise)",
+        "desc": "Rotate your arms forward to warm up shoulders."
+      },
+      "warmup2": {
+        "title": "Arm Circles (Counterclockwise)",
+        "desc": "Rotate your arms backward."
+      },
+      "warmup3": {
+        "title": "Jump Without Rope",
+        "desc": "Light cardio warm-up."
+      },
+      "push1": {
+        "title": "Knee Push-Ups Hold",
+        "desc": "Lower slowly and hold."
+      },
+      "push2": {
+        "title": "Military Push-Ups",
+        "desc": "Keep elbows close to body."
+      },
+      "push3": {
+        "title": "Push-Ups with Rotation",
+        "desc": "Rotate torso after each rep."
+      },
+      "push4": {
+        "title": "Seated Push-Ups",
+        "desc": "Press using arms while seated."
+      },
+      "arms1": {
+        "title": "Elbow Squeeze",
+        "desc": "Bring elbows together."
+      },
+      "arms2": {
+        "title": "Elbow Up-Down",
+        "desc": "Move elbows vertically."
+      },
+      "twist1": {
+        "title": "Doorway Twist (Left)",
+        "desc": "Twist body to left."
+      },
+      "twist2": {
+        "title": "Doorway Twist (Right)",
+        "desc": "Twist body to right."
+      },
+      "floor1": {
+        "title": "Floor Twist (Left)",
+        "desc": "Control rotation."
+      },
+      "floor2": {
+        "title": "Floor Twist (Right)",
+        "desc": "Control rotation."
+      },
+      "box": {
+        "title": "Side Punches",
+        "desc": "Boxing movement."
+      },
+      "biceps1": {
+        "title": "Leg Raise Curl (Left)",
+        "desc": "Engage biceps."
+      },
+      "biceps2": {
+        "title": "Leg Raise Curl (Right)",
+        "desc": "Engage biceps."
+      },
+      "burpee": {
+        "title": "Burpee",
+        "desc": "Full body explosive move."
+      },
+      "stretch1": {
+        "title": "Triceps Stretch (Left)",
+        "desc": "Stretch triceps."
+      },
+      "stretch2": {
+        "title": "Triceps Stretch (Right)",
+        "desc": "Stretch triceps."
+      },
+      "stretch3": {
+        "title": "Biceps Stretch",
+        "desc": "Stretch biceps."
+      }
+    },
+    "legs": {
+      "jump1": {
+        "title": "Plank Jumps",
+        "desc": "Jumping from plank position"
+      },
+      "kick1": {
+        "title": "Leg Kick Up (Left)",
+        "desc": "Lift leg up on all fours"
+      },
+      "kick2": {
+        "title": "Leg Kick Up (Right)",
+        "desc": "Lift leg up on all fours"
+      },
+      "burpee": {
+        "title": "Burpees",
+        "desc": "Full body exercise"
+      },
+      "lunge1": {
+        "title": "Reverse Lunges",
+        "desc": "Strengthens legs and glutes"
+      },
+      "lunge2": {
+        "title": "Side Lunges",
+        "desc": "Targets inner thighs"
+      },
+      "squat1": {
+        "title": "Short Squats",
+        "desc": "Quadriceps focused"
+      },
+      "squat2": {
+        "title": "Squats",
+        "desc": "Classic squats"
+      },
+      "bridge": {
+        "title": "Glute Bridge March",
+        "desc": "Glutes and hamstrings"
+      },
+      "legraise": {
+        "title": "Leg Raises Lying",
+        "desc": "Glutes workout"
+      },
+      "calf1": {
+        "title": "Calf Raise (Left)",
+        "desc": "Calf muscles"
+      },
+      "calf2": {
+        "title": "Calf Raise (Right)",
+        "desc": "Calf muscles"
+      },
+      "jump2": {
+        "title": "Jumps",
+        "desc": "Cardio movement"
+      },
+      "run": {
+        "title": "High Knees",
+        "desc": "Cardio exercise"
+      },
+      "heel": {
+        "title": "Butt Kicks",
+        "desc": "Warm up legs"
+      },
+      "stretch1": {
+        "title": "Lunge Stretch (Left)",
+        "desc": "Stretch legs"
+      },
+      "stretch2": {
+        "title": "Lunge Stretch (Right)",
+        "desc": "Stretch legs"
+      },
+      "quad1": {
+        "title": "Quad Stretch (Left)",
+        "desc": "Stretch quads"
+      },
+      "quad2": {
+        "title": "Quad Stretch (Right)",
+        "desc": "Stretch quads"
+      },
+      "calfstretch1": {
+        "title": "Calf Stretch (Left)",
+        "desc": "Stretch calves"
+      }
+    }
+  },
+  "aiProfile": {
+    "badge": "AI Profile",
+    "title": "Personal AI Survey",
+    "subtitle": "Fill out this profile once. Then these data will be used for both workouts and nutrition.",
+    "steps": {
+      "goal": {
+        "title": "Primary goal",
+        "desc": "The system will tailor recommendations to your main objective."
+      },
+      "training": {
+        "title": "Workouts",
+        "desc": "Here we save the conditions in which you usually train."
+      },
+      "nutrition": {
+        "title": "Nutrition",
+        "desc": "These data will later be used in the AI nutrition section."
+      }
+    },
+    "goal": {
+      "lose_weight": "Lose weight",
+      "gain_mass": "Gain mass",
+      "keep_fit": "Maintain shape"
+    },
+    "level": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "location": {
+      "home": "At home",
+      "gym": "At the gym"
+    },
+    "equipment": {
+      "none": "No equipment",
+      "dumbbells": "Dumbbells",
+      "machines": "Machines"
+    },
+    "fields": {
+      "meals_per_day": "Meals per day",
+      "training_level": "Training level",
+      "training_location": "Where do you train",
+      "equipment": "Equipment",
+      "workouts_per_week": "Workouts per week",
+      "workout_duration": "Workout duration",
+      "limitations": "Limitations / injuries",
+      "food_preferences": "Food preferences",
+      "allergies": "Allergies / restrictions"
+    },
+    "duration": {
+      "15": "15 minutes",
+      "20": "20 minutes",
+      "30": "30 minutes",
+      "45": "45 minutes",
+      "60": "60 minutes"
+    },
+    "placeholders": {
+      "limitations": "For example: knee pain, no jumping, back problems"
+    },
+    "food": {
+      "high_protein": "More protein",
+      "low_carb": "Lower carbs",
+      "balanced": "Balanced",
+      "no_pork": "No pork",
+      "lactose_free": "Lactose free",
+      "vegetarian": "Vegetarian"
+    },
+    "allergies": {
+      "nuts": "Nuts",
+      "milk": "Milk",
+      "eggs": "Eggs",
+      "gluten": "Gluten",
+      "fish": "Fish",
+      "seafood": "Seafood"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "next": "Next",
+      "save": "Save profile",
+      "saving": "Saving..."
+    },
+    "errors": {
+      "chooseGoal": "Choose a primary goal.",
+      "chooseLevel": "Choose a training level.",
+      "chooseLocation": "Choose a training location."
+    }
+  },
+  "knowledgePage": {
+    "badge": "Smart knowledge section",
+    "title": "Energy, habits and recovery",
+    "subtitle": "This section helps the user understand their current state, get practical advice for today, and choose useful habits without overload.",
+    "sections": {
+      "energy": "State check",
+      "recovery": "Recovery",
+      "habits": "Habits",
+      "library": "Useful knowledge"
+    },
+    "energyCheck": {
+      "title": "Energy Check",
+      "subtitle": "Answer a few questions and the system will show what type of fatigue you most likely have right now.",
+      "sleepHours": "How many hours did you sleep?",
+      "stress": "Stress level",
+      "mentalLoad": "How overloaded does your mind feel?",
+      "screenFatigue": "How tired are you from screens?",
+      "motivation": "Motivation level",
+      "bodyPain": "Do you have muscle pain / soreness?",
+      "bodyHeavy": "How heavy does your body feel?",
+      "analyze": "Check my state",
+      "reanalyze": "Check again",
+      "scaleLow": "Low",
+      "scaleHigh": "High"
+    },
+    "results": {
+      "title": "Assessment result",
+      "mental": "Mental fatigue",
+      "physical": "Physical fatigue",
+      "mixed": "Mixed fatigue",
+      "balanced": "State is normal",
+      "mentalText": "Your mind is likely overloaded: stress, screen fatigue and lower concentration.",
+      "physicalText": "Your body seems more tired than your mind. Recovery and lighter activity may help.",
+      "mixedText": "There are signs of both mental and physical overload. Recovery should be the focus today.",
+      "balancedText": "There are no strong signs of overload. A normal balanced day should be fine."
+    },
+    "recovery": {
+      "title": "What is best to do now",
+      "mentalMain": "Reduce mental load and take a short break away from screens.",
+      "physicalMain": "Let your body recover and avoid training through strong fatigue.",
+      "mixedMain": "It is better to reduce both mental and physical load today.",
+      "balancedMain": "Your condition is close to normal — keep a calm and stable routine.",
+      "mentalActions": [
+        "Avoid screens for 20–30 minutes",
+        "Take a 10–15 minute walk without your phone",
+        "Drink water",
+        "Do 1 simple task instead of overloading yourself",
+        "Do not demand maximum output from yourself today"
+      ],
+      "physicalActions": [
+        "Reduce training load for today",
+        "Do light stretching or walking",
+        "Add water and a proper meal",
+        "Do not heavily load already tired muscles",
+        "Go to bed earlier"
+      ],
+      "mixedActions": [
+        "Reduce both mental and physical load",
+        "Take a calm walk",
+        "Drink water and eat properly",
+        "Do not force a hard workout",
+        "Choose earlier sleep or a short rest"
+      ],
+      "balancedActions": [
+        "Light or moderate activity is suitable",
+        "Keep your water and sleep routine stable",
+        "Do not overload the day with unnecessary tasks",
+        "Do one useful habit today",
+        "Stay consistent without extremes"
+      ]
+    },
+    "habits": {
+      "title": "Habit Builder",
+      "subtitle": "Choose a goal and the system will suggest useful micro-habits.",
+      "chooseGoal": "Choose a goal",
+      "energy": "More energy",
+      "sleep": "Better sleep",
+      "recovery": "Less fatigue",
+      "discipline": "Discipline",
+      "focus": "Focus",
+      "energyDesc": "Small actions that help you feel more energetic during the day.",
+      "sleepDesc": "Habits for better sleep quality and recovery.",
+      "recoveryDesc": "Focus on recovery instead of overload.",
+      "disciplineDesc": "Micro-habits that are easier to keep every day.",
+      "focusDesc": "Useful when it is hard to concentrate and your mind feels overloaded."
+    },
+    "habitLists": {
+      "energy": [
+        "Drink a glass of water right after waking up",
+        "Get 10 minutes of walking or morning light",
+        "Avoid your phone for the first 15 minutes after sleep",
+        "Do light movement every 60–90 minutes",
+        "Go to bed at about the same time each day"
+      ],
+      "sleep": [
+        "Avoid bright screens 30–60 minutes before sleep",
+        "Do not drink coffee in the evening",
+        "Air out the room before bed",
+        "Go to bed and wake up on a stable schedule",
+        "Avoid heavy workouts late in the evening"
+      ],
+      "recovery": [
+        "Take a 5-minute break after long mental work",
+        "Add 15–20 minutes of calm walking",
+        "Drink water throughout the day, not only in the evening",
+        "Do a short stretch after training",
+        "Do not try to do everything at maximum every day"
+      ],
+      "discipline": [
+        "Start the day with one simple useful action",
+        "Plan only 3 main tasks for the day",
+        "Do your workout even in a short 10–15 minute version",
+        "Track completed habits every day",
+        "Prepare clothes, food or plan in advance"
+      ],
+      "focus": [
+        "Work in short blocks of 25–50 minutes",
+        "Take a small break after each block",
+        "Remove unnecessary notifications while working",
+        "Start with the simplest task first",
+        "If overloaded, go offline for 10 minutes without a screen"
+      ]
+    },
+    "cards": {
+      "title": "Short useful knowledge",
+      "sleepTitle": "Why sleep matters",
+      "sleepText": "Lack of sleep reduces concentration, worsens muscle recovery and makes workouts less effective.",
+      "waterTitle": "Water and energy",
+      "waterText": "Even mild dehydration can increase sluggishness, headaches and the feeling of fatigue.",
+      "recoveryTitle": "Recovery is not weakness",
+      "recoveryText": "Rest is as important as load. Without recovery, motivation, shape and progress go down.",
+      "foodTitle": "Nutrition affects how you feel",
+      "foodText": "Too few meals, too little protein or too little water can increase weakness and reduce performance.",
+      "mentalTitle": "Mental overload",
+      "mentalText": "If thinking feels hard, tasks irritate you and concentration is low, the issue may be overload rather than laziness.",
+      "movementTitle": "Movement helps",
+      "movementText": "Sometimes a light walk, stretch or short warm-up restores energy better than sitting for another hour."
+    }
+  },
+  "knowledgeModule": {
+      "habits": {
+      "reminderScheduled": "A reminder will be sent to your email at {{time}}"
+      },
+    "home": {
+      "mainTitle": "Knowledge section for real life",
+      "mainText": "This section is not only for reading. It helps the user understand habits, energy, focus, and core health knowledge that directly affect quality of life.",
+      "habitsTitle": "Habits",
+      "habitsDesc": "How to build useful habits and change your life through small steps.",
+      "energyTitle": "Energy",
+      "energyDesc": "How to understand your condition, notice different types of fatigue, and recover on time.",
+      "focusTitle": "Focus",
+      "focusDesc": "How to reduce distractions, improve concentration, and stay on what matters.",
+      "healthTitle": "Useful knowledge",
+      "healthDesc": "Why exercise, nutrition, sleep, and recovery are some of the most important foundations of life."
+    },
+    "videos": {
+      "title": "Recommended videos",
+      "subtitle": "For now these are basic recommendations. Later this block will show videos selected by our AI according to the user's request.",
+      "watch": "Watch"
+    },
+    "healthFeed": {
+      "badge": "Knowledge Feed",
+      "title": "Useful knowledge without boring lectures",
+      "subtitle": "Short, clear and visually pleasant lessons about sleep, energy, nutrition, recovery and daily state.",
+      "daily": {
+        "label": "Knowledge of the day",
+        "title": "Low sleep is not just tiredness",
+        "text": "When a person regularly lacks sleep, energy, focus, self-control and stress resistance all drop. That makes routine, food and productivity harder to manage."
+      },
+      "tabs": {
+        "lessons": "Mini lessons",
+        "myths": "Myth / Fact",
+        "whatIf": "What to do if...",
+        "collections": "Videos & collections"
+      },
+      "lessons": [
+        {
+          "icon": "😴",
+          "tag": "Sleep",
+          "title": "Why sleep changes the whole day",
+          "text": "Sleep affects not only rest, but also mood, appetite, focus and energy."
+        },
+        {
+          "icon": "💧",
+          "tag": "Energy",
+          "title": "Why water affects how you feel",
+          "text": "Even simple lack of water can increase sluggishness and the feeling of being low-energy."
+        },
+        {
+          "icon": "🧠",
+          "tag": "Focus",
+          "title": "Bad focus is not always laziness",
+          "text": "Often the reason is mental fatigue, screens, overload and poor recovery."
+        },
+        {
+          "icon": "🍽️",
+          "tag": "Nutrition",
+          "title": "Food affects more than body weight",
+          "text": "Food affects energy, mood, mental clarity and the ability to keep your day stable."
+        },
+        {
+          "icon": "🛌",
+          "tag": "Recovery",
+          "title": "Rest is part of progress",
+          "text": "Without recovery even good workouts and healthy eating work less effectively."
+        },
+        {
+          "icon": "⚡",
+          "tag": "State",
+          "title": "No energy does not always mean weak character",
+          "text": "Sometimes a person needs sleep, water, food, walking and lower overload — not more pressure."
+        },
+        {
+          "icon": "🎯",
+          "tag": "Habits",
+          "title": "Small habits are stronger than motivation",
+          "text": "Motivation is unstable, but useful habits slowly change your lifestyle."
+        },
+        {
+          "icon": "📉",
+          "tag": "Overload",
+          "title": "Why chaos breaks routine",
+          "text": "When the day feels unmanaged, energy, discipline and concentration all drop faster."
+        }
+      ],
+      "myths": [
+        {
+          "myth": "If you have no energy, you are just lazy.",
+          "fact": "Often the reason is lack of sleep, overload, mental fatigue, lack of water or no routine."
+        },
+        {
+          "myth": "More workouts without rest always mean better results.",
+          "fact": "Without recovery both body and mind overload faster, and progress gets worse."
+        },
+        {
+          "myth": "Coffee solves fatigue.",
+          "fact": "Coffee may help temporarily, but sleep, water, food and recovery have a deeper effect."
+        },
+        {
+          "myth": "To become disciplined, you need to change everything at once.",
+          "fact": "Strong change usually comes from one stable habit, not overload."
+        }
+      ],
+      "scenarios": [
+        {
+          "title": "What to do if you have no energy",
+          "short": "Quick reset for your state",
+          "problem": "If you feel completely drained, do not demand maximum from yourself first. Stabilize the basics.",
+          "actions": [
+            "Drink water",
+            "Take a calm 5–10 minute walk",
+            "Eat something proper, not random snacks",
+            "Step away from screens for a few minutes"
+          ]
+        },
+        {
+          "title": "What to do if you cannot focus",
+          "short": "Support for concentration",
+          "problem": "When your attention is scattered, it is important not to start 10 tasks at once.",
+          "actions": [
+            "Close extra tabs and notifications",
+            "Leave only 1 main task",
+            "Take a short break without the phone",
+            "Return in a small work block"
+          ]
+        },
+        {
+          "title": "What to do if you crave sweets",
+          "short": "Soft stabilization",
+          "problem": "Sugar cravings are often stronger when you are underslept, chaotic, skipping meals or exhausted.",
+          "actions": [
+            "Eat a proper meal first",
+            "Check whether you are actually hungry",
+            "Drink water",
+            "Do not shame yourself — look at the cause, not only the symptom"
+          ]
+        },
+        {
+          "title": "What to do if motivation is gone",
+          "short": "Come back through one small step",
+          "problem": "When motivation is low, do not build a huge plan. Return through one useful action.",
+          "actions": [
+            "Do 1 simple useful action",
+            "Do not try to restart your whole life today",
+            "Lower the bar for today",
+            "Return to rhythm through repetition"
+          ]
+        }
+      ],
+      "collections": [
+        {
+          "title": "3 foods for energy",
+          "summary": "A simple set of foods and basics that often help keep your daily state more stable.",
+          "items": [
+            "Water",
+            "A proper breakfast",
+            "Fruit or a light protein snack"
+          ],
+          "videoTitle": "Video about energy",
+          "videoUrl": "https://www.youtube.com/results?search_query=energy+nutrition+sleep+recovery"
+        },
+        {
+          "title": "5 signs of overload",
+          "summary": "If you notice several of these together, you probably need recovery, not more pressure.",
+          "items": [
+            "Mental noise",
+            "No energy even for simple tasks",
+            "Irritability",
+            "Bad sleep",
+            "Scattered focus"
+          ],
+          "videoTitle": "Video about overload",
+          "videoUrl": "https://www.youtube.com/results?search_query=mental+overload+recovery+tips"
+        },
+        {
+          "title": "4 habits for a better morning",
+          "summary": "You do not need to change everything. One or two simple habits can make the morning calmer.",
+          "items": [
+            "Sleep earlier",
+            "Do not grab the phone right away",
+            "Drink water",
+            "Start the day with less rush"
+          ],
+          "videoTitle": "Video about habits",
+          "videoUrl": "https://www.youtube.com/results?search_query=morning+habits+focus+energy"
+        },
+        {
+          "title": "3 things that block recovery",
+          "summary": "Sometimes a person formally rests but does not actually recover. Usually basic things are the reason.",
+          "items": [
+            "Late-night screen overload",
+            "No routine",
+            "Constant internal tension"
+          ],
+          "videoTitle": "Video about recovery",
+          "videoUrl": "https://www.youtube.com/results?search_query=recovery+sleep+stress+health"
+        }
+      ]
+    },
+    "habits": {
+      "title": "Healthy habits",
+      "subtitle": "Big change usually starts not with a huge push, but with small repeated actions.",
+      "ideaTitle": "Main idea",
+      "ideaText": "The point of habits is not doing something perfectly once. The real goal is doing one useful action consistently. That is how a strong lifestyle is built.",
+      "whyTitle": "Why it matters",
+      "whyText": "If a person wants to look better, feel better, and become more disciplined, motivation alone is not enough. A stable habit system is needed.",
+      "stepsTitle": "How to build habits better",
+      "steps": [
+        "Start with one habit, not ten at once",
+        "Make the habit very simple at the beginning",
+        "Attach the new habit to an action you already do",
+        "Do not expect a perfect result every day",
+        "Focus on consistency, not one-time maximum effort"
+      ],
+      "tipsTitle": "Practical tips",
+      "tips": [
+        "Start small: 5 minutes, 1 set, 1 action",
+        "Do not build a habit through overload and guilt",
+        "It is better to do a little, but regularly",
+        "Try to track completed habits every day",
+        "If you miss a day, do not quit — just return the next day"
+      ],
+      "ui": {
+        "badge": "Habit Builder",
+        "heroText": "Here the user chooses a habit or challenge, understands why it matters, and enables reminders for daily life.",
+        "habitsTab": "Habits",
+        "challengeTab": "Challenges",
+        "currentHabit": "Selected habit",
+        "whyItMatters": "Why it matters",
+        "chainTitle": "How it affects the day",
+        "chainSleep1": "Went to bed earlier",
+        "chainSleep2": "Woke up easier",
+        "chainSleep3": "Started the morning calmer",
+        "chainSleep4": "Less rushing and being late",
+        "chainSleep5": "The day went better",
+        "chainWater1": "Drank water",
+        "chainWater2": "Less sluggishness",
+        "chainWater3": "Better well-being",
+        "chainWater4": "More energy",
+        "chainWater5": "A more stable day",
+        "chainPhone1": "Did not take the phone in the morning",
+        "chainPhone2": "Less noise in the mind",
+        "chainPhone3": "Calmer start of the day",
+        "chainPhone4": "Better focus",
+        "chainPhone5": "Less chaos",
+        "chainGeneric1": "Small action",
+        "chainGeneric2": "Better condition",
+        "chainGeneric3": "Better day",
+        "chainGeneric4": "More stability",
+        "chainGeneric5": "Healthier lifestyle",
+        "reminderTitle": "Habit reminder",
+        "enableEmail": "Enable email reminder",
+        "timeLabel": "Time",
+        "previewLabel": "Email preview",
+        "previewWater": "Hi! Don’t forget to drink water today.",
+        "previewSleep": "Hi! Reminder for your habit: try to go to bed earlier today.",
+        "previewPhone": "Hi! Don’t forget: a calm morning without the phone helps your focus.",
+        "previewWalk": "Hi! A short walk today will help both your body and mind.",
+        "saveReminder": "Save reminder",
+        "savedHabit": "Habit settings saved. Later this will be connected to real email reminders.",
+        "currentChallenge": "Selected challenge",
+        "challengeBenefitTitle": "Why it is useful",
+        "challengeReminderTitle": "Challenge reminder",
+        "enableChallengeEmail": "Enable challenge reminder by email",
+        "challengePreviewWalk": "Hi! Reminder about your challenge: a 15-minute walk today can refresh your mind and reduce fatigue.",
+        "challengePreviewWater": "Hi! Don’t forget your challenge: drink water today and keep the rhythm.",
+        "challengePreviewSleep": "Hi! Reminder about your challenge: try to go to bed on time today.",
+        "challengePreviewPhone": "Hi! Reminder about your challenge: try to start the morning without your phone.",
+        "saveChallengeReminder": "Save reminder",
+        "savedChallenge": "Challenge settings saved. Later this will be connected to real email reminders.",
+        "days": "days"
+      }
+    },
+    "energy": {
+      "title": "Energy and condition",
+      "subtitle": "The problem is not always laziness. Sometimes a person simply lacks recovery, sleep, water, movement, or calm.",
+      "typesTitle": "Types of fatigue",
+      "typesText": "Fatigue can be physical, mental, or mixed. When you understand that difference, advice becomes much more accurate: sometimes you need sleep, sometimes a walk, and sometimes lower load.",
+      "mainAdviceTitle": "Main principle",
+      "mainAdviceText": "First understand your condition, then choose the action. The best answer is not always to force yourself to do more.",
+      "signsTitle": "What to pay attention to",
+      "signs": [
+        "Sleepiness and lack of freshness in the morning",
+        "Heavy body and sore muscles",
+        "Irritability and feeling overloaded",
+        "Hard to think and keep attention",
+        "No desire to work or train"
+      ],
+      "actionsTitle": "What may help",
+      "actions": [
+        "Take a short rest or go to sleep earlier",
+        "Go for a calm walk without overload",
+        "Drink water and eat properly",
+        "Reduce today's load if the body is overworked",
+        "Step away from screens if your mind feels tired"
+      ],
+      "ui": {
+        "heroBadge": "Energy Check",
+        "heroTitle": "Understand why you feel drained",
+        "heroText": "This interface helps identify what kind of fatigue you have right now: mental, physical, or mixed. For now it uses smart local logic, and later it will work with our own AI model.",
+        "startButton": "I feel tired",
+        "checkButton": "Check my condition",
+        "mentalMiniTitle": "Mental fatigue",
+        "mentalMiniText": "Stress, screens, overload, trouble concentrating",
+        "physicalMiniTitle": "Physical fatigue",
+        "physicalMiniText": "Muscle soreness, body heaviness, lack of recovery",
+        "mixedMiniTitle": "Mixed condition",
+        "mixedMiniText": "When both body and mind feel tired at the same time",
+        "surveyTitle": "Mini state survey",
+        "surveyText": "Answer a few questions. The interface will show your fatigue type and suggest what is best to do next.",
+        "surveyHint": "Scale from 1 to 5",
+        "sleepLabel": "How many hours did you sleep?",
+        "stressLabel": "Stress level",
+        "headLoadLabel": "How overloaded does your mind feel?",
+        "screenLabel": "How tired are you from screens?",
+        "muscleLabel": "Do you have muscle soreness / pain?",
+        "bodyLabel": "How heavy does your body feel?",
+        "motivationLabel": "Motivation level",
+        "low": "Low",
+        "high": "High",
+        "lowMotivation": "Low",
+        "highMotivation": "High",
+        "analyzeButton": "See result",
+        "backButton": "Back",
+        "detectedType": "Detected type",
+        "overallState": "Overall state",
+        "mentalPercent": "Mental fatigue",
+        "physicalPercent": "Physical fatigue",
+        "overallPercent": "Overall fatigue level",
+        "levelHigh": "High level",
+        "levelMedium": "Medium level",
+        "levelLow": "Low level",
+        "whatNowTitle": "What is best to do now",
+        "futureAiTitle": "What will come later",
+        "futureAiText": "Later this interface will work through our own model: it will determine the fatigue type, confidence percentage, overload level, and give more accurate personal recommendations.",
+        "retakeButton": "Take the survey again",
+        "toMainButton": "Back to energy section"
+      },
+      "result": {
+        "mentalTitle": "Mental fatigue",
+        "mentalDesc": "Your mind is likely more overloaded right now: stress, information noise, screen fatigue, and reduced concentration.",
+        "mentalAction1": "Avoid screens for 20–30 minutes",
+        "mentalAction2": "Take a 10–15 minute walk without your phone",
+        "mentalAction3": "Do only 1 simple task instead of overloading yourself",
+        "mentalAction4": "Drink water and switch activities a little",
+        "mentalAction5": "Do not expect maximum output from yourself today",
+        "physicalTitle": "Physical fatigue",
+        "physicalDesc": "It seems your body is more tired than your mind. Your body probably needs recovery, not extra load.",
+        "physicalAction1": "Reduce today's load",
+        "physicalAction2": "Do light stretching or calm walking",
+        "physicalAction3": "Eat properly and drink water",
+        "physicalAction4": "Do not heavily load already tired muscles",
+        "physicalAction5": "Go to bed earlier",
+        "mixedTitle": "Mixed fatigue",
+        "mixedDesc": "There are signs of both mental and physical overload. Today it is better to reduce pressure and focus on recovery.",
+        "mixedAction1": "Reduce both mental and physical load",
+        "mixedAction2": "Take a calm walk",
+        "mixedAction3": "Drink water and eat properly",
+        "mixedAction4": "Do not force a workout through exhaustion",
+        "mixedAction5": "Choose earlier sleep or a short rest",
+        "balancedTitle": "Condition is close to normal",
+        "balancedDesc": "There are no strong signs of overload right now. You can keep a calm routine and avoid overdoing it.",
+        "balancedAction1": "Light or moderate activity is suitable",
+        "balancedAction2": "Keep your water and sleep routine stable",
+        "balancedAction3": "Do not overload the day with unnecessary tasks",
+        "balancedAction4": "Do one useful habit today",
+        "balancedAction5": "Keep a stable rhythm without extremes"
+      }
+    },
+    "focus": {
+      "title": "Focus and concentration",
+      "subtitle": "Today it is harder for people to stay focused on one thing. Constant notifications and overload make the brain tired very quickly.",
+      "problemTitle": "Why this became a problem",
+      "problemText": "Modern life overloads attention. People often jump between tasks, screens, messages, and responsibilities, which makes deep concentration much harder.",
+      "ideaTitle": "Main idea",
+      "ideaText": "Focus is not a natural gift only. It is a skill that can be strengthened through simple rules and a calmer daily structure.",
+      "problemsTitle": "What usually breaks focus",
+      "problems": [
+        "Constant notifications and fast switching",
+        "The habit of doing many things at once",
+        "Lack of sleep and mental fatigue",
+        "No clear daily plan",
+        "Working too long without breaks"
+      ],
+      "methodsTitle": "What helps maintain focus",
+      "methods": [
+        "Work in short blocks with breaks",
+        "Turn off unnecessary notifications while working",
+        "Start with one main task",
+        "Do not try to do everything at once",
+        "Let the brain rest without screens"
+      ],
+      "ui": {
+        "heroBadge": "Focus Check",
+        "heroTitle": "See how strong your focus is right now",
+        "heroText": "This interface helps estimate concentration, distraction level, and attention overload. For now it uses smart front-end logic, and later it will work with our own model.",
+        "startButton": "Check my focus",
+        "secondButton": "How to improve concentration",
+        "lowMiniTitle": "Low focus",
+        "lowMiniText": "Mental fatigue, mental noise, constant distractions",
+        "mediumMiniTitle": "Medium focus",
+        "mediumMiniText": "There is concentration, but it is unstable and quickly lost",
+        "highMiniTitle": "Good focus",
+        "highMiniText": "A suitable state for study, work, and tasks that require attention",
+        "surveyTitle": "Focus check",
+        "surveyText": "Answer a few questions. The interface will show your focus level, distraction risk, and what may help right now.",
+        "surveyHint": "Scale from 1 to 5",
+        "sleepLabel": "How many hours did you sleep?",
+        "distractionLabel": "How easily do you get distracted?",
+        "screenLabel": "How overloaded is your mind from screens?",
+        "fatigueLabel": "How tired does your mind feel?",
+        "switchLabel": "How often do you switch between tasks?",
+        "calmnessLabel": "How calm does your mind feel?",
+        "motivationLabel": "Motivation level",
+        "low": "Low",
+        "high": "High",
+        "lowMotivation": "Low",
+        "highMotivation": "High",
+        "analyzeButton": "See result",
+        "backButton": "Back",
+        "highTitle": "Good focus level",
+        "highDesc": "Your concentration is currently quite good. This is a suitable state for important work, study, and attention-heavy tasks.",
+        "highBenefit1": "It is easier to do important tasks",
+        "highBenefit2": "Less chaos in the mind",
+        "highBenefit3": "Higher productivity",
+        "mediumTitle": "Medium focus level",
+        "mediumDesc": "There is focus, but it is unstable. Fatigue, notifications, task switching, or mental overload may be affecting you.",
+        "mediumBenefit1": "Concentration can be improved through routine",
+        "mediumBenefit2": "Short work blocks help",
+        "mediumBenefit3": "Fewer distractions mean better results",
+        "lowTitle": "Low focus level",
+        "lowDesc": "Your concentration is low right now. Most likely this is influenced by mental fatigue, screen overload, lack of sleep, or switching too often.",
+        "lowBenefit1": "Focus can be restored gradually",
+        "lowBenefit2": "Attention overload needs to be reduced",
+        "lowBenefit3": "Small actions already help",
+        "levelHigh": "High level",
+        "levelMedium": "Medium level",
+        "levelLow": "Low level",
+        "focusState": "Focus state",
+        "focusLevel": "Level",
+        "focusScore": "Focus Score",
+        "distractionRisk": "Distraction risk",
+        "overloadScore": "Attention overload",
+        "distractionSub": "Shows how easily attention drifts away",
+        "overloadSub": "Shows how tired the brain feels",
+        "nowTitle": "What to do right now",
+        "foodTitle": "What may help focus",
+        "foodLow1": "Water",
+        "foodLow2": "A light proper breakfast",
+        "foodLow3": "Nuts",
+        "foodLow4": "Fruits",
+        "foodMedium1": "Water",
+        "foodMedium2": "A protein snack",
+        "foodMedium3": "Fruits",
+        "foodMedium4": "Light food without overload",
+        "foodHigh1": "Water",
+        "foodHigh2": "Balanced nutrition",
+        "foodHigh3": "Protein",
+        "foodHigh4": "Food that does not feel heavy before an important task",
+        "resetLow1": "Put your phone away for 10 minutes",
+        "resetLow2": "Drink water",
+        "resetLow3": "Take a 5–10 minute walk",
+        "resetLow4": "Return to only 1 task",
+        "resetMedium1": "Work in a short 25–40 minute block",
+        "resetMedium2": "Remove unnecessary notifications",
+        "resetMedium3": "Take a short break",
+        "resetMedium4": "Choose 1 main task",
+        "resetHigh1": "Use this state for important work",
+        "resetHigh2": "Do not scatter attention on small things",
+        "resetHigh3": "Keep a calm rhythm",
+        "resetHigh4": "Do not overload your brain with extra switching",
+        "benefitTitle": "What good focus gives you",
+        "futureAiTitle": "What will come later",
+        "futureAiText": "Later this interface will work through our own model: it will determine concentration level, distraction risk, mental overload, and give more personal suggestions about food, routine, and actions.",
+        "retakeButton": "Take again",
+        "toMainButton": "Back to focus section",
+        "checkTab": "Check",
+        "exerciseTab": "Exercises",
+        "exerciseBadge": "Focus Exercises",
+        "exerciseHeroTitle": "Exercises to improve concentration",
+        "exerciseHeroText": "Here you will find short exercises that help train attention, reduce mental noise, and hold focus better.",
+        "exerciseCount": "exercises",
+        "exerciseMinutes": "minutes a day",
+        "exerciseWhy": "Why it is useful",
+        "exerciseBenefitsTitle": "What it can improve",
+        "exerciseVideoButton": "Watch on YouTube",
+        "rescueTitle": "I really cannot focus right now",
+        "rescue1": "Put your phone away for 10 minutes",
+        "rescue2": "Drink water",
+        "rescue3": "Do a short warm-up",
+        "rescue4": "Sit calmly for 3 minutes",
+        "rescue5": "Return to only one task"
+      }
+    },
+    "health": {
+      "title": "Useful health knowledge",
+      "subtitle": "Exercise, nutrition, sleep, energy, habits, and recovery are not separate topics. They are parts of one system.",
+      "mainTitle": "Why it matters",
+      "mainText": "The meaning of the project is not only workouts. It helps a person live better: support the body, mind, energy, discipline, and overall quality of life.",
+      "sportTitle": "Exercise",
+      "sportText": "Physical activity helps the body become stronger, supports health, and positively affects mood.",
+      "foodTitle": "Nutrition",
+      "foodText": "Proper nutrition gives energy, supports recovery, and affects how a person feels every day.",
+      "sleepTitle": "Sleep",
+      "sleepText": "Without quality sleep it is harder to recover, concentrate, and maintain stable energy.",
+      "energyTitle": "Energy",
+      "energyText": "Human energy depends not on one factor, but on routine, sleep, food, activity, and overload level.",
+      "focusTitle": "Focus",
+      "focusText": "The ability to keep attention is an important part of study, work, self-development, and discipline.",
+      "recoveryTitle": "Recovery",
+      "recoveryText": "Progress is built not only on effort, but also on the ability to recover at the right time."
+    }
+  }
+}

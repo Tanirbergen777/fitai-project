@@ -1,0 +1,49 @@
+# secrets
+.env
+frontend/.env
+
+# python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# virtual env
+venv/
+.venv/
+env/
+
+# node
+node_modules/
+frontend/node_modules/
+
+# uploads/static user files
+static/avatars/
+
+# large AI/data/model files
+ai_engine/datasets/
+ai_engine/models_bin/
+ai_engine/models/
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.zip
+*.rar
+*.7z
+
+# results / generated
+results/
+
+# IDE
+.idea/
+.vscode/
+
+# system
+.DS_Store
+Thumbs.db

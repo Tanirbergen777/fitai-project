@@ -1,0 +1,1516 @@
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
+import {
+  LANDMARKS,
+  detectExerciseMode,
+  buildPoseFeatures,
+  analyzeSquat,
+  analyzePushup,
+  analyzeJumpingJacks,
+  analyzePlank,
+  analyzeHighKnees,
+  analyzeCrunch,
+  analyzeLunge,
+  analyzeGeneric,
+} from './cameraAnalyzers';
+
+const API_BASE = 'http://127.0.0.1:8000';
+
+const getStoredUserId = () => {
+  const directKeys = ['user_id', 'userId'];
+
+  for (const key of directKeys) {
+    const value = localStorage.getItem(key);
+    if (value && !Number.isNaN(Number(value))) {
+      return Number(value);
+    }
+  }
+
+  const objectKeys = ['user', 'userData', 'currentUser', 'authUser'];
+
+  for (const key of objectKeys) {
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+
+    try {
+      const parsed = JSON.parse(raw);
+      const possibleId =
+        parsed?.id ??
+        parsed?.user_id ??
+        parsed?.user?.id ??
+        parsed?.user?.user_id;
+
+      if (possibleId && !Number.isNaN(Number(possibleId))) {
+        return Number(possibleId);
+      }
+    } catch (e) {
+      console.warn(`Не удалось распарсить localStorage ключ ${key}`, e);
+    }
+  }
+
+  return null;
+};
+
+const POSE_CONNECTIONS = [
+  [LANDMARKS.LEFT_SHOULDER, LANDMARKS.RIGHT_SHOULDER],
+  [LANDMARKS.LEFT_SHOULDER, LANDMARKS.LEFT_ELBOW],
+  [LANDMARKS.LEFT_ELBOW, LANDMARKS.LEFT_WRIST],
+  [LANDMARKS.RIGHT_SHOULDER, LANDMARKS.RIGHT_ELBOW],
+  [LANDMARKS.RIGHT_ELBOW, LANDMARKS.RIGHT_WRIST],
+  [LANDMARKS.LEFT_SHOULDER, LANDMARKS.LEFT_HIP],
+  [LANDMARKS.RIGHT_SHOULDER, LANDMARKS.RIGHT_HIP],
+  [LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP],
+  [LANDMARKS.LEFT_HIP, LANDMARKS.LEFT_KNEE],
+  [LANDMARKS.LEFT_KNEE, LANDMARKS.LEFT_ANKLE],
+  [LANDMARKS.RIGHT_HIP, LANDMARKS.RIGHT_KNEE],
+  [LANDMARKS.RIGHT_KNEE, LANDMARKS.RIGHT_ANKLE],
+];
+
+const isVisiblePoint = (point, min = 0.45) =>
+  point && (point.visibility ?? 1) >= min;
+
+const drawRoundedRect = (ctx, x, y, w, h, r = 14) => {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + w - radius, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+  ctx.lineTo(x + w, y + h - radius);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+  ctx.lineTo(x + radius, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+};
+
+const getOverlayTone = (errorType, isTargetReached) => {
+  if (isTargetReached) {
+    return {
+      accent: '#22c55e',
+      soft: 'rgba(34, 197, 94, 0.18)',
+      text: '#dcfce7',
+      line: 'rgba(99, 224, 255, 0.95)',
+      joint: '#7dd3fc',
+    };
+  }
+
+  if (!errorType) {
+    return {
+      accent: '#22c55e',
+      soft: 'rgba(34, 197, 94, 0.18)',
+      text: '#ecfdf5',
+      line: 'rgba(99, 224, 255, 0.95)',
+      joint: '#7dd3fc',
+    };
+  }
+
+  if (
+    [
+      'not_low_enough',
+      'range_incomplete',
+      'legs_not_wide_enough',
+      'hands_not_up',
+      'knee_not_high_enough',
+    ].includes(errorType)
+  ) {
+    return {
+      accent: '#f59e0b',
+      soft: 'rgba(245, 158, 11, 0.18)',
+      text: '#fff7ed',
+      line: 'rgba(99, 224, 255, 0.95)',
+      joint: '#fbbf24',
+    };
+  }
+
+  return {
+    accent: '#ef4444',
+    soft: 'rgba(239, 68, 68, 0.18)',
+    text: '#fef2f2',
+    line: 'rgba(99, 224, 255, 0.95)',
+    joint: '#f87171',
+  };
+};
+
+const formatStage = (stage) => String(stage || '—').toUpperCase();
+
+const formatMetricValue = (label, value) => {
+  if (value == null || Number.isNaN(Number(value))) return '—';
+
+  const lower = String(label || '').toLowerCase();
+
+  if (lower.includes('угол')) {
+    return `${Math.round(Number(value))}°`;
+  }
+
+  if (lower.includes('время') || lower.includes('сек')) {
+    return `${Math.round(Number(value))} сек`;
+  }
+
+  if (Math.abs(Number(value)) < 10) {
+    return Number(value).toFixed(2);
+  }
+
+  return `${Math.round(Number(value))}`;
+};
+
+const drawConnection = (ctx, landmarks, startIdx, endIdx, width, height, tone) => {
+  const start = landmarks[startIdx];
+  const end = landmarks[endIdx];
+
+  if (!isVisiblePoint(start) || !isVisiblePoint(end)) return;
+
+  ctx.beginPath();
+  ctx.moveTo(start.x * width, start.y * height);
+  ctx.lineTo(end.x * width, end.y * height);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = tone.line;
+  ctx.stroke();
+};
+
+const drawJoint = (ctx, point, width, height, tone) => {
+  if (!isVisiblePoint(point)) return;
+
+  const x = point.x * width;
+  const y = point.y * height;
+
+  ctx.beginPath();
+  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.fillStyle = tone.joint;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x, y, 8, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(15, 23, 32, 0.55)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+};
+
+const drawChip = (ctx, x, y, label, value, tone, options = {}) => {
+  const width = options.width ?? 160;
+  const height = options.height ?? 56;
+
+  drawRoundedRect(ctx, x, y, width, height, 14);
+  ctx.fillStyle = 'rgba(10, 15, 25, 0.68)';
+  ctx.fill();
+  ctx.strokeStyle = tone.soft;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(168, 180, 200, 0.95)';
+  ctx.font = '700 12px Inter, Arial, sans-serif';
+  ctx.fillText(label, x + 12, y + 18);
+
+  ctx.fillStyle = tone.text;
+  ctx.font = '900 22px Inter, Arial, sans-serif';
+  ctx.fillText(String(value), x + 12, y + 42);
+};
+
+const drawPoseSkeleton = (ctx, landmarks, width, height, tone) => {
+  ctx.clearRect(0, 0, width, height);
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  for (const [startIdx, endIdx] of POSE_CONNECTIONS) {
+    drawConnection(ctx, landmarks, startIdx, endIdx, width, height, tone);
+  }
+
+  for (const point of landmarks) {
+    drawJoint(ctx, point, width, height, tone);
+  }
+
+  ctx.restore();
+};
+
+const drawHudOverlay = (ctx, width, height, overlay) => {
+  const {
+    exerciseName,
+    repCount,
+    targetType,
+    targetReps,
+    targetDurationSeconds,
+    stage,
+    feedback,
+    metricLabel,
+    metricValue,
+    errorType,
+    isTargetReached,
+    completionPercent,
+    isActive,
+  } = overlay;
+
+  const tone = getOverlayTone(errorType, isTargetReached);
+
+  ctx.clearRect(0, 0, width, height);
+  ctx.save();
+
+  const topGradient = ctx.createLinearGradient(0, 0, 0, 160);
+  topGradient.addColorStop(0, 'rgba(8, 12, 20, 0.78)');
+  topGradient.addColorStop(1, 'rgba(8, 12, 20, 0)');
+  ctx.fillStyle = topGradient;
+  ctx.fillRect(0, 0, width, 160);
+
+  drawRoundedRect(ctx, 18, 16, 220, 42, 12);
+  ctx.fillStyle = 'rgba(8, 12, 20, 0.72)';
+  ctx.fill();
+  ctx.strokeStyle = tone.soft;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = '800 18px Inter, Arial, sans-serif';
+  ctx.fillText(exerciseName || 'Camera Coach', 32, 42);
+
+  drawChip(
+    ctx,
+    18,
+    72,
+    'Target',
+    targetType === 'reps'
+      ? `${targetReps ?? '—'}`
+      : `${targetDurationSeconds ?? '—'}s`,
+    tone,
+    { width: 120 }
+  );
+
+  drawChip(ctx, 148, 72, 'Counter', String(repCount ?? 0), tone, { width: 120 });
+  drawChip(ctx, 278, 72, 'Stage', formatStage(stage), tone, { width: 150 });
+
+  const metricText = formatMetricValue(metricLabel, metricValue);
+  drawChip(ctx, 438, 72, metricLabel || 'Metric', metricText, tone, { width: 190 });
+
+  const statusText = isTargetReached
+    ? 'Completed'
+    : !isActive
+    ? 'Prepare'
+    : !errorType
+    ? 'Good'
+    : 'Warning';
+
+  drawRoundedRect(ctx, width - 160, 16, 142, 42, 12);
+  ctx.fillStyle = tone.soft;
+  ctx.fill();
+  ctx.strokeStyle = tone.accent;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.fillStyle = tone.text;
+  ctx.font = '800 18px Inter, Arial, sans-serif';
+  ctx.fillText(statusText, width - 130, 42);
+
+  const progress = Math.max(0, Math.min(100, Number(completionPercent ?? 0)));
+  const barX = 18;
+  const barY = height - 34;
+  const barW = width - 36;
+  const barH = 14;
+
+  drawRoundedRect(ctx, barX, barY, barW, barH, 999);
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.fill();
+
+  drawRoundedRect(ctx, barX, barY, (barW * progress) / 100, barH, 999);
+  ctx.fillStyle = tone.accent;
+  ctx.fill();
+
+  const feedbackWidth = Math.min(width - 36, 520);
+  const feedbackHeight = 56;
+  const feedbackX = 18;
+  const feedbackY = height - 100;
+
+  drawRoundedRect(ctx, feedbackX, feedbackY, feedbackWidth, feedbackHeight, 14);
+  ctx.fillStyle = 'rgba(8, 12, 20, 0.74)';
+  ctx.fill();
+  ctx.strokeStyle = tone.soft;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(168, 180, 200, 0.95)';
+  ctx.font = '700 12px Inter, Arial, sans-serif';
+  ctx.fillText('Feedback', feedbackX + 12, feedbackY + 18);
+
+  ctx.fillStyle = '#f8fafc';
+  ctx.font = '700 16px Inter, Arial, sans-serif';
+  const feedbackText = feedback || 'Смотри в камеру и займи позицию.';
+  ctx.fillText(feedbackText.slice(0, 58), feedbackX + 12, feedbackY + 40);
+
+  ctx.restore();
+};
+
+export default function CameraCoachPanel({
+  exerciseName = '',
+  exerciseOrderIndex = null,
+  targetReps = null,
+  targetLabel = '',
+  targetType = 'reps',
+  targetDurationSeconds = null,
+  elapsedWorkSeconds = 0,
+  isActive = false,
+  exerciseModeOverride = '',
+  onRepCountChange = null,
+  onTargetReached = null,
+}) {
+  const videoRef = useRef(null);
+  const skeletonCanvasRef = useRef(null);
+  const hudCanvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const poseLandmarkerRef = useRef(null);
+  const rafRef = useRef(null);
+  const lastVideoTimeRef = useRef(-1);
+  const stageRef = useRef('up');
+
+  const lastLiveSampleSentAtRef = useRef(0);
+  const isActiveRef = useRef(isActive);
+  const exerciseModeRef = useRef('generic');
+  const latestFeaturesRef = useRef(null);
+  const latestErrorTypeRef = useRef(null);
+  const metricLabelRef = useRef('Угол');
+  const metricValueRef = useRef(null);
+
+  const sessionIdRef = useRef(null);
+  const finishingSessionRef = useRef(false);
+  const repCountRef = useRef(0);
+  const feedbackRef = useRef('');
+  const prevExerciseNameRef = useRef('');
+
+  const attemptCountRef = useRef(0);
+  const squatMlPendingRef = useRef(false);
+  const cycleStartedRef = useRef(false);
+  const cycleHadErrorRef = useRef(false);
+  const repCooldownRef = useRef(0);
+  const squatBottomSnapshotRef = useRef(null);
+
+  const targetRepsRef = useRef(targetReps);
+  const targetTypeRef = useRef(targetType);
+  const targetDurationSecondsRef = useRef(targetDurationSeconds);
+  const elapsedWorkSecondsRef = useRef(elapsedWorkSeconds);
+  const targetReachedNotifiedRef = useRef(false);
+
+  const [cameraOn, setCameraOn] = useState(false);
+  const [modelStatus, setModelStatus] = useState('loading');
+  const [feedback, setFeedback] = useState('Инициализация camera coach...');
+  const [repCount, setRepCount] = useState(0);
+  const [stage, setStage] = useState('up');
+  const [metricLabel, setMetricLabel] = useState('Угол');
+  const [metricValue, setMetricValue] = useState(null);
+
+const exerciseMode = useMemo(() => {
+  if (exerciseModeOverride) return exerciseModeOverride;
+  return detectExerciseMode(exerciseName);
+}, [exerciseModeOverride, exerciseName]);
+
+  const FIXED_LANDSCAPE_ROTATION = 90;
+
+  const completionPercent = useMemo(() => {
+    if (targetType === 'reps') {
+      if (!targetReps || targetReps <= 0) return null;
+      return Math.min(100, Math.round((repCount / targetReps) * 100));
+    }
+
+    if (targetType === 'time') {
+      if (!targetDurationSeconds || targetDurationSeconds <= 0) return null;
+      return Math.min(
+        100,
+        Math.round((elapsedWorkSeconds / targetDurationSeconds) * 100)
+      );
+    }
+
+    return null;
+  }, [repCount, targetReps, targetType, targetDurationSeconds, elapsedWorkSeconds]);
+
+  const isTargetReached = useMemo(() => {
+    if (targetType === 'reps') {
+      return targetReps ? repCount >= targetReps : false;
+    }
+
+    if (targetType === 'time') {
+      return targetDurationSeconds
+        ? elapsedWorkSeconds >= targetDurationSeconds
+        : false;
+    }
+
+    return false;
+  }, [targetType, targetReps, repCount, targetDurationSeconds, elapsedWorkSeconds]);
+
+  useEffect(() => {
+    repCountRef.current = repCount;
+  }, [repCount]);
+
+  useEffect(() => {
+    if (typeof onRepCountChange === 'function') {
+      onRepCountChange(repCount);
+    }
+  }, [repCount, onRepCountChange]);
+
+  useEffect(() => {
+    feedbackRef.current = feedback;
+  }, [feedback]);
+
+  useEffect(() => {
+    metricLabelRef.current = metricLabel;
+  }, [metricLabel]);
+
+  useEffect(() => {
+    metricValueRef.current = metricValue;
+  }, [metricValue]);
+
+  useEffect(() => {
+    targetRepsRef.current = targetReps;
+  }, [targetReps]);
+
+  useEffect(() => {
+    targetTypeRef.current = targetType;
+  }, [targetType]);
+
+  useEffect(() => {
+    targetDurationSecondsRef.current = targetDurationSeconds;
+  }, [targetDurationSeconds]);
+
+  useEffect(() => {
+    elapsedWorkSecondsRef.current = elapsedWorkSeconds;
+  }, [elapsedWorkSeconds]);
+
+  useEffect(() => {
+    isActiveRef.current = isActive;
+  }, [isActive]);
+
+  useEffect(() => {
+    exerciseModeRef.current = exerciseMode;
+  }, [exerciseMode]);
+
+  useEffect(() => {
+    targetReachedNotifiedRef.current = false;
+  }, [exerciseName, exerciseOrderIndex, targetReps, targetType]);
+
+  useEffect(() => {
+    if (targetType !== 'reps') return;
+    if (!isActive || !cameraOn) return;
+    if (!isTargetReached) return;
+    if (targetReachedNotifiedRef.current) return;
+
+    targetReachedNotifiedRef.current = true;
+
+    if (typeof onTargetReached === 'function') {
+      onTargetReached({
+        exerciseName,
+        exerciseOrderIndex,
+        repCount,
+        targetReps,
+        targetType,
+        completionPercent,
+      });
+    }
+  }, [
+    cameraOn,
+    isActive,
+    isTargetReached,
+    onTargetReached,
+    exerciseName,
+    exerciseOrderIndex,
+    repCount,
+    targetReps,
+    targetType,
+    completionPercent,
+  ]);
+
+  const startBackendSession = useCallback(async () => {
+    try {
+      const userId = getStoredUserId();
+
+      if (!userId) {
+        console.warn('Camera session: user_id не найден в localStorage');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE}/camera-workout/session/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          exercise_name: exerciseName || 'Упражнение',
+          exercise_order_index: exerciseOrderIndex,
+          exercise_mode: exerciseMode,
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Не удалось стартовать camera session:', text);
+        return;
+      }
+
+      const data = await response.json();
+      sessionIdRef.current = data.id;
+      lastLiveSampleSentAtRef.current = 0;
+      console.log('Camera session started:', data.id);
+    } catch (error) {
+      console.error('Camera session start error:', error);
+    }
+  }, [exerciseName, exerciseOrderIndex, exerciseMode]);
+
+  const finishBackendSession = useCallback(async () => {
+    const sessionId = sessionIdRef.current;
+    if (!sessionId || finishingSessionRef.current) return;
+
+    finishingSessionRef.current = true;
+
+    const currentTargetType = targetTypeRef.current;
+    const currentTargetReps = targetRepsRef.current;
+    const currentTargetDurationSeconds = targetDurationSecondsRef.current;
+    const currentElapsedWorkSeconds = elapsedWorkSecondsRef.current;
+
+    const finalCompletionPercent =
+      currentTargetType === 'reps'
+        ? currentTargetReps && currentTargetReps > 0
+          ? Math.min(
+              100,
+              Math.round((repCountRef.current / currentTargetReps) * 100)
+            )
+          : null
+        : currentTargetType === 'time'
+        ? currentTargetDurationSeconds && currentTargetDurationSeconds > 0
+          ? Math.min(
+              100,
+              Math.round(
+                (currentElapsedWorkSeconds / currentTargetDurationSeconds) * 100
+              )
+            )
+          : null
+        : null;
+
+    const completionSummary =
+      currentTargetType === 'reps'
+        ? currentTargetReps && currentTargetReps > 0
+          ? `Выполнено ${repCountRef.current} из ${currentTargetReps} (${finalCompletionPercent}%)`
+          : `Сделано повторов: ${repCountRef.current}`
+        : currentTargetType === 'time'
+        ? currentTargetDurationSeconds && currentTargetDurationSeconds > 0
+          ? `По времени выполнено ${currentElapsedWorkSeconds} из ${currentTargetDurationSeconds} сек (${finalCompletionPercent}%)`
+          : 'Упражнение по времени'
+        : `Сделано повторов: ${repCountRef.current}`;
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/camera-workout/session/${sessionId}/finish`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            form_score: finalCompletionPercent,
+            feedback_summary: `${feedbackRef.current || ''} | ${completionSummary}`,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Не удалось завершить camera session:', text);
+      } else {
+        const data = await response.json();
+        console.log('Camera session finished:', data.id);
+      }
+    } catch (error) {
+      console.error('Camera session finish error:', error);
+    } finally {
+      sessionIdRef.current = null;
+      finishingSessionRef.current = false;
+    }
+  }, []);
+
+  const sendRepEvent = useCallback(
+    async ({
+      repIndex,
+      isCorrect,
+      feedbackText,
+      errorType = null,
+      score = null,
+      labelSource = 'rule',
+      features = latestFeaturesRef.current,
+      stage = stageRef.current,
+      metricLabel = metricLabelRef.current,
+      metricValue =
+        typeof metricValueRef.current === 'number' ? metricValueRef.current : null,
+    }) => {
+      const sessionId = sessionIdRef.current;
+      if (!sessionId) return;
+
+      try {
+        const response = await fetch(
+          `${API_BASE}/camera-workout/session/${sessionId}/rep-event`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              rep_index: repIndex,
+              is_correct: isCorrect,
+              score: score ?? (isCorrect ? 0.95 : 0.45),
+              feedback:
+                feedbackText ||
+                (isCorrect ? 'Повтор засчитан' : 'Повтор с ошибкой'),
+              exercise_mode: exerciseModeRef.current,
+              stage,
+              metric_label: metricLabel,
+              metric_value: metricValue,
+              features_json: features,
+              error_type: errorType,
+              label_source: labelSource,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('Не удалось отправить rep-event:', text);
+        }
+      } catch (error) {
+        console.error('Rep-event error:', error);
+      }
+    },
+    []
+  );
+
+  const sendLiveSample = useCallback(async () => {
+    const sessionId = sessionIdRef.current;
+    if (!sessionId) return;
+
+    const now = performance.now();
+    if (now - lastLiveSampleSentAtRef.current < 700) return;
+
+    lastLiveSampleSentAtRef.current = now;
+
+    const featuresPayload = {
+      ...(latestFeaturesRef.current || {}),
+      is_active: isActiveRef.current,
+      rep_count: repCountRef.current,
+      target_type: targetTypeRef.current,
+      target_reps: targetRepsRef.current,
+      target_duration_seconds: targetDurationSecondsRef.current,
+    };
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/camera-workout/session/${sessionId}/live-sample`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            exercise_mode: exerciseModeRef.current,
+            stage: stageRef.current,
+            metric_label: metricLabelRef.current,
+            metric_value:
+              typeof metricValueRef.current === 'number'
+                ? metricValueRef.current
+                : null,
+            features_json: featuresPayload,
+            error_type: latestErrorTypeRef.current,
+            label_source: 'rule_live',
+            elapsed_seconds: elapsedWorkSecondsRef.current ?? 0,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Не удалось отправить live-sample:', text);
+      }
+    } catch (error) {
+      console.error('Live-sample error:', error);
+    }
+  }, []);
+
+  const finalizeAttempt = useCallback(
+    ({ isCorrect, feedbackText, errorType = null, score = null, labelSource = 'rule' }) => {
+      attemptCountRef.current += 1;
+      const currentAttemptIndex = attemptCountRef.current;
+
+      latestErrorTypeRef.current = errorType;
+
+      if (isCorrect) {
+        setRepCount((prev) => prev + 1);
+      }
+
+      void sendRepEvent({
+        repIndex: currentAttemptIndex,
+        isCorrect,
+        feedbackText,
+        errorType,
+        score,
+        labelSource,
+      });
+
+      cycleStartedRef.current = false;
+      cycleHadErrorRef.current = false;
+    },
+    [sendRepEvent]
+  );
+
+  const evaluateSquatAttempt = useCallback(
+    async ({
+      fallbackIsCorrect,
+      fallbackFeedbackText,
+      fallbackErrorType = null,
+      features = null,
+    }) => {
+      if (squatMlPendingRef.current) return;
+      squatMlPendingRef.current = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/camera-workout/ml/squat-evaluate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            features_json: features || latestFeaturesRef.current || {},
+            phase: stageRef.current,
+            exercise_mode: 'squat',
+          }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || 'ML squat evaluate failed');
+        }
+
+        const data = await response.json();
+        const finalFeedback = data.feedback || fallbackFeedbackText;
+        setFeedback(finalFeedback);
+
+        finalizeAttempt({
+          isCorrect: Boolean(data.is_correct),
+          feedbackText: finalFeedback,
+          errorType: data.error_type ?? fallbackErrorType ?? null,
+          score: data.score ?? null,
+          labelSource: data.label_source || 'ml_rf_squat',
+        });
+      } catch (error) {
+        console.error('Squat ML evaluate error:', error);
+        setFeedback(fallbackFeedbackText);
+
+        finalizeAttempt({
+          isCorrect: fallbackIsCorrect,
+          feedbackText: fallbackFeedbackText,
+          errorType: fallbackErrorType,
+          score: null,
+          labelSource: 'rule_fallback',
+        });
+      } finally {
+        squatMlPendingRef.current = false;
+      }
+    },
+    [finalizeAttempt]
+  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    const initPoseModel = async () => {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+        );
+
+        const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: '/models/pose_landmarker_lite.task',
+            delegate: 'GPU',
+          },
+          runningMode: 'VIDEO',
+          numPoses: 1,
+          minPoseDetectionConfidence: 0.5,
+          minPosePresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+
+        if (!mounted) return;
+
+        poseLandmarkerRef.current = poseLandmarker;
+        setModelStatus('ready');
+        setFeedback('Модель позы загружена. Можно включать камеру.');
+      } catch (error) {
+        console.error('Pose model init error:', error);
+        if (!mounted) return;
+
+        setModelStatus('error');
+        setFeedback(
+          'Камера может работать, но pose model не загрузилась. Проверь файл в public/models.'
+        );
+      }
+    };
+
+    initPoseModel();
+
+    return () => {
+      mounted = false;
+      void finishBackendSession();
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+
+      if (poseLandmarkerRef.current?.close) {
+        poseLandmarkerRef.current.close();
+      }
+    };
+  }, [finishBackendSession]);
+
+  useEffect(() => {
+    setRepCount(0);
+    setMetricValue(null);
+    attemptCountRef.current = 0;
+    cycleStartedRef.current = false;
+    cycleHadErrorRef.current = false;
+    repCooldownRef.current = 0;
+    squatBottomSnapshotRef.current = null;
+    latestErrorTypeRef.current = null;
+    lastLiveSampleSentAtRef.current = 0;
+    squatMlPendingRef.current = false;
+    stageRef.current = exerciseMode === 'jumping_jacks' ? 'closed' : 'up';
+    setStage(exerciseMode === 'jumping_jacks' ? 'closed' : 'up');
+
+    if (exerciseMode === 'jumping_jacks') {
+      setMetricLabel('Ширина ног');
+      setFeedback('Режим jumping jacks. Нужно разводить ноги шире и поднимать руки вверх.');
+    } else if (exerciseMode === 'squat') {
+      setMetricLabel('Угол колена');
+      setFeedback('Режим squat. Поставь камеру сбоку, чтобы было видно бедро и колено.');
+    } else if (exerciseMode === 'pushup') {
+      setMetricLabel('Угол локтя');
+      setFeedback('Режим push-up. Лучше встать боком к камере.');
+    } else if (exerciseMode === 'plank') {
+      setMetricLabel('Смещение таза');
+      setFeedback('Режим plank. Держи плечи, таз и ноги на одной линии.');
+    } else if (exerciseMode === 'high_knees') {
+      setMetricLabel('Высота колена');
+      setFeedback('Режим high knees. Поднимай колени выше уровня таза.');
+    } else if (exerciseMode === 'crunch') {
+      setMetricLabel('Угол корпуса');
+      setFeedback('Режим crunch. Скручивай корпус сильнее и без рывков.');
+    } else if (exerciseMode === 'lunge') {
+      setMetricLabel('Угол колена');
+      setFeedback('Режим lunge. Лучше встать боком к камере и опускаться глубже.');
+    } else {
+      setMetricLabel('Landmarks');
+      setFeedback('Для этого упражнения пока включён только общий pose tracking.');
+    }
+  }, [exerciseMode, exerciseName]);
+
+  useEffect(() => {
+    if (!cameraOn) {
+      prevExerciseNameRef.current = exerciseName;
+      return;
+    }
+
+    if (!prevExerciseNameRef.current) {
+      prevExerciseNameRef.current = exerciseName;
+      return;
+    }
+
+    if (prevExerciseNameRef.current !== exerciseName) {
+      const restartSessionForNewExercise = async () => {
+        await finishBackendSession();
+        await startBackendSession();
+      };
+
+      void restartSessionForNewExercise();
+      prevExerciseNameRef.current = exerciseName;
+    }
+  }, [exerciseName, cameraOn, exerciseMode, startBackendSession, finishBackendSession]);
+
+  const stopCamera = async () => {
+    await finishBackendSession();
+
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    const skeletonCanvas = skeletonCanvasRef.current;
+    const hudCanvas = hudCanvasRef.current;
+    const skeletonCtx = skeletonCanvas?.getContext('2d');
+    const hudCtx = hudCanvas?.getContext('2d');
+    if (skeletonCanvas && skeletonCtx) {
+      skeletonCtx.clearRect(0, 0, skeletonCanvas.width, skeletonCanvas.height);
+    }
+    if (hudCanvas && hudCtx) {
+      hudCtx.clearRect(0, 0, hudCanvas.width, hudCanvas.height);
+    }
+
+    lastVideoTimeRef.current = -1;
+    targetReachedNotifiedRef.current = false;
+    setCameraOn(false);
+  };
+
+  const badgeText =
+    exerciseMode === 'jumping_jacks'
+      ? 'Jumping Jacks coach'
+      : exerciseMode === 'squat'
+      ? 'Squat coach'
+      : exerciseMode === 'pushup'
+      ? 'Push-up coach'
+      : exerciseMode === 'plank'
+      ? 'Plank coach'
+      : exerciseMode === 'high_knees'
+      ? 'High Knees coach'
+      : exerciseMode === 'crunch'
+      ? 'Crunch coach'
+      : exerciseMode === 'lunge'
+      ? 'Lunge coach'
+      : 'Camera coach';
+
+  const runAnalyzer = (landmarks) => {
+    const currentMode = exerciseModeRef.current;
+    const currentIsActive = isActiveRef.current;
+
+    const currentAnalyzerContext = {
+      isActive: currentIsActive,
+      stageRef,
+      setStage,
+      setMetricValue,
+      setFeedback,
+      latestFeaturesRef,
+      latestErrorTypeRef,
+      cycleStartedRef,
+      cycleHadErrorRef,
+      finalizeAttempt,
+    };
+
+    if (currentMode === 'jumping_jacks') {
+      analyzeJumpingJacks({ landmarks, ...currentAnalyzerContext });
+      return;
+    }
+
+    if (currentMode === 'squat') {
+      analyzeSquat({
+        landmarks,
+        ...currentAnalyzerContext,
+        finalizeSquatAttempt: evaluateSquatAttempt,
+        repCooldownRef,
+        squatBottomSnapshotRef,
+      });
+      return;
+    }
+
+    if (currentMode === 'pushup') {
+      analyzePushup({ landmarks, ...currentAnalyzerContext });
+      return;
+    }
+
+    if (currentMode === 'plank') {
+      analyzePlank({
+        landmarks,
+        isActive: currentIsActive,
+        setMetricValue,
+        setFeedback,
+        latestFeaturesRef,
+        latestErrorTypeRef,
+      });
+      return;
+    }
+
+    if (currentMode === 'high_knees') {
+      analyzeHighKnees({ landmarks, ...currentAnalyzerContext });
+      return;
+    }
+
+    if (currentMode === 'crunch') {
+      analyzeCrunch({ landmarks, ...currentAnalyzerContext });
+      return;
+    }
+
+    if (currentMode === 'lunge') {
+      analyzeLunge({ landmarks, ...currentAnalyzerContext });
+      return;
+    }
+
+    analyzeGeneric({
+      landmarks,
+      isActive: currentIsActive,
+      setMetricValue,
+      setFeedback,
+    });
+  };
+
+  const processFrame = () => {
+    const video = videoRef.current;
+    const skeletonCanvas = skeletonCanvasRef.current;
+    const hudCanvas = hudCanvasRef.current;
+    const poseLandmarker = poseLandmarkerRef.current;
+
+    if (!video || !skeletonCanvas || !hudCanvas) {
+      rafRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+
+    if (video.readyState < 2) {
+      rafRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+
+    const width = video.videoWidth || 960;
+    const height = video.videoHeight || 540;
+
+    if (skeletonCanvas.width !== width) skeletonCanvas.width = width;
+    if (skeletonCanvas.height !== height) skeletonCanvas.height = height;
+    if (hudCanvas.width !== width) hudCanvas.width = width;
+    if (hudCanvas.height !== height) hudCanvas.height = height;
+
+    const skeletonCtx = skeletonCanvas.getContext('2d');
+    const hudCtx = hudCanvas.getContext('2d');
+
+    if (!skeletonCtx || !hudCtx) {
+      rafRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+
+    if (
+      modelStatus === 'ready' &&
+      poseLandmarker &&
+      video.currentTime !== lastVideoTimeRef.current
+    ) {
+      try {
+        let result;
+
+        try {
+          result = poseLandmarker.detectForVideo(video, performance.now());
+        } catch {
+          result = poseLandmarker.detectForVideo(video);
+        }
+
+        const landmarks = result?.landmarks?.[0];
+        const worldLandmarks = result?.worldLandmarks?.[0] || null;
+
+        if (landmarks?.length) {
+          latestFeaturesRef.current = {
+            ...buildPoseFeatures(landmarks, worldLandmarks),
+            exercise_mode: exerciseModeRef.current,
+            phase: stageRef.current,
+          };
+
+          runAnalyzer(landmarks);
+
+          const currentTargetType = targetTypeRef.current;
+          const currentTargetReps = targetRepsRef.current;
+          const currentTargetDurationSeconds = targetDurationSecondsRef.current;
+          const currentElapsedWorkSeconds = elapsedWorkSecondsRef.current ?? 0;
+
+          const currentCompletionPercent =
+            currentTargetType === 'reps'
+              ? currentTargetReps && currentTargetReps > 0
+                ? Math.min(100, Math.round((repCountRef.current / currentTargetReps) * 100))
+                : 0
+              : currentTargetType === 'time'
+              ? currentTargetDurationSeconds && currentTargetDurationSeconds > 0
+                ? Math.min(
+                    100,
+                    Math.round(
+                      (currentElapsedWorkSeconds / currentTargetDurationSeconds) * 100
+                    )
+                  )
+                : 0
+              : 0;
+
+          const currentIsTargetReached =
+            currentTargetType === 'reps'
+              ? Boolean(currentTargetReps && repCountRef.current >= currentTargetReps)
+              : currentTargetType === 'time'
+              ? Boolean(
+                  currentTargetDurationSeconds &&
+                    currentElapsedWorkSeconds >= currentTargetDurationSeconds
+                )
+              : false;
+
+          const tone = getOverlayTone(
+            latestErrorTypeRef.current,
+            currentIsTargetReached
+          );
+
+          drawPoseSkeleton(skeletonCtx, landmarks, width, height, tone);
+          drawHudOverlay(hudCtx, width, height, {
+            exerciseName: exerciseName || badgeText,
+            repCount: repCountRef.current,
+            targetType: currentTargetType,
+            targetReps: currentTargetReps,
+            targetDurationSeconds: currentTargetDurationSeconds,
+            elapsedWorkSeconds: currentElapsedWorkSeconds,
+            stage: stageRef.current,
+            feedback: feedbackRef.current,
+            metricLabel: metricLabelRef.current,
+            metricValue: metricValueRef.current,
+            errorType: latestErrorTypeRef.current,
+            isTargetReached: currentIsTargetReached,
+            completionPercent: currentCompletionPercent,
+            isActive: isActiveRef.current,
+          });
+
+          void sendLiveSample();
+        } else {
+          skeletonCtx.clearRect(0, 0, width, height);
+          hudCtx.clearRect(0, 0, width, height);
+          setFeedback('Поза не найдена. Отойди чуть дальше от камеры.');
+        }
+
+        lastVideoTimeRef.current = video.currentTime;
+      } catch (error) {
+        console.error('Pose detect error:', error);
+        setFeedback('Ошибка распознавания позы.');
+      }
+    } else {
+      skeletonCtx.clearRect(0, 0, width, height);
+      hudCtx.clearRect(0, 0, width, height);
+    }
+
+    rafRef.current = requestAnimationFrame(processFrame);
+  };
+
+  const startCamera = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+
+      const droidCamDevice =
+        videoDevices.find((d) => /droidcam/i.test(d.label)) ||
+        videoDevices.find((d) => /tanirbergen/i.test(d.label)) ||
+        videoDevices[0];
+
+      if (!droidCamDevice) {
+        throw new Error('Не найдена ни одна видеокамера');
+      }
+
+      console.log('Chosen camera:', droidCamDevice.label, droidCamDevice.deviceId);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: { exact: droidCamDevice.deviceId },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+
+      setCameraOn(true);
+      prevExerciseNameRef.current = exerciseName;
+      await startBackendSession();
+
+      rafRef.current = requestAnimationFrame(processFrame);
+    } catch (error) {
+      console.error('Camera start error:', error);
+      setFeedback(`Не удалось открыть камеру: ${error.message || error}`);
+    }
+  };
+
+  return (
+    <div style={styles.panel}>
+      <div style={styles.header}>
+        <div>
+          <div style={styles.badge}>{badgeText}</div>
+          <h3 style={styles.title}>Камера</h3>
+          <p style={styles.subtitle}>
+            MVP: webcam + pose landmarks + базовый feedback
+          </p>
+        </div>
+
+        <div style={styles.actions}>
+          {!cameraOn ? (
+            <button style={styles.primaryBtn} onClick={startCamera}>
+              Включить
+            </button>
+          ) : (
+            <button style={styles.secondaryBtn} onClick={() => void stopCamera()}>
+              Остановить
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={styles.videoWrap}>
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          style={{
+            ...styles.video,
+            transform: `scaleX(-1) rotate(${FIXED_LANDSCAPE_ROTATION}deg)`,
+            transformOrigin: 'center center',
+          }}
+        />
+
+        <canvas
+          ref={skeletonCanvasRef}
+          style={{
+            ...styles.canvas,
+            transform: `scaleX(-1) rotate(${FIXED_LANDSCAPE_ROTATION}deg)`,
+            transformOrigin: 'center center',
+          }}
+        />
+
+        <canvas ref={hudCanvasRef} style={styles.canvas} />
+      </div>
+
+      <div style={styles.statsGrid}>
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Модель</span>
+          <strong style={styles.statValue}>
+            {modelStatus === 'ready'
+              ? 'готова'
+              : modelStatus === 'loading'
+              ? 'загрузка'
+              : 'ошибка'}
+          </strong>
+        </div>
+
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Повторы</span>
+          <strong style={styles.statValue}>{repCount}</strong>
+        </div>
+
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>Фаза</span>
+          <strong style={styles.statValue}>{stage}</strong>
+        </div>
+
+        <div style={styles.statCard}>
+          <span style={styles.statLabel}>{metricLabel}</span>
+          <strong style={styles.statValue}>{metricValue ?? '—'}</strong>
+        </div>
+      </div>
+
+      <div style={styles.progressCard}>
+        <div style={styles.progressTop}>
+          <span style={styles.progressLabel}>Цель</span>
+
+          <strong style={styles.progressValue}>
+            {targetType === 'reps'
+              ? `${repCount} / ${targetReps ?? '—'}`
+              : targetType === 'time'
+              ? `${elapsedWorkSeconds} / ${targetDurationSeconds ?? '—'} сек`
+              : targetLabel || 'Без цели'}
+          </strong>
+        </div>
+
+        <div style={styles.progressTrack}>
+          <div
+            style={{
+              ...styles.progressFill,
+              width: `${completionPercent ?? 0}%`,
+            }}
+          />
+        </div>
+
+        <div style={styles.progressBottom}>
+          <span>{completionPercent ?? 0}% выполнено</span>
+          <strong>
+            {isTargetReached ? 'Упражнение завершено' : 'Ещё не завершено'}
+          </strong>
+        </div>
+      </div>
+
+      <div style={styles.feedbackBox}>{feedback}</div>
+
+      <div style={styles.helpText}>
+        Текущее упражнение: <strong>{exerciseName || 'не выбрано'}</strong>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  panel: {
+    width: '100%',
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '18px',
+    color: '#fff',
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: '14px',
+    flexWrap: 'wrap',
+  },
+  badge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '8px 14px',
+    borderRadius: '999px',
+    background: 'rgba(198, 120, 221, 0.12)',
+    border: '1px solid rgba(198, 120, 221, 0.26)',
+    color: '#d8a8ea',
+    fontSize: '12px',
+    fontWeight: 800,
+    marginBottom: '12px',
+  },
+  title: {
+    margin: 0,
+    fontSize: '38px',
+    lineHeight: 1.05,
+    fontWeight: 900,
+  },
+  subtitle: {
+    margin: '10px 0 0',
+    color: '#aab3c2',
+    lineHeight: 1.6,
+    fontSize: '15px',
+    maxWidth: '420px',
+  },
+  actions: {
+    display: 'flex',
+    gap: '10px',
+  },
+  primaryBtn: {
+    border: 'none',
+    borderRadius: '16px',
+    padding: '12px 16px',
+    fontSize: '14px',
+    fontWeight: 800,
+    cursor: 'pointer',
+    background: 'linear-gradient(135deg, #63e0ff 0%, #4e8fff 100%)',
+    color: '#0f1720',
+  },
+  secondaryBtn: {
+    borderRadius: '16px',
+    padding: '12px 16px',
+    fontSize: '14px',
+    fontWeight: 800,
+    cursor: 'pointer',
+    background: 'transparent',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,0.12)',
+  },videoWrap: {
+  position: 'relative',
+  width: '100%',
+  maxWidth: '430px',
+  aspectRatio: '9 / 16',
+  minHeight: '620px',
+  margin: '0 auto',
+  background: '#11161f',
+  borderRadius: '22px',
+  overflow: 'hidden',
+  border: '1px solid rgba(255,255,255,0.08)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+video: {
+  width: '100%',
+  height: '100%',
+  display: 'block',
+  background: '#000',
+  objectFit: 'contain',
+},
+  canvas: {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gap: '12px',
+  },
+  statCard: {
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    borderRadius: '18px',
+    padding: '14px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  statLabel: {
+    color: '#9ea8b8',
+    fontSize: '12px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+  },
+  statValue: {
+    fontSize: '20px',
+    fontWeight: 900,
+    color: '#fff',
+  },
+  progressCard: {
+    borderRadius: '18px',
+    padding: '14px 16px',
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  progressTop: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+  },
+  progressLabel: {
+    color: '#9ea8b8',
+    fontSize: '12px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+  },
+  progressValue: {
+    fontSize: '20px',
+    fontWeight: 900,
+    color: '#fff',
+  },
+  progressTrack: {
+    width: '100%',
+    height: '12px',
+    borderRadius: '999px',
+    background: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: '999px',
+    background: 'linear-gradient(90deg, #63e0ff 0%, #4e8fff 100%)',
+    transition: 'width 0.25s ease',
+  },
+  progressBottom: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+    color: '#c9d4e4',
+    fontSize: '14px',
+    flexWrap: 'wrap',
+  },
+  feedbackBox: {
+    borderRadius: '18px',
+    padding: '14px 16px',
+    background: 'rgba(99, 224, 255, 0.08)',
+    border: '1px solid rgba(99, 224, 255, 0.18)',
+    color: '#dbefff',
+    lineHeight: 1.5,
+    fontWeight: 700,
+  },
+  helpText: {
+    color: '#aab3c2',
+    fontSize: '14px',
+  },
+};

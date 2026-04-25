@@ -1,0 +1,744 @@
+/* Сброс всех стандартных отступов */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html, #root {
+  height: 100%;
+  width: 100%;
+   /* Чтобы не было двойной прокрутки */
+  background-color: #1c1e22;
+}
+
+
+select {
+    max-height: 200px; /* Ограничиваем высоту прокрутки */
+}
+select::-webkit-scrollbar {
+    width: 6px;
+}
+select::-webkit-scrollbar-thumb {
+    background: #61dafb;
+    border-radius: 10px;
+}
+.custom-select {
+  background-color: white !important; /* Белый фон как на фото */
+  color: #333 !important;             /* Темный текст для читаемости */
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;      /* Закругление углов */
+  padding: 10px !important;
+  cursor: pointer;
+  outline: none;
+  font-weight: 500;
+}
+.custom-select option {
+  background-color: white;
+  color: black;
+  padding: 10px;
+
+}
+.auth-card {
+  width: 100%;
+}
+/* В файле CSS */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  box-sizing: border-box; /* Это самое важное! */
+}
+
+input, select {
+  box-sizing: border-box; /* Чтобы padding не расширял элементы */
+}
+button {
+  border-radius: 25px !important; /* Делает кнопку овальной, как на референсе */
+  transition: opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+/* Эффект при клике на поле ввода */
+input:focus, .custom-select:focus {
+  outline: none; /* Убираем стандартную черную рамку браузера */
+  border: 2px solid white; /* Твой фирменный цвет */
+  box-shadow: 0 0 8px rgba(97, 218, 251, 0.4); /* Мягкое свечение вокруг */
+  background-color: #ffffff; /* Убеждаемся, что фон остается белым */
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Плавный переход цвета, чтобы не дергалось */
+input, .custom-select {
+  transition: border-color 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent; /* Изначально прозрачная или серая граница */
+}
+.App {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--bg-main, #1c1e22);
+}
+aside {
+  box-sizing: border-box;
+  pointer-events: auto !important; /* Гарантируем кликабельность внутри */
+}
+/* Контейнер списка */
+.workout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Метка режима (Набор массы / Жиросжигание) */
+.workout-label {
+  color: #abb2bf;
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* Карточка упражнения */
+.exercise-card {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  background: #282c34;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exercise-card:hover {
+  background: #323844;
+  transform: translateY(-2px);
+  border-color: rgba(97, 218, 251, 0.5);
+}
+
+.exercise-card.completed {
+  opacity: 0.6;
+  border-color: #61dafb;
+}
+
+/* Инфо блок внутри карточки */
+.exercise-info {
+  flex: 1;
+  text-align: left;
+  margin-left: 15px;
+}
+
+.exercise-name {
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.exercise-reps {
+  color: #61dafb;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.exercise-check {
+  font-size: 20px;
+}
+
+/* Прогресс-бар */
+.progress-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #61dafb;
+  transition: width 0.4s ease;
+}
+
+main {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+.sidebar-logo span {
+  display: inline-block;
+  animation: flame-pulse 2s infinite ease-in-out;
+}
+/* Стиль для активного элемента меню */
+.menu-item.active {
+  background: rgba(97, 218, 251, 0.1); /* Твой голубой цвет с прозрачностью */
+  border-left: 4px solid #61dafb;
+  box-shadow: inset 10px 0 20px -10px rgba(97, 218, 251, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.menu-item:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(5px); /* Легкий сдвиг вправо при наведении */
+}
+
+
+/* Добавь это в CSS для эффекта блеска */
+.logout-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(rgba(255,255,255,0.2), transparent, transparent);
+  transform: rotate(45deg);
+  transition: 0.5s;
+}
+
+.logout-btn:hover::after {
+  left: 120%;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 77, 79, 0.4);
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.menu-item {
+  animation: slideIn 0.4s ease forwards;
+  opacity: 0;
+}
+.menu-item:nth-child(1) { animation-delay: 0.1s; }
+.menu-item:nth-child(2) { animation-delay: 0.2s; }
+.menu-item:nth-child(3) { animation-delay: 0.3s; }
+.menu-item:nth-child(4) { animation-delay: 0.4s; }
+.menu-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Задержка для каждого пункта, чтобы они выходили один за другим */
+.menu-item:nth-child(1) { animation-delay: 0.1s; }
+.menu-item:nth-child(2) { animation-delay: 0.2s; }
+.menu-item:nth-child(3) { animation-delay: 0.3s; }
+.menu-item:nth-child(4) { animation-delay: 0.4s; }
+.menu-item:nth-child(5) { animation-delay: 0.5s; }
+/* 1. Пульсация огонька в логотипе */
+.logo-fire {
+  display: inline-block;
+  animation: fire-pulse 2s infinite ease-in-out;
+}
+
+@keyframes fire-pulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 2px #ff4d4f); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 8px #ff7875); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 2px #ff4d4f); }
+}
+
+/* 2. Блик на кнопке выхода при наведении */
+.logout-btn-animated::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.logout-btn-animated:hover::before {
+  left: 100%;
+}
+
+.logout-btn-animated:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 77, 79, 0.4);
+}
+/* Линия с градиентом и свечением */
+.sidebar-divider {
+  position: absolute;
+  right: 0;
+  top: 10%;
+  height: 80%;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, #61dafb, #ff4d4f, transparent);
+  box-shadow: 0 0 15px rgba(97, 218, 251, 0.5);
+  border-radius: 10px;
+}
+.main-view-bg {
+  background-color: #1c1e22;
+  background-image:
+    linear-gradient(rgba(97, 218, 251, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(97, 218, 251, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px; /* Размер ячеек сетки */
+    border-radius: 24px;
+}
+@keyframes border-glow {
+  0% { border-color: #ff9800; box-shadow: 0 0 5px #ff9800; }
+  50% { border-color: #ff5722; box-shadow: 0 0 15px #ff5722; }
+  100% { border-color: #ff9800; box-shadow: 0 0 5px #ff9800; }
+}
+
+.streak-badge-animated {
+  animation: border-glow 3s infinite ease-in-out;
+  background: rgba(255, 152, 0, 0.1) !important;
+  backdrop-filter: blur(5px);
+}
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: #61dafb;
+  border-radius: 50%;
+  animation: dot-pulse 1.4s infinite ease-in-out;
+  box-shadow: 0 0 5px #61dafb;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}.chat-input-focus:focus {
+  border-color: #61dafb !important;
+  box-shadow: 0 0 12px rgba(97, 218, 251, 0.3);
+}
+ .menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-4px) translateX(5px); /* Приподнимаем вверх и чуть вправо */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Тень создает эффект высоты */
+}
+ .menu-item.active {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(97, 218, 251, 0.2);
+}
+ .logout-btn-animated {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.logout-btn-animated:hover {
+  transform: translateY(-5px); /* Эффект прыжка вверх */
+  box-shadow: 0 12px 24px rgba(255, 77, 79, 0.5); /* Мощное свечение под кнопкой */
+  filter: brightness(1.1); /* Легкая вспышка */
+}
+
+.logout-btn-animated:active {
+  transform: translateY(-1px); /* Эффект нажатия (возврат вниз) */
+}
+.new-chat-button { /* Убедись, что у кнопки этот класс или примени к стилю */
+  transition: all 0.3s ease;
+}
+
+.new-chat-button:hover {
+  transform: scale(1.02) translateY(-2px);
+  border-color: #61dafb;
+  box-shadow: 0 0 15px rgba(97, 218, 251, 0.4);
+  background: rgba(97, 218, 251, 0.05);
+}
+/* Внутри твоего компонента ChatHistoryItem или в общем CSS */
+.chat-history-item {
+  transition: transform 0.2s ease;
+}
+/* Сетка выбора */
+.selection-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+    max-width: 600px;
+  margin: 20px auto 0 ;
+
+}
+
+.selection-card {
+  background: #282c34;
+  padding: 25px;
+  border-radius: 20px;
+  border: 2px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.selection-card:hover {
+  transform: translateY(-5px);
+  background: #323844;
+}
+
+.selection-card.gain:hover { border-color: #61dafb; }
+.selection-card.lose:hover { border-color: #ff4d00; }
+.selection-card.general:hover { border-color: #4caf50; }
+
+.selection-icon { font-size: 40px; margin-bottom: 10px; }
+.selection-card h3 { color: white; margin: 0; }
+.selection-card p { color: #abb2bf; margin: 5px 0 0; font-size: 14px; }
+
+/* Кнопка назад */
+.back-button {
+  background: none;
+  border: none;
+  color: #61dafb;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.chat-history-item:hover {
+  transform: translateX(8px); /* Плавное смещение вбок, как бы открывая контент */
+  background: rgba(255, 255, 255, 0.03);
+box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.2);
+}
+.dashboard-card:hover {
+  transform: translateY(-10px); /* Всплытие вверх */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(97, 218, 251, 0.1);
+  border-color: rgba(97, 218, 251, 0.3);
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+/* Контейнер страницы */
+.workout-page-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.workout-header {
+  color: #61dafb;
+  margin-bottom: 30px;
+}
+
+/* Стили модального окна */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: #20232a;
+  padding: 40px;
+  border-radius: 30px;
+  text-align: center;
+  border: 2px solid #ff4d00;
+  width: 320px;
+  box-shadow: 0 0 30px rgba(255, 77, 0, 0.3);
+}
+
+.fire-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 77, 0, 0.1);
+  border: 2px solid #ff4d00;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.continue-button {
+  margin-top: 25px;
+  width: 100%;
+  padding: 15px;
+  border-radius: 25px;
+  border: none;
+  background: #ff4d00;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.continue-button:hover {
+  transform: scale(1.05);
+  background: #ff6a00;
+}
+
+
+/* Эффект для иконок внутри карточек при наведении */
+.dashboard-card:hover img, .dashboard-card:hover span {
+  transform: scale(1.1) rotate(5deg);
+  transition: 0.3s;
+}
+/* Анимация пульсации и свечения для иконки профиля */
+.profile-badge-animated {
+  animation: profile-float 4s infinite ease-in-out;
+}
+
+@keyframes profile-float {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(97, 218, 251, 0.2);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(97, 218, 251, 0.4);
+    transform: translateY(-2px); /* Легкое плавание вверх */
+  }
+}
+
+.profile-badge-animated:hover {
+  background: rgba(97, 218, 251, 0.15) !important;
+  border-color: #61dafb !important;
+}
+
+/* Плавное выпадение меню */
+.history-dropdown {
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.profile-card-img {
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dashboard-card:hover .profile-card-img {
+  transform: scale(1.05);
+
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+:root {
+  /* Светлая тема (по умолчанию) */
+  --bg-main: #f5f7fa;
+  --bg-sidebar: #ffffff;
+  --bg-header: #ffffff;
+  --text-primary: #2d3436;
+  --text-secondary: #636e72;
+  --border-color: #e1e4e8;
+  --card-bg: #ffffff;
+}
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  border-color: #61dafb;
+  box-shadow: 0 10px 30px rgba(97, 218, 251, 0.15);
+}
+[data-theme='dark'] {
+  /* Темная тема */
+  --bg-main: #1c1e22;
+  --bg-sidebar: rgba(28, 30, 34, 0.95);
+  --bg-header: #20232a;
+  --text-primary: #ffffff;
+  --text-secondary: #abb2bf;
+  --border-color: #333333;
+  --card-bg: #282c34;
+}
+:root {
+  --bg-sidebar: #ffffff;
+  --bg-main: #f8f9fa;
+  --text-primary: #1a1a1b;
+  --text-secondary: #586069;
+  --border-color: #eaecef;
+}
+
+[data-theme='dark'] {
+  --bg-sidebar: rgba(28, 30, 34, 0.95);
+  --bg-main: #1c1e22;
+  --text-primary: #ffffff;
+  --text-secondary: #abb2bf;
+  --border-color: #333333;
+}
+/* Отключаем лишние выделения текста, которые могут мешать кликам */
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+/* Убираем стандартные отступы, чтобы fixed элементы не глючили */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+/* Плавный скролл только там, где он нужен */
+.main-view-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #61dafb transparent;
+}
+/* Прячем стандартный скроллбар для Chrome, Safari и Opera */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Для Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* Если хочешь оставить тонкий красивый скролл только в чате: */
+.messages-list::-webkit-scrollbar {
+  width: 4px;
+}
+.messages-list::-webkit-scrollbar-thumb {
+  background: rgba(97, 218, 251, 0.3);
+  border-radius: 10px;
+}
+/* Обертка на весь экран для центрирования */
+.auth-wrapper {
+  display: flex;
+
+  justify-content: center; /* Центр по горизонтали */
+  align-items: center;     /* Центр по вертикали */
+  width: 100vw;
+  height: 100vh;
+  background-color: #1c1e22; /* Цвет фона как в HomePage */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+    right: 0;
+    bottom: 0;
+}
+
+/* Карточка формы */
+.auth-container {
+  background: #20232a;
+  padding: 40px;
+  border-radius: 24px; /* Более мягкие углы */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 420px; /* Оптимальная ширина для форм */
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  animation: fadeIn 0.5s ease-out;
+}
+.workout-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.workout-progress-header {
+  margin-bottom: 25px;
+  text-align: left;
+  color: #61dafb;
+  font-weight: bold;
+}
+
+.exercise-vertical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.exercise-detailed-card {
+  display: flex;
+  background: #282c34;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.exercise-detailed-card.done {
+  border-color: #4caf50;
+  opacity: 0.8;
+}
+
+.exercise-media {
+  width: 150px;
+  height: 150px;
+  background: #fff; /* Фон для GIF */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exercise-gif {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.exercise-content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.exercise-content h4 {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+}
+
+.reps-tag {
+  color: #61dafb;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.complete-btn {
+  background: #61dafb;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  width: fit-content;
+}
+
+.complete-btn.btn-done {
+  background: #4caf50;
+  color: white;
+}
+/* Ссылка назад */
+.back-link {
+  color: #61dafb;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 20px;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.back-link:hover {
+  opacity: 0.7;
+}
+
+/* Статус (сообщения об ошибках/успехе) */
+.auth-status {
+  margin-top: 20px;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
