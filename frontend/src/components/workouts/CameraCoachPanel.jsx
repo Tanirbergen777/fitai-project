@@ -13,8 +13,8 @@ import {
   analyzeLunge,
   analyzeGeneric,
 } from './cameraAnalyzers';
-
-const API_BASE = 'http://127.0.0.1:8000';
+import { API_BASE_URL } from '../../config/api';
+const API_BASE = API_BASE_URL;
 
 const getStoredUserId = () => {
   const directKeys = ['user_id', 'userId'];
@@ -1176,46 +1176,115 @@ const exerciseMode = useMemo(() => {
     rafRef.current = requestAnimationFrame(processFrame);
   };
 
-  const startCamera = async () => {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+const startCamera = async () => {
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error('Браузер не поддерживает доступ к камере');
+    }
 
-      const droidCamDevice =
-        videoDevices.find((d) => /droidcam/i.test(d.label)) ||
-        videoDevices.find((d) => /tanirbergen/i.test(d.label)) ||
-        videoDevices[0];
+    let stream = null;
+    let lastError = null;
 
-      if (!droidCamDevice) {
-        throw new Error('Не найдена ни одна видеокамера');
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+
+    console.log(
+      'Available cameras:',
+      videoDevices.map((d, index) => ({
+        index,
+        label: d.label || `Camera ${index + 1}`,
+        deviceId: d.deviceId,
+      }))
+    );
+
+    const attempts = [];
+
+    // 1) Сначала пробуем все найденные камеры по очереди
+    videoDevices.forEach((device, index) => {
+      if (device.deviceId) {
+        attempts.push({
+          name: device.label || `Camera ${index + 1}`,
+          constraints: {
+            video: {
+              deviceId: { exact: device.deviceId },
+            },
+            audio: false,
+          },
+        });
       }
+    });
 
-      console.log('Chosen camera:', droidCamDevice.label, droidCamDevice.deviceId);
+    // 2) Потом пробуем обычную default camera
+    attempts.push({
+      name: 'Default camera',
+      constraints: {
+        video: true,
+        audio: false,
+      },
+    });
 
-      const stream = await navigator.mediaDevices.getUserMedia({
+    // 3) Потом пробуем user-facing camera
+    attempts.push({
+      name: 'User facing camera',
+      constraints: {
         video: {
-          deviceId: { exact: droidCamDevice.deviceId },
+          facingMode: { ideal: 'user' },
         },
         audio: false,
-      });
+      },
+    });
 
-      streamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+    for (const attempt of attempts) {
+      try {
+        console.log('Trying camera:', attempt.name);
+        stream = await navigator.mediaDevices.getUserMedia(attempt.constraints);
+        console.log('Camera opened:', attempt.name);
+        break;
+      } catch (err) {
+        console.warn('Camera attempt failed:', attempt.name, err);
+        lastError = err;
       }
-
-      setCameraOn(true);
-      prevExerciseNameRef.current = exerciseName;
-      await startBackendSession();
-
-      rafRef.current = requestAnimationFrame(processFrame);
-    } catch (error) {
-      console.error('Camera start error:', error);
-      setFeedback(`Не удалось открыть камеру: ${error.message || error}`);
     }
-  };
+
+    if (!stream) {
+      throw lastError || new Error('Камера табылмады немесе ашылмады');
+    }
+
+    streamRef.current = stream;
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      await videoRef.current.play();
+    }
+
+    setCameraOn(true);
+    prevExerciseNameRef.current = exerciseName;
+    await startBackendSession();
+
+    rafRef.current = requestAnimationFrame(processFrame);
+  } catch (error) {
+    console.error('Camera start error:', error);
+
+    if (error?.name === 'NotAllowedError') {
+      setFeedback('Камераға рұқсат берілмеді. Chrome ішінде Camera → Allow қой.');
+      return;
+    }
+
+    if (error?.name === 'NotFoundError') {
+      setFeedback('Камера табылмады. Ноутбук камерасы қосулы екенін тексер.');
+      return;
+    }
+
+    if (error?.name === 'OverconstrainedError') {
+      setFeedback(
+        'Chrome таңдалған камераны аша алмады. Chrome Settings → Camera бөлімінен ноутбук камерасын таңда.'
+      );
+      return;
+    }
+
+    setFeedback(`Не удалось открыть камеру: ${error.message || error}`);
+  }
+};
 
   return (
     <div style={styles.panel}>
