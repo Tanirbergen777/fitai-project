@@ -202,10 +202,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
     radial-gradient(circle at top left, rgba(97, 218, 251, 0.08), transparent 28%),
     radial-gradient(circle at top right, rgba(198, 120, 221, 0.08), transparent 26%),
     #1c1f24;
-  padding: 22px;
+  padding: 24px;
   box-sizing: border-box;
   align-items: stretch;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .workout-page-container--session {
@@ -215,7 +216,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 .training-header {
   width: 100%;
   text-align: center;
-  margin: 8px auto 34px;
+  margin: 10px auto 34px;
   max-width: 860px;
 }
 
@@ -235,11 +236,13 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 .workout-header {
-  font-size: clamp(34px, 5vw, 56px);
+  font-size: clamp(36px, 5vw, 64px);
   line-height: 1.02;
   font-weight: 950;
   margin: 0 0 12px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  color: #61dafb;
+  text-shadow: 0 18px 50px rgba(97, 218, 251, 0.18);
 }
 
 .training-subtitle {
@@ -263,32 +266,38 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
 .selection-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
-  width: min(1400px, 100%);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+  width: min(1280px, 100%);
   margin: 0 auto;
+  align-items: stretch;
 }
 
 .selection-card {
   width: 100%;
   min-width: 0;
-  min-height: 240px;
+  min-height: 260px;
   text-align: left;
   color: #fff;
   background:
     radial-gradient(circle at top right, rgba(97, 218, 251, 0.10), transparent 34%),
     linear-gradient(180deg, #252a35 0%, #1d222c 100%);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 26px;
-  padding: 24px;
+  border-radius: 28px;
+  padding: 26px;
   cursor: pointer;
-  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
   box-shadow: 0 18px 42px rgba(0,0,0,0.28);
   font-family: inherit;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   touch-action: manipulation;
+  overflow: hidden;
 }
 
 .selection-card:hover {
@@ -309,25 +318,26 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 22px;
+  margin-bottom: 26px;
 }
 
 .selection-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(97, 218, 251, 0.11);
   border: 1px solid rgba(97, 218, 251, 0.14);
-  font-size: 30px;
+  font-size: 32px;
   flex-shrink: 0;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.14);
 }
 
 .selection-arrow {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -335,16 +345,19 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   color: #61dafb;
   background: rgba(97, 218, 251, 0.08);
   border: 1px solid rgba(97, 218, 251, 0.15);
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .selection-card h3 {
   margin: auto 0 12px 0;
-  font-size: 22px;
-  font-weight: 900;
-  line-height: 1.18;
-  word-break: break-word;
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 950;
+  line-height: 1.15;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
 }
 
 .selection-card p {
@@ -599,11 +612,23 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-shadow: 0 16px 34px rgba(97,218,251,0.24);
 }
 
-/* Large tablet */
-@media (max-width: 1200px) {
+/* Medium desktop */
+@media (max-width: 1350px) {
   .selection-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: min(820px, 100%);
+    width: min(1040px, 100%);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+
+  .selection-card {
+    min-height: 240px;
+  }
+}
+
+/* Laptop / tablet */
+@media (max-width: 1100px) {
+  .selection-grid {
+    width: min(760px, 100%);
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
   }
 }
 
@@ -615,6 +640,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
   .workout-page-container--session {
     padding: 10px;
+  }
+
+  .selection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
 
   .training-ai-grid {
@@ -666,7 +696,8 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 
   .selection-card {
-    min-height: 150px;
+    min-width: 0;
+    min-height: 152px;
     border-radius: 22px;
     padding: 18px;
   }
@@ -689,8 +720,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 
   .selection-card h3 {
-    font-size: 20px;
+    font-size: 21px;
+    line-height: 1.18;
     margin-bottom: 8px;
+    word-break: normal;
+    overflow-wrap: break-word;
   }
 
   .selection-card p {
@@ -784,10 +818,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   .selection-card {
     padding: 16px;
     border-radius: 20px;
+    min-height: 146px;
   }
 
   .selection-card h3 {
-    font-size: 19px;
+    font-size: 20px;
   }
 
   .training-ai-shell {
