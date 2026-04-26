@@ -276,7 +276,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
 
                     <div className="we-plan-info">
                       <div className="we-plan-name">{ex.name}</div>
-                      <div className="we-plan-reps">{ex.reps || '3 x 12'}</div>
+                      <div className="we-plan-reps">{ex.reps || t('training.defaultReps')}</div>
                     </div>
                   </div>
                 ))}
@@ -330,7 +330,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
                     {currentEx.name}
                   </h2>
 
-                  <div className="we-reps-pill">{currentEx.reps || '3 x 12'}</div>
+                  <div className="we-reps-pill">{currentEx.reps || t('training.defaultReps')}</div>
 
                   <div className="we-prep-timer-wrap">
                     <div className="we-prep-timer">

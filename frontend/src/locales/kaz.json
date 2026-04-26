@@ -472,7 +472,7 @@
     "intensity": "Қарқындылығы",
     "exercisesCount": "жатт.",
     "currentExercise": "Ағымдағы жаттығу",
-    "defaultDescription": "Жаттығуды дұрыс техникамен орындап, тынысыңды бақыла.",
+    "defaultDescription": "Жаттығуды дұрыс техникамен орында және тынысыңды бақыла.",
     "skip": "Өткізу",
     "done": "Дайын",
     "restMode": "Демалыс режимі",
@@ -481,11 +481,11 @@
     "nextExercise": "Келесі жаттығу",
     "finish": "Аяқтау",
     "skipRest": "Демалысты өткізу",
-    "loadingTitle": "Жаттығулар таңдалып жатыр",
-    "loadingSubtitle": "Саған ең жақсы жаттығуды дайындап жатырмыз...",
-    "massGainTitle": "Күш: Бұлшықет массасын арттыру",
-    "loseWeightTitle": "Кардио: Май жағу",
-    "generalTitle": "Фитнес: Жалпы форма",
+    "loadingTitle": "Жаттығулар дайындалуда",
+    "loadingSubtitle": "Саған ең қолайлы жаттығу жоспары құрылып жатыр...",
+    "massGainTitle": "Күш жаттығуы: масса жинау",
+    "loseWeightTitle": "Кардио: май жағу",
+    "generalTitle": "Фитнес: жалпы форма",
     "reps": {
       "fiveMinutes": "5 минут"
     },
@@ -896,7 +896,11 @@
       "back": "Арқа",
       "support": "Тірек",
       "wholeBody": "Толық дене"
-    }
+    },
+    "prepareTitle": "Дайындық",
+    "prepareHint": "Жаттығуға дайындал. Бірнеше секундтан кейін бастаймыз.",
+    "skipPrepare": "Қазір бастау",
+    "defaultReps": "3 × 12"
   },
   "exercises": {
     "mass": {
