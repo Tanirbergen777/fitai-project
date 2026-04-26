@@ -219,16 +219,23 @@ const RegisterPage = ({
 .register-responsive-page {
   width: 100%;
   min-width: 0;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 28px 0 70px;
 }
 
 .register-auth-card {
   width: 100%;
   max-width: 520px;
   box-sizing: border-box;
+  margin: 0 auto;
 }
 
 .register-header {
