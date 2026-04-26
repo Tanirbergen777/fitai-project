@@ -21,45 +21,45 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
   const renderAITraining = () => {
     return (
-      <div className="training-ai-shell">
-        <div className="training-ai-badge">{t('training.ai.badge')}</div>
+      <div className="tp-ai-shell">
+        <div className="tp-ai-badge">{t('training.ai.badge')}</div>
 
-        <h2 className="training-ai-title">{t('training.ai.title')}</h2>
-        <p className="training-ai-text">{t('training.ai.subtitle')}</p>
+        <h2 className="tp-ai-title">{t('training.ai.title')}</h2>
+        <p className="tp-ai-text">{t('training.ai.subtitle')}</p>
 
-        <div className="training-ai-grid">
-          <div className="training-ai-card">
-            <div className="training-ai-icon">🎯</div>
+        <div className="tp-ai-grid">
+          <div className="tp-ai-card">
+            <div className="tp-ai-icon">🎯</div>
             <h3>{t('training.ai.cards.goal.title')}</h3>
             <p>{t('training.ai.cards.goal.text')}</p>
           </div>
 
-          <div className="training-ai-card">
-            <div className="training-ai-icon">📈</div>
+          <div className="tp-ai-card">
+            <div className="tp-ai-icon">📈</div>
             <h3>{t('training.ai.cards.level.title')}</h3>
             <p>{t('training.ai.cards.level.text')}</p>
           </div>
 
-          <div className="training-ai-card">
-            <div className="training-ai-icon">⏱️</div>
+          <div className="tp-ai-card">
+            <div className="tp-ai-icon">⏱️</div>
             <h3>{t('training.ai.cards.duration.title')}</h3>
             <p>{t('training.ai.cards.duration.text')}</p>
           </div>
 
-          <div className="training-ai-card">
-            <div className="training-ai-icon">🛡️</div>
+          <div className="tp-ai-card">
+            <div className="tp-ai-icon">🛡️</div>
             <h3>{t('training.ai.cards.limitations.title')}</h3>
             <p>{t('training.ai.cards.limitations.text')}</p>
           </div>
         </div>
 
-        <div className="training-ai-note">
+        <div className="tp-ai-note">
           <h3>{t('training.ai.futureTitle')}</h3>
           <p>{t('training.ai.futureText')}</p>
         </div>
 
-        <div className="training-ai-actions">
-          <button className="training-back-btn" onClick={() => setSelectedGoal(null)}>
+        <div className="tp-ai-actions">
+          <button className="tp-back-btn" onClick={() => setSelectedGoal(null)}>
             ← {t('common.back')}
           </button>
         </div>
@@ -114,11 +114,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   ];
 
   return (
-    <div
-      className={`workout-page-container ${
-        selectedGoal ? 'workout-page-container--session' : ''
-      }`}
-    >
+    <div className={`training-page ${selectedGoal ? 'training-page--session' : ''}`}>
       {isFinished && (
         <Confetti
           width={window.innerWidth}
@@ -128,42 +124,38 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
       )}
 
       {!selectedGoal && (
-        <div className="training-header">
-          <div className="training-hero-badge">AI Fitness</div>
-          <h1 className="workout-header">{t('menu.training')}</h1>
-          <p className="training-subtitle">{t('training.heroSubtitle')}</p>
-        </div>
-      )}
+        <>
+          <div className="tp-header">
+            <h1 className="tp-title">{t('menu.training')}</h1>
+            <p className="tp-subtitle">{t('training.heroSubtitle')}</p>
+          </div>
 
-      <div className={`training-body ${selectedGoal ? 'training-body--session' : ''}`}>
-        {!selectedGoal ? (
-          <div className="selection-grid">
+          <div className="tp-grid">
             {selectionCards.map((card) => (
               <button
                 type="button"
                 key={card.key}
-                className={`selection-card ${card.className}`}
+                className={`tp-card tp-card--${card.className}`}
                 onClick={() => setSelectedGoal(card.key)}
               >
-                <div className="selection-card-top">
-                  <div className="selection-icon">{card.icon}</div>
-                  <div className="selection-arrow">›</div>
-                </div>
+                <div className="tp-card-icon">{card.icon}</div>
 
-                <h3>{card.title}</h3>
-                <p>{card.desc}</p>
+                <div className="tp-card-content">
+                  <h3>{card.title}</h3>
+                  <p>{card.desc}</p>
+                </div>
               </button>
             ))}
           </div>
-        ) : (
-          renderWorkout()
-        )}
-      </div>
+        </>
+      )}
+
+      {selectedGoal && renderWorkout()}
 
       {isFinished && (
-        <div className="modal-overlay" onClick={() => setIsFinished(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="fire-circle">
+        <div className="tp-modal-overlay" onClick={() => setIsFinished(false)}>
+          <div className="tp-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="tp-fire-circle">
               <span>🔥</span>
             </div>
 
@@ -171,11 +163,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
             <p>
               {t('training.finishModal.received')}{' '}
-              <span className="modal-stars">+50 ⭐</span>
+              <span className="tp-modal-stars">+50 ⭐</span>
             </p>
 
             <button
-              className="continue-button"
+              className="tp-continue-button"
               onClick={() => {
                 if (typeof setActiveTab === 'function') {
                   setActiveTab('main');
@@ -191,236 +183,159 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
       )}
 
       <style>{`
-.workout-page-container {
-  width: calc(100vw - 92px);
-  max-width: calc(100vw - 92px);
+.training-page {
+  width: 100%;
   min-width: 0;
-  min-height: calc(100dvh - 80px);
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  color: white;
-  background:
-    radial-gradient(circle at top left, rgba(97, 218, 251, 0.08), transparent 28%),
-    radial-gradient(circle at top right, rgba(198, 120, 221, 0.08), transparent 26%),
-    #1c1f24;
-  padding: 36px 48px 56px;
+  min-height: 100dvh;
   box-sizing: border-box;
-  align-items: stretch;
+  color: #ffffff;
+  background: #1c1f24;
+  padding: 46px 34px 70px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-.workout-page-container--session {
-  width: 100%;
-  max-width: 100%;
+.training-page--session {
   min-height: 100%;
-  left: auto;
-  transform: none;
   padding: 0;
   background: transparent;
+  overflow: visible;
 }
 
-.training-header {
+.tp-header {
   width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 70px;
   text-align: center;
-  margin: 0 auto 44px;
-  max-width: 980px;
 }
 
-.training-hero-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: rgba(97, 218, 251, 0.1);
-  border: 1px solid rgba(97, 218, 251, 0.25);
-  color: #7ce3ff;
-  font-size: 12px;
-  font-weight: 900;
-  margin-bottom: 18px;
-  letter-spacing: 0.04em;
-}
-
-.workout-header {
-  font-size: clamp(44px, 4.8vw, 72px);
-  line-height: 1.02;
+.tp-title {
+  margin: 0 0 18px;
+  font-size: clamp(46px, 5vw, 68px);
+  line-height: 1.05;
   font-weight: 950;
-  margin: 0 0 14px;
-  letter-spacing: -0.04em;
-  color: #61dafb;
-  text-shadow: 0 18px 50px rgba(97, 218, 251, 0.18);
+  letter-spacing: -0.035em;
+  color: #ffffff;
 }
 
-.training-subtitle {
+.tp-subtitle {
+  margin: 0 auto;
+  max-width: 900px;
   color: #b8c7df;
-  font-size: 18px;
-  line-height: 1.6;
-  margin: 0 auto;
-  max-width: 760px;
+  font-size: 20px;
+  line-height: 1.55;
 }
 
-.training-body {
+.tp-grid {
   width: 100%;
-  display: block;
-  min-width: 0;
-}
-
-.training-body--session {
-  flex: 1;
-  min-height: 0;
-}
-
-/* DESKTOP: old wide notebook style */
-.selection-grid {
+  max-width: 1780px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, minmax(230px, 1fr));
-  gap: 24px;
-  width: 100%;
-  max-width: 1680px;
-  margin: 0 auto;
-  align-items: stretch;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
 }
 
-.selection-card {
+.tp-card {
   width: 100%;
   min-width: 0;
-  min-height: 320px;
-  text-align: left;
-  color: #fff;
-  background:
-    radial-gradient(circle at top right, rgba(97, 218, 251, 0.10), transparent 34%),
-    linear-gradient(180deg, #252a35 0%, #1d222c 100%);
+  min-height: 325px;
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 28px;
-  padding: 30px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top left, rgba(97,218,251,0.045), transparent 34%),
+    linear-gradient(180deg, #22272f 0%, #20242c 100%);
+  color: #ffffff;
+  padding: 34px 32px;
+  box-sizing: border-box;
+  text-align: left;
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    background 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
-  box-shadow: 0 18px 42px rgba(0,0,0,0.28);
   font-family: inherit;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 34px;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.18);
+  transition:
+    transform 0.24s ease,
+    border-color 0.24s ease,
+    box-shadow 0.24s ease,
+    background 0.24s ease;
   touch-action: manipulation;
-  overflow: hidden;
 }
 
-.selection-card:hover {
+.tp-card:hover {
   transform: translateY(-6px);
+  border-color: rgba(97,218,251,0.32);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.34);
   background:
-    radial-gradient(circle at top right, rgba(97, 218, 251, 0.16), transparent 34%),
-    linear-gradient(180deg, #2c313d 0%, #202630 100%);
-  border-color: rgba(97, 218, 251, 0.42);
-  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.42);
+    radial-gradient(circle at top left, rgba(97,218,251,0.08), transparent 34%),
+    linear-gradient(180deg, #252b35 0%, #20242c 100%);
 }
 
-.selection-card:active {
+.tp-card:active {
   transform: scale(0.985);
 }
 
-.selection-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 30px;
+.tp-card--ai {
+  border: 1px dashed rgba(198,120,221,0.50);
+  background:
+    radial-gradient(circle at top left, rgba(198,120,221,0.07), transparent 35%),
+    linear-gradient(180deg, #24242d 0%, #20202a 100%);
 }
 
-.selection-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(97, 218, 251, 0.11);
-  border: 1px solid rgba(97, 218, 251, 0.14);
-  font-size: 32px;
-  flex-shrink: 0;
-  box-shadow: 0 14px 30px rgba(0,0,0,0.14);
+.tp-card--ai:hover {
+  border-color: rgba(198,120,221,0.75);
+  box-shadow: 0 28px 70px rgba(198,120,221,0.12);
 }
 
-.selection-arrow {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
+.tp-card-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: rgba(97,218,251,0.09);
+  border: 1px solid rgba(97,218,251,0.11);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #61dafb;
-  background: rgba(97, 218, 251, 0.08);
-  border: 1px solid rgba(97, 218, 251, 0.15);
-  font-size: 28px;
-  line-height: 1;
+  font-size: 31px;
   flex-shrink: 0;
 }
 
-.selection-card h3 {
-  margin: auto 0 14px 0;
-  font-size: clamp(24px, 1.65vw, 32px);
+.tp-card--lose .tp-card-icon {
+  background: rgba(255,100,100,0.09);
+  border-color: rgba(255,100,100,0.12);
+}
+
+.tp-card--general .tp-card-icon {
+  background: rgba(255,212,80,0.09);
+  border-color: rgba(255,212,80,0.12);
+}
+
+.tp-card--ai .tp-card-icon {
+  background: rgba(198,120,221,0.12);
+  border-color: rgba(198,120,221,0.14);
+}
+
+.tp-card-content h3 {
+  margin: 0 0 18px;
+  color: #ffffff;
+  font-size: clamp(25px, 1.8vw, 34px);
+  line-height: 1.14;
   font-weight: 950;
-  line-height: 1.16;
+  letter-spacing: -0.02em;
   word-break: normal;
-  overflow-wrap: normal;
+  overflow-wrap: break-word;
   hyphens: none;
 }
 
-.selection-card p {
+.tp-card-content p {
   margin: 0;
-  color: #a5afbf;
-  font-size: 16px;
+  color: #b8c7df;
+  font-size: 18px;
   line-height: 1.55;
 }
 
-.selection-card.gain {
-  background:
-    radial-gradient(circle at top right, rgba(97, 218, 251, 0.13), transparent 34%),
-    linear-gradient(180deg, #252a35 0%, #1d222c 100%);
-}
-
-.selection-card.lose {
-  background:
-    radial-gradient(circle at top right, rgba(255, 96, 96, 0.12), transparent 34%),
-    linear-gradient(180deg, #252a35 0%, #1d222c 100%);
-}
-
-.selection-card.general {
-  background:
-    radial-gradient(circle at top right, rgba(255, 211, 105, 0.11), transparent 34%),
-    linear-gradient(180deg, #252a35 0%, #1d222c 100%);
-}
-
-.selection-card.ai {
-  border: 1px dashed rgba(198, 120, 221, 0.48);
-  background:
-    radial-gradient(circle at top right, rgba(198, 120, 221, 0.15), transparent 34%),
-    linear-gradient(180deg, rgba(198, 120, 221, 0.08) 0%, #1d222c 100%);
-}
-
-.selection-card.ai:hover {
-  border-color: #c678dd;
-  box-shadow: 0 22px 52px rgba(198, 120, 221, 0.22);
-}
-
-.selection-card.ai .selection-icon {
-  background: rgba(198, 120, 221, 0.12);
-  border-color: rgba(198, 120, 221, 0.18);
-}
-
-.selection-card.ai .selection-arrow {
-  color: #d8a8ea;
-  background: rgba(198, 120, 221, 0.10);
-  border-color: rgba(198, 120, 221, 0.18);
-}
-
-.training-ai-shell {
+.tp-ai-shell {
   width: min(1200px, 100%);
   margin: 0 auto;
   background:
@@ -433,7 +348,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-shadow: 0 25px 60px rgba(0,0,0,0.35);
 }
 
-.training-ai-badge {
+.tp-ai-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -447,7 +362,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   margin-bottom: 16px;
 }
 
-.training-ai-title {
+.tp-ai-title {
   font-size: clamp(28px, 4vw, 42px);
   font-weight: 950;
   line-height: 1.08;
@@ -455,7 +370,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   letter-spacing: -0.02em;
 }
 
-.training-ai-text {
+.tp-ai-text {
   color: #aab3c2;
   line-height: 1.7;
   font-size: 15px;
@@ -463,14 +378,14 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   max-width: 860px;
 }
 
-.training-ai-grid {
+.tp-ai-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 24px;
 }
 
-.training-ai-card {
+.tp-ai-card {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 22px;
@@ -478,7 +393,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   min-width: 0;
 }
 
-.training-ai-icon {
+.tp-ai-icon {
   width: 50px;
   height: 50px;
   border-radius: 16px;
@@ -490,21 +405,21 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   margin-bottom: 14px;
 }
 
-.training-ai-card h3 {
+.tp-ai-card h3 {
   margin: 0 0 10px 0;
   font-size: 20px;
   font-weight: 900;
   line-height: 1.25;
 }
 
-.training-ai-card p {
+.tp-ai-card p {
   margin: 0;
   color: #c8d1df;
   line-height: 1.6;
   font-size: 14px;
 }
 
-.training-ai-note {
+.tp-ai-note {
   margin-top: 10px;
   padding: 20px;
   border-radius: 20px;
@@ -512,27 +427,27 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   border: 1px solid rgba(97, 218, 251, 0.18);
 }
 
-.training-ai-note h3 {
+.tp-ai-note h3 {
   margin: 0 0 10px 0;
   font-size: 18px;
   font-weight: 900;
 }
 
-.training-ai-note p {
+.tp-ai-note p {
   margin: 0;
   color: #c8d1df;
   line-height: 1.7;
   font-size: 14px;
 }
 
-.training-ai-actions {
+.tp-ai-actions {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 24px;
 }
 
-.training-back-btn {
+.tp-back-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -549,13 +464,13 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   min-height: 44px;
 }
 
-.training-back-btn:hover {
+.tp-back-btn:hover {
   transform: translateY(-2px);
   background: rgba(97, 218, 251, 0.16);
   box-shadow: 0 10px 30px rgba(97, 218, 251, 0.18);
 }
 
-.modal-overlay {
+.tp-modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -568,7 +483,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-sizing: border-box;
 }
 
-.modal-content {
+.tp-modal-content {
   width: min(420px, 100%);
   background:
     radial-gradient(circle at top, rgba(97,218,251,0.10), transparent 34%),
@@ -580,7 +495,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-shadow: 0 28px 80px rgba(0,0,0,0.48);
 }
 
-.fire-circle {
+.tp-fire-circle {
   width: 82px;
   height: 82px;
   border-radius: 999px;
@@ -593,25 +508,25 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   font-size: 38px;
 }
 
-.modal-content h2 {
+.tp-modal-content h2 {
   color: #fff;
   margin: 0 0 10px;
   font-size: 26px;
   font-weight: 950;
 }
 
-.modal-content p {
+.tp-modal-content p {
   color: #abb2bf;
   margin: 0 0 22px;
   line-height: 1.55;
 }
 
-.modal-stars {
+.tp-modal-stars {
   color: #ffd700;
   font-weight: 900;
 }
 
-.continue-button {
+.tp-continue-button {
   width: 100%;
   min-height: 54px;
   border: none;
@@ -624,268 +539,137 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-shadow: 0 16px 34px rgba(97,218,251,0.24);
 }
 
-/* Normal laptop */
-@media (max-width: 1350px) {
-  .workout-page-container {
-    padding: 34px 32px 52px;
+/* ноут / desktop */
+@media (max-width: 1400px) {
+  .training-page {
+    padding: 42px 28px 64px;
   }
 
-  .selection-grid {
-    gap: 20px;
+  .tp-grid {
+    gap: 22px;
   }
 
-  .selection-card {
+  .tp-card {
     min-height: 300px;
-    padding: 26px;
+    padding: 30px 28px;
   }
 
-  .selection-card h3 {
-    font-size: clamp(22px, 1.8vw, 30px);
+  .tp-card-content h3 {
+    font-size: clamp(23px, 1.75vw, 30px);
   }
 
-  .selection-card p {
-    font-size: 15px;
-  }
-}
-
-/* Smaller laptop */
-@media (max-width: 1150px) {
-  .selection-grid {
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
-    gap: 16px;
-  }
-
-  .selection-card {
-    min-height: 280px;
-    padding: 22px;
-    border-radius: 24px;
-  }
-
-  .selection-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 17px;
-    font-size: 28px;
-  }
-
-  .selection-card h3 {
-    font-size: 22px;
-    line-height: 1.16;
-  }
-
-  .selection-card p {
-    font-size: 14px;
+  .tp-card-content p {
+    font-size: 16px;
   }
 }
 
-/* Tablet */
-@media (max-width: 900px) {
-  .workout-page-container {
-    width: 100%;
-    max-width: 100%;
-    min-height: 100dvh;
-    left: auto;
-    transform: none;
-    padding: 18px;
-  }
-
-  .workout-page-container--session {
-    padding: 10px;
-  }
-
-  .selection-grid {
+/* кіші ноут / планшет */
+@media (max-width: 1100px) {
+  .tp-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-    gap: 16px;
   }
 
-  .selection-card {
-    min-height: 230px;
-  }
-
-  .training-ai-grid {
-    grid-template-columns: 1fr;
+  .tp-card {
+    min-height: 245px;
   }
 }
 
-/* Phone */
+/* телефон */
 @media (max-width: 768px) {
-  .workout-page-container {
-    width: 100%;
-    max-width: 100%;
+  .training-page {
     min-height: 100dvh;
-    left: auto;
-    transform: none;
-    padding: 12px 10px 96px;
-    background:
-      radial-gradient(circle at top, rgba(97,218,251,0.10), transparent 28%),
-      #1c1f24;
+    padding: 24px 12px 96px;
   }
 
-  .workout-page-container--session {
-    padding: 6px 6px 96px;
+  .training-page--session {
+    padding: 0 0 96px;
   }
 
-  .training-header {
+  .tp-header {
     text-align: left;
-    margin: 10px 0 22px;
+    margin: 0 0 24px;
     padding: 0 4px;
   }
 
-  .training-hero-badge {
-    padding: 7px 12px;
-    font-size: 11px;
-    margin-bottom: 12px;
-  }
-
-  .workout-header {
-    font-size: clamp(32px, 10vw, 42px);
+  .tp-title {
+    font-size: clamp(34px, 10vw, 46px);
     margin-bottom: 10px;
   }
 
-  .training-subtitle {
+  .tp-subtitle {
     font-size: 14px;
     line-height: 1.55;
     max-width: 100%;
   }
 
-  .selection-grid {
-    width: 100%;
+  .tp-grid {
     grid-template-columns: 1fr;
     gap: 14px;
   }
 
-  .selection-card {
-    min-width: 0;
-    min-height: 152px;
+  .tp-card {
+    min-height: 158px;
     border-radius: 22px;
     padding: 18px;
+    gap: 20px;
   }
 
-  .selection-card-top {
-    margin-bottom: 16px;
-  }
-
-  .selection-icon {
+  .tp-card-icon {
     width: 52px;
     height: 52px;
     border-radius: 16px;
     font-size: 27px;
   }
 
-  .selection-arrow {
-    width: 32px;
-    height: 32px;
-    font-size: 24px;
-  }
-
-  .selection-card h3 {
-    font-size: 21px;
+  .tp-card-content h3 {
+    font-size: 22px;
     line-height: 1.18;
     margin-bottom: 8px;
-    word-break: normal;
-    overflow-wrap: break-word;
   }
 
-  .selection-card p {
+  .tp-card-content p {
     font-size: 13px;
     line-height: 1.5;
   }
 
-  .training-ai-shell {
+  .tp-ai-shell {
     border-radius: 22px;
     padding: 20px;
   }
 
-  .training-ai-badge {
-    padding: 7px 12px;
-    font-size: 11px;
-  }
-
-  .training-ai-title {
-    font-size: clamp(26px, 8vw, 34px);
-  }
-
-  .training-ai-text {
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 18px;
-  }
-
-  .training-ai-grid {
+  .tp-ai-grid {
+    grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  .training-ai-card {
-    border-radius: 18px;
-    padding: 16px;
-  }
-
-  .training-ai-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    font-size: 23px;
-    margin-bottom: 12px;
-  }
-
-  .training-ai-card h3 {
-    font-size: 17px;
-  }
-
-  .training-ai-card p {
-    font-size: 13px;
-  }
-
-  .training-ai-note {
-    padding: 16px;
-    border-radius: 18px;
-  }
-
-  .training-back-btn {
+  .tp-back-btn {
     width: 100%;
     min-height: 50px;
   }
 
-  .modal-content {
+  .tp-modal-content {
     border-radius: 24px;
     padding: 24px 18px;
   }
-
-  .fire-circle {
-    width: 74px;
-    height: 74px;
-    font-size: 34px;
-  }
-
-  .modal-content h2 {
-    font-size: 24px;
-  }
 }
 
-/* Small phone */
 @media (max-width: 430px) {
-  .workout-page-container {
+  .training-page {
     padding-left: 8px;
     padding-right: 8px;
   }
 
-  .workout-page-container--session {
-    padding-left: 4px;
-    padding-right: 4px;
-  }
-
-  .selection-card {
+  .tp-card {
     padding: 16px;
     border-radius: 20px;
-    min-height: 146px;
+    min-height: 150px;
   }
 
-  .selection-card h3 {
+  .tp-card-content h3 {
     font-size: 20px;
   }
 
-  .training-ai-shell {
+  .tp-ai-shell {
     padding: 16px;
     border-radius: 20px;
   }
