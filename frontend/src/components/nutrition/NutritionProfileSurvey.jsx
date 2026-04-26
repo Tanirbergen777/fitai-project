@@ -1,351 +1,717 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import NutritionProfileSurvey from './NutritionProfileSurvey';
-import {
-  getNutritionProfile,
-  saveNutritionProfile,
-  getNutritionHistory,
-  addNutritionHistory,
-  clearNutritionHistoryApi,
-  getNutritionRecommendations,
-} from './nutritionApi';
 
-const AINutritionPage = ({ onBack, userId }) => {
+const NutritionProfileSurvey = ({
+  initialData = null,
+  loading = false,
+  onSubmit,
+  onBack,
+}) => {
   const { t } = useTranslation();
+  const [step, setStep] = useState(1);
+  const [error, setError] = useState('');
 
-  const [profile, setProfile] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
-  const [currentSlot, setCurrentSlot] = useState('breakfast');
-  const [showSurvey, setShowSurvey] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState('');
-  const [pageLoading, setPageLoading] = useState(true);
-  const [surveySaving, setSurveySaving] = useState(false);
+  const normalizedInitial = useMemo(() => {
+    return {
+      goal: initialData?.goal || '',
+      meals_per_day: initialData?.meals_per_day || 4,
+      budget: initialData?.budget || 'medium',
+      food_preferences: Array.isArray(initialData?.food_preferences)
+        ? initialData.food_preferences
+        : [],
+      allergies: Array.isArray(initialData?.allergies)
+        ? initialData.allergies
+        : [],
+      breakfast_time: initialData?.breakfast_time || '08:00',
+      lunch_time: initialData?.lunch_time || '13:00',
+      dinner_time: initialData?.dinner_time || '19:00',
+      late_meals: initialData?.late_meals || 'sometimes',
+      cooking_mode: initialData?.cooking_mode || 'both',
+      disliked_foods: initialData?.disliked_foods || '',
+    };
+  }, [initialData]);
 
-  const goalLabelMap = {
-    gain_mass: t('nutrition.ai.goalLabels.gain_mass'),
-    lose_weight: t('nutrition.ai.goalLabels.lose_weight'),
-    keep_fit: t('nutrition.ai.goalLabels.keep_fit'),
-  };
-
-  const slotLabelMap = {
-    breakfast: t('nutrition.ai.slotLabels.breakfast'),
-    lunch: t('nutrition.ai.slotLabels.lunch'),
-    snack: t('nutrition.ai.slotLabels.snack'),
-    dinner: t('nutrition.ai.slotLabels.dinner'),
-    late: t('nutrition.ai.slotLabels.late'),
-  };
-
-  const budgetLabelMap = {
-    low: t('nutrition.ai.budgetLabels.low'),
-    medium: t('nutrition.ai.budgetLabels.medium'),
-    high: t('nutrition.ai.budgetLabels.high'),
-  };
-
-  const loadHistory = useCallback(async () => {
-    if (!userId) return [];
-    const items = await getNutritionHistory(userId, true);
-    setHistory(items);
-    return items;
-  }, [userId]);
-
-  const loadRecommendations = useCallback(async () => {
-    if (!userId) return;
-    const data = await getNutritionRecommendations(userId);
-    setCurrentSlot(data.current_slot);
-    setRecommendations(data.recommendations || []);
-  }, [userId]);
+  const [form, setForm] = useState(normalizedInitial);
 
   useEffect(() => {
-    const loadPageData = async () => {
-      setPageLoading(true);
+    setForm(normalizedInitial);
+  }, [normalizedInitial]);
 
-      if (!userId) {
-        setProfile(null);
-        setHistory([]);
-        setRecommendations([]);
-        setShowSurvey(true);
-        setPageLoading(false);
-        return;
-      }
+  const updateField = (field, value) => {
+    setError('');
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-      try {
-        await loadHistory();
+  const toggleArrayField = (field, value) => {
+    setError('');
 
-        try {
-          const profileData = await getNutritionProfile(userId);
-          setProfile(profileData);
-          setShowSurvey(false);
-          await loadRecommendations();
-        } catch {
-          setProfile(null);
-          setRecommendations([]);
-          setShowSurvey(true);
-        }
-      } catch (error) {
-        console.error('Nutrition page load error:', error);
-        setProfile(null);
-        setHistory([]);
-        setRecommendations([]);
-        setShowSurvey(true);
-      } finally {
-        setPageLoading(false);
-      }
-    };
+    setForm((prev) => {
+      const current = prev[field] || [];
+      const exists = current.includes(value);
 
-    loadPageData();
-  }, [userId, loadHistory, loadRecommendations]);
+      return {
+        ...prev,
+        [field]: exists
+          ? current.filter((item) => item !== value)
+          : [...current, value],
+      };
+    });
+  };
 
-  const todayFoods = history;
+  const validateStep = () => {
+    if (step === 1 && !form.goal) {
+      setError(t('nutrition.survey.errors.goalRequired', 'Выберите цель питания.'));
+      return false;
+    }
 
-  const handleSaveProfile = async (payload) => {
-    if (!userId) {
-      setSelectedMessage(t('nutrition.ai.messages.userNotFound'));
+    setError('');
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!validateStep()) return;
+    setStep((prev) => Math.min(prev + 1, 3));
+  };
+
+  const handlePrev = () => {
+    setError('');
+    setStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleSubmit = () => {
+    if (!form.goal) {
+      setError(t('nutrition.survey.errors.goalRequired', 'Выберите цель питания.'));
       return;
     }
 
-    setSurveySaving(true);
+    setError('');
 
-    try {
-      const savedProfile = await saveNutritionProfile(userId, payload, !!profile);
-      setProfile(savedProfile);
-      setShowSurvey(false);
-      await loadRecommendations();
-      setSelectedMessage(t('nutrition.ai.messages.profileSaved'));
-    } catch (error) {
-      console.error(error);
-      setSelectedMessage(
-        error.message || t('nutrition.ai.messages.profileSaveError')
-      );
-    } finally {
-      setSurveySaving(false);
-    }
+    onSubmit?.({
+      goal: form.goal,
+      meals_per_day: Number(form.meals_per_day),
+      budget: form.budget,
+      food_preferences: form.food_preferences,
+      allergies: form.allergies,
+      breakfast_time: form.breakfast_time,
+      lunch_time: form.lunch_time,
+      dinner_time: form.dinner_time,
+      late_meals: form.late_meals,
+      cooking_mode: form.cooking_mode,
+      disliked_foods: String(form.disliked_foods || '').trim(),
+    });
   };
 
-  const handleSelectFood = async (food) => {
-    if (!userId) {
-      setSelectedMessage(t('nutrition.ai.messages.userNotFound'));
-      return;
-    }
+  const goalOptions = [
+    {
+      value: 'gain_mass',
+      icon: '🍚',
+      title: t('nutrition.survey.goals.gainMass.title', 'Набор массы'),
+      text: t('nutrition.survey.goals.gainMass.text', 'Больше калорий и белка для роста мышц.'),
+    },
+    {
+      value: 'lose_weight',
+      icon: '🥗',
+      title: t('nutrition.survey.goals.loseWeight.title', 'Похудение'),
+      text: t('nutrition.survey.goals.loseWeight.text', 'Лёгкие блюда с контролем калорий.'),
+    },
+    {
+      value: 'keep_fit',
+      icon: '⚖️',
+      title: t('nutrition.survey.goals.keepFit.title', 'Поддержание формы'),
+      text: t('nutrition.survey.goals.keepFit.text', 'Сбалансированное питание на каждый день.'),
+    },
+  ];
 
-    const alreadyToday = todayFoods.some((item) => item.name === food.name);
+  const preferenceOptions = [
+    { value: 'high_protein', label: t('nutrition.survey.preferences.highProtein', 'Белковая еда') },
+    { value: 'low_calorie', label: t('nutrition.survey.preferences.lowCalorie', 'Низкокалорийное') },
+    { value: 'quick', label: t('nutrition.survey.preferences.quick', 'Быстро готовить') },
+    { value: 'budget', label: t('nutrition.survey.preferences.budget', 'Бюджетно') },
+    { value: 'healthy', label: t('nutrition.survey.preferences.healthy', 'Здоровое питание') },
+    { value: 'fitness', label: t('nutrition.survey.preferences.fitness', 'Fitness рацион') },
+  ];
 
-    try {
-      await addNutritionHistory({
-        user_id: userId,
-        food_id: food.id,
-        food_name: food.name,
-        calories: food.calories,
-        protein: food.protein,
-        fat: food.fat,
-        carbs: food.carbs,
-        meal_time: slotLabelMap[currentSlot],
-        source: 'ai',
-      });
+  const allergyOptions = [
+    { value: 'milk', label: t('nutrition.survey.allergies.milk', 'Молочные продукты') },
+    { value: 'eggs', label: t('nutrition.survey.allergies.eggs', 'Яйца') },
+    { value: 'nuts', label: t('nutrition.survey.allergies.nuts', 'Орехи') },
+    { value: 'gluten', label: t('nutrition.survey.allergies.gluten', 'Глютен') },
+    { value: 'fish', label: t('nutrition.survey.allergies.fish', 'Рыба') },
+  ];
 
-      await loadHistory();
-      await loadRecommendations();
-
-      if (alreadyToday) {
-        setSelectedMessage(
-          t('nutrition.ai.messages.alreadySelected', { name: food.name })
-        );
-      } else {
-        setSelectedMessage(
-          t('nutrition.ai.messages.selected', { name: food.name })
-        );
-      }
-    } catch (error) {
-      console.error(error);
-      setSelectedMessage(t('nutrition.ai.messages.foodSaveError'));
-    }
-  };
-
-  const handleClearHistory = async () => {
-    if (!userId) {
-      setSelectedMessage(t('nutrition.ai.messages.userNotFound'));
-      return;
-    }
-
-    try {
-      await clearNutritionHistoryApi(userId, true);
-      setHistory([]);
-      await loadRecommendations();
-      setSelectedMessage(t('nutrition.ai.messages.historyCleared'));
-    } catch (error) {
-      console.error(error);
-      setSelectedMessage(t('nutrition.ai.messages.historyClearError'));
-    }
-  };
-
-  if (pageLoading) {
-    return (
-      <div className="nutrition-section">
-        <div className="nutrition-ai-shell">
-          <h2 className="nutrition-ai-title">{t('nutrition.ai.loadingTitle')}</h2>
-        </div>
-      </div>
-    );
-  }
-
-  if (showSurvey) {
-    return (
-      <NutritionProfileSurvey
-        initialData={profile}
-        loading={surveySaving}
-        onSubmit={handleSaveProfile}
-        onBack={profile ? () => setShowSurvey(false) : onBack}
-      />
-    );
-  }
+  const Chip = ({ active, onClick, children }) => (
+    <button
+      type="button"
+      className={`nutrition-survey-chip ${active ? 'active' : ''}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
 
   return (
-    <div className="nutrition-section">
-      <div className="nutrition-topbar">
+    <div className="nutrition-section nutrition-survey-section">
+      <div className="nutrition-survey-topbar">
         <button className="nutrition-back-btn" onClick={onBack}>
-          ← {t('common.back')}
+          ← {t('common.back', 'Назад')}
         </button>
+
+        <div className="nutrition-survey-step-indicator">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className={`nutrition-survey-dot ${step >= item ? 'active' : ''}`}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="nutrition-ai-shell">
-        <div className="nutrition-ai-badge">{t('nutrition.ai.badge')}</div>
-        <h2 className="nutrition-ai-title">{t('nutrition.ai.title')}</h2>
-        <p className="nutrition-ai-text">{t('nutrition.ai.subtitle')}</p>
-
-        <div className="nutrition-summary-row">
-          <div className="nutrition-summary-chip">
-            {t('nutrition.ai.summary.goal')}:{' '}
-            {goalLabelMap[profile?.goal] || t('nutrition.ai.summary.notSpecified')}
-          </div>
-
-          <div className="nutrition-summary-chip">
-            {t('nutrition.ai.summary.currentSlot')}:{' '}
-            {slotLabelMap[currentSlot] || t('nutrition.ai.summary.notSpecified')}
-          </div>
-
-          <div className="nutrition-summary-chip">
-            {t('nutrition.ai.summary.mealsPerDay')}: {profile?.meals_per_day ?? '—'}
-          </div>
-
-          <div className="nutrition-summary-chip">
-            {t('nutrition.ai.summary.budget')}:{' '}
-            {budgetLabelMap[profile?.budget] || t('nutrition.ai.summary.notSpecified')}
-          </div>
+      <div className="nutrition-survey-card">
+        <div className="nutrition-ai-badge">
+          {t('nutrition.survey.badge', 'AI Nutrition Survey')}
         </div>
 
-        {todayFoods.length > 0 && (
-          <div className="nutrition-empty-box" style={{ marginBottom: '20px' }}>
-            <strong>{t('nutrition.ai.todaySelectedTitle')}</strong>
-            <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {todayFoods.map((item) => (
-                <div
-                  key={item.id || `${item.name}-${item.selectedAt}`}
-                  className="nutrition-summary-chip"
+        <h2 className="nutrition-ai-title">
+          {t('nutrition.survey.title', 'Анкета питания')}
+        </h2>
+
+        <p className="nutrition-ai-text">
+          {t(
+            'nutrition.survey.subtitle',
+            'Ответьте на несколько вопросов, чтобы AI мог подобрать еду под вашу цель, режим и предпочтения.'
+          )}
+        </p>
+
+        {error && <div className="nutrition-survey-error">{error}</div>}
+
+        {step === 1 && (
+          <div className="nutrition-survey-step">
+            <h3 className="nutrition-survey-question">
+              {t('nutrition.survey.step1Title', 'Какая у вас цель?')}
+            </h3>
+
+            <div className="nutrition-survey-options-grid nutrition-survey-options-grid--three">
+              {goalOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`nutrition-survey-option ${
+                    form.goal === option.value ? 'active' : ''
+                  }`}
+                  onClick={() => updateField('goal', option.value)}
                 >
-                  {item.name}
-                </div>
+                  <div className="nutrition-survey-option-icon">{option.icon}</div>
+                  <h4>{option.title}</h4>
+                  <p>{option.text}</p>
+                </button>
               ))}
             </div>
           </div>
         )}
 
-        <div className="nutrition-ai-actions">
-          <button
-            className="nutrition-secondary-btn"
-            onClick={() => setShowSurvey(true)}
-          >
-            {t('nutrition.ai.actions.editSurvey')}
-          </button>
+        {step === 2 && (
+          <div className="nutrition-survey-step">
+            <h3 className="nutrition-survey-question">
+              {t('nutrition.survey.step2Title', 'Предпочтения и ограничения')}
+            </h3>
 
-          {todayFoods.length > 0 && (
+            <div className="nutrition-survey-block">
+              <label className="nutrition-survey-label">
+                {t('nutrition.survey.preferencesTitle', 'Что вам больше подходит?')}
+              </label>
+
+              <div className="nutrition-survey-chip-row">
+                {preferenceOptions.map((option) => (
+                  <Chip
+                    key={option.value}
+                    active={form.food_preferences.includes(option.value)}
+                    onClick={() => toggleArrayField('food_preferences', option.value)}
+                  >
+                    {option.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div className="nutrition-survey-block">
+              <label className="nutrition-survey-label">
+                {t('nutrition.survey.allergiesTitle', 'Есть аллергии?')}
+              </label>
+
+              <div className="nutrition-survey-chip-row">
+                {allergyOptions.map((option) => (
+                  <Chip
+                    key={option.value}
+                    active={form.allergies.includes(option.value)}
+                    onClick={() => toggleArrayField('allergies', option.value)}
+                  >
+                    {option.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div className="nutrition-survey-block">
+              <label className="nutrition-survey-label">
+                {t('nutrition.survey.dislikedFoods', 'Какие продукты не любите?')}
+              </label>
+
+              <input
+                className="nutrition-survey-input"
+                value={form.disliked_foods}
+                onChange={(e) => updateField('disliked_foods', e.target.value)}
+                placeholder={t('nutrition.survey.dislikedPlaceholder', 'Например: рыба, лук, творог')}
+              />
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="nutrition-survey-step">
+            <h3 className="nutrition-survey-question">
+              {t('nutrition.survey.step3Title', 'Режим питания')}
+            </h3>
+
+            <div className="nutrition-survey-form-grid">
+              <div className="nutrition-survey-field">
+                <label>{t('nutrition.survey.mealsPerDay', 'Приёмов пищи в день')}</label>
+                <select
+                  value={form.meals_per_day}
+                  onChange={(e) => updateField('meals_per_day', e.target.value)}
+                  className="nutrition-survey-input"
+                >
+                  <option value={3}>3</option>
+                  <option value={4}>4</option>
+                  <option value={5}>5</option>
+                </select>
+              </div>
+
+              <div className="nutrition-survey-field">
+                <label>{t('nutrition.survey.budget', 'Бюджет')}</label>
+                <select
+                  value={form.budget}
+                  onChange={(e) => updateField('budget', e.target.value)}
+                  className="nutrition-survey-input"
+                >
+                  <option value="low">{t('nutrition.ai.budgetLabels.low', 'Низкий')}</option>
+                  <option value="medium">{t('nutrition.ai.budgetLabels.medium', 'Средний')}</option>
+                  <option value="high">{t('nutrition.ai.budgetLabels.high', 'Высокий')}</option>
+                </select>
+              </div>
+
+              <div className="nutrition-survey-field">
+                <label>{t('nutrition.survey.breakfastTime', 'Завтрак')}</label>
+                <input
+                  type="time"
+                  value={form.breakfast_time}
+                  onChange={(e) => updateField('breakfast_time', e.target.value)}
+                  className="nutrition-survey-input"
+                />
+              </div>
+
+              <div className="nutrition-survey-field">
+                <label>{t('nutrition.survey.lunchTime', 'Обед')}</label>
+                <input
+                  type="time"
+                  value={form.lunch_time}
+                  onChange={(e) => updateField('lunch_time', e.target.value)}
+                  className="nutrition-survey-input"
+                />
+              </div>
+
+              <div className="nutrition-survey-field">
+                <label>{t('nutrition.survey.dinnerTime', 'Ужин')}</label>
+                <input
+                  type="time"
+                  value={form.dinner_time}
+                  onChange={(e) => updateField('dinner_time', e.target.value)}
+                  className="nutrition-survey-input"
+                />
+              </div>
+
+              <div className="nutrition-survey-field">
+                <label>{t('nutrition.survey.lateMeals', 'Поздние приёмы пищи')}</label>
+                <select
+                  value={form.late_meals}
+                  onChange={(e) => updateField('late_meals', e.target.value)}
+                  className="nutrition-survey-input"
+                >
+                  <option value="avoid">{t('nutrition.survey.lateAvoid', 'Избегаю')}</option>
+                  <option value="sometimes">{t('nutrition.survey.lateSometimes', 'Иногда')}</option>
+                  <option value="often">{t('nutrition.survey.lateOften', 'Часто')}</option>
+                </select>
+              </div>
+
+              <div className="nutrition-survey-field nutrition-survey-field--wide">
+                <label>{t('nutrition.survey.cookingMode', 'Как предпочитаете питаться?')}</label>
+                <select
+                  value={form.cooking_mode}
+                  onChange={(e) => updateField('cooking_mode', e.target.value)}
+                  className="nutrition-survey-input"
+                >
+                  <option value="cook">{t('nutrition.survey.cookModeCook', 'Готовить самому')}</option>
+                  <option value="buy">{t('nutrition.survey.cookModeBuy', 'Покупать готовое')}</option>
+                  <option value="both">{t('nutrition.survey.cookModeBoth', 'Оба варианта')}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="nutrition-survey-actions">
+          {step > 1 ? (
             <button
-              className="nutrition-secondary-btn"
-              onClick={handleClearHistory}
+              type="button"
+              className="nutrition-survey-secondary-btn"
+              onClick={handlePrev}
+              disabled={loading}
             >
-              {t('nutrition.ai.actions.clearTodayHistory')}
+              {t('common.back', 'Назад')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="nutrition-survey-secondary-btn"
+              onClick={onBack}
+              disabled={loading}
+            >
+              {t('common.cancel', 'Отмена')}
+            </button>
+          )}
+
+          {step < 3 ? (
+            <button
+              type="button"
+              className="nutrition-survey-primary-btn"
+              onClick={handleNext}
+              disabled={loading}
+            >
+              {t('common.next', 'Далее')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="nutrition-survey-primary-btn"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading
+                ? t('common.loading', 'Сохранение...')
+                : t('nutrition.survey.saveButton', 'Сохранить анкету')}
             </button>
           )}
         </div>
-
-        <h3 className="nutrition-section-title" style={{ marginTop: '26px' }}>
-          {t('nutrition.ai.recommendationsTitle')}
-        </h3>
-
-        <p className="nutrition-section-subtitle">
-          {t('nutrition.ai.recommendationsSubtitle', {
-            slot: slotLabelMap[currentSlot] || t('nutrition.ai.fitsNow'),
-          })}
-        </p>
-
-        {recommendations.length > 0 ? (
-          <div className="nutrition-food-grid">
-            {recommendations.map((food) => (
-              <div className="nutrition-food-card" key={food.id}>
-                <div className="nutrition-food-time">
-                  {slotLabelMap[currentSlot] || t('nutrition.ai.fitsNow')}
-                </div>
-
-                <h3>{food.name}</h3>
-
-                <div className="nutrition-food-stats">
-                  <div className="nutrition-stat-box">
-                    <div className="nutrition-stat-label">{t('nutrition.labels.calories')}</div>
-                    <div className="nutrition-stat-value">
-                      {food.calories} {t('nutrition.labels.kcal')}
-                    </div>
-                  </div>
-
-                  <div className="nutrition-stat-box">
-                    <div className="nutrition-stat-label">{t('nutrition.labels.protein')}</div>
-                    <div className="nutrition-stat-value">
-                      {food.protein} {t('nutrition.labels.grams')}
-                    </div>
-                  </div>
-
-                  <div className="nutrition-stat-box">
-                    <div className="nutrition-stat-label">{t('nutrition.labels.fat')}</div>
-                    <div className="nutrition-stat-value">
-                      {food.fat} {t('nutrition.labels.grams')}
-                    </div>
-                  </div>
-
-                  <div className="nutrition-stat-box">
-                    <div className="nutrition-stat-label">{t('nutrition.labels.carbs')}</div>
-                    <div className="nutrition-stat-value">
-                      {food.carbs} {t('nutrition.labels.grams')}
-                    </div>
-                  </div>
-                </div>
-
-                <p className="nutrition-recipe">{food.recipe}</p>
-
-                {food.reason && (
-                  <p className="nutrition-section-subtitle" style={{ marginBottom: '14px' }}>
-                    {t('nutrition.ai.reasonLabel')}: {food.reason}
-                  </p>
-                )}
-
-                <button
-                  className="nutrition-select-btn"
-                  onClick={() => handleSelectFood(food)}
-                >
-                  {t('nutrition.ai.selectDishButton')}
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="nutrition-empty-box">
-            {t('nutrition.ai.emptyRecommendations')}
-          </div>
-        )}
-
-        {selectedMessage && (
-          <div className="nutrition-message-box">{selectedMessage}</div>
-        )}
       </div>
+
+      <style>{`
+.nutrition-survey-section {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.nutrition-survey-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.nutrition-survey-step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nutrition-survey-dot {
+  width: 30px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+}
+
+.nutrition-survey-dot.active {
+  background: #61dafb;
+  box-shadow: 0 0 18px rgba(97,218,251,0.35);
+}
+
+.nutrition-survey-card {
+  background: linear-gradient(180deg, #232833 0%, #1b2029 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 28px;
+  padding: 28px;
+  color: #fff;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+  box-sizing: border-box;
+}
+
+.nutrition-survey-question {
+  margin: 0 0 18px;
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.nutrition-survey-options-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.nutrition-survey-options-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.nutrition-survey-option {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.035);
+  color: #fff;
+  border-radius: 22px;
+  padding: 22px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-height: 190px;
+  box-sizing: border-box;
+}
+
+.nutrition-survey-option:hover {
+  transform: translateY(-3px);
+  border-color: rgba(97,218,251,0.32);
+  background: rgba(255,255,255,0.055);
+}
+
+.nutrition-survey-option.active {
+  border-color: rgba(97,218,251,0.72);
+  background: rgba(97,218,251,0.10);
+  box-shadow: 0 18px 42px rgba(97,218,251,0.12);
+}
+
+.nutrition-survey-option-icon {
+  font-size: 34px;
+  margin-bottom: 14px;
+}
+
+.nutrition-survey-option h4 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.nutrition-survey-option p {
+  margin: 0;
+  color: #aab3c2;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.nutrition-survey-block {
+  margin-bottom: 22px;
+}
+
+.nutrition-survey-label,
+.nutrition-survey-field label {
+  display: block;
+  color: #aab3c2;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.nutrition-survey-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nutrition-survey-chip {
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  color: #dce4f2;
+  border-radius: 999px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  transition: all 0.22s ease;
+}
+
+.nutrition-survey-chip.active {
+  background: rgba(97,218,251,0.14);
+  border-color: rgba(97,218,251,0.58);
+  color: #7ce3ff;
+}
+
+.nutrition-survey-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.nutrition-survey-field--wide {
+  grid-column: 1 / -1;
+}
+
+.nutrition-survey-input {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: #1c1f24;
+  color: #ffffff;
+  padding: 0 14px;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.nutrition-survey-input:focus {
+  border-color: rgba(97,218,251,0.65);
+  box-shadow: 0 0 0 4px rgba(97,218,251,0.10);
+}
+
+.nutrition-survey-error {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 123, 123, 0.10);
+  border: 1px solid rgba(255, 123, 123, 0.25);
+  color: #ff9b9b;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.nutrition-survey-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.nutrition-survey-primary-btn,
+.nutrition-survey-secondary-btn {
+  min-width: 170px;
+  border-radius: 18px;
+  padding: 15px 20px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-height: 52px;
+}
+
+.nutrition-survey-primary-btn {
+  border: none;
+  background: linear-gradient(135deg, #63e0ff 0%, #4e8fff 100%);
+  color: #0f1720;
+  box-shadow: 0 14px 30px rgba(97,218,251,0.25);
+}
+
+.nutrition-survey-secondary-btn {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: #fff;
+}
+
+.nutrition-survey-primary-btn:disabled,
+.nutrition-survey-secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .nutrition-survey-options-grid--three,
+  .nutrition-survey-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .nutrition-survey-section {
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: 104px;
+  }
+
+  .nutrition-survey-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 14px;
+    padding: 8px 0 10px;
+    background: linear-gradient(180deg, rgba(28,31,36,0.98), rgba(28,31,36,0.78));
+    backdrop-filter: blur(12px);
+  }
+
+  .nutrition-survey-step-indicator {
+    justify-content: center;
+  }
+
+  .nutrition-survey-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .nutrition-survey-question {
+    font-size: 21px;
+  }
+
+  .nutrition-survey-option {
+    min-height: 145px;
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .nutrition-survey-option h4 {
+    font-size: 18px;
+  }
+
+  .nutrition-survey-option p {
+    font-size: 13px;
+  }
+
+  .nutrition-survey-chip {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 16px;
+    text-align: left;
+  }
+
+  .nutrition-survey-input {
+    min-height: 52px;
+    font-size: 16px;
+  }
+
+  .nutrition-survey-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nutrition-survey-primary-btn,
+  .nutrition-survey-secondary-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .nutrition-survey-card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .nutrition-survey-dot {
+    width: 26px;
+  }
+}
+      `}</style>
     </div>
   );
 };
 
-export default AINutritionPage;
+export default NutritionProfileSurvey;
