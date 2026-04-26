@@ -19,25 +19,37 @@ const AiAssistantPage = ({
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobileHistoryOpen, setIsMobileHistoryOpen] = useState(false);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-    const safeSessions = useMemo(() => {
-      return Array.isArray(sessions) ? sessions : [];
-    }, [sessions]);
+  const safeSessions = useMemo(() => {
+    return Array.isArray(sessions) ? sessions : [];
+  }, [sessions]);
 
-    const sessionExists = useCallback(
-      (sid) => {
-        if (!sid) return false;
+  const sessionExists = useCallback(
+    (sid) => {
+      if (!sid) return false;
 
-        return safeSessions.some((session) => {
-          const sessionId = session.id || session.session_id;
-          return Number(sessionId) === Number(sid);
-        });
-      },
-      [safeSessions]
-    );
+      return safeSessions.some((session) => {
+        const sessionId = session.id || session.session_id;
+        return Number(sessionId) === Number(sid);
+      });
+    },
+    [safeSessions]
+  );
+
+  const currentSessionTitle = useMemo(() => {
+    if (!currentSessionId) return t('ai.new_chat', 'Новый чат');
+
+    const found = safeSessions.find((session) => {
+      const sessionId = session.id || session.session_id;
+      return Number(sessionId) === Number(currentSessionId);
+    });
+
+    return found?.title || t('ai.new_chat', 'Новый чат');
+  }, [currentSessionId, safeSessions, t]);
 
   useEffect(() => {
     if (!currentSessionId) return;
@@ -68,6 +80,7 @@ const AiAssistantPage = ({
           if (response.status === 404) {
             setCurrentSessionId(null);
             localStorage.removeItem('lastSessionId');
+
             setMessages([
               {
                 text: t('ai.session_not_found', 'Этот чат был удалён. Начните новый чат.'),
@@ -240,14 +253,54 @@ const AiAssistantPage = ({
   const handleSessionClick = (sessionId) => {
     setCurrentSessionId(sessionId);
     localStorage.setItem('lastSessionId', String(sessionId));
+    setIsMobileHistoryOpen(false);
+  };
+
+  const handleNewChat = () => {
+    setIsMobileHistoryOpen(false);
+
+    if (typeof handleCreateNewChat === 'function') {
+      handleCreateNewChat();
+    }
   };
 
   return (
     <div className="ai-page">
-      <aside className="ai-history-sidebar">
+      <div className="ai-mobile-toolbar">
         <button
           type="button"
-          onClick={handleCreateNewChat}
+          className="ai-mobile-history-btn"
+          onClick={() => setIsMobileHistoryOpen(true)}
+        >
+          ☰ {t('ai.history_title', 'История')}
+        </button>
+
+        <div className="ai-mobile-current-chat">
+          💬 {currentSessionTitle}
+        </div>
+      </div>
+
+      <div
+        className={`ai-mobile-history-backdrop ${isMobileHistoryOpen ? 'show' : ''}`}
+        onClick={() => setIsMobileHistoryOpen(false)}
+      />
+
+      <aside className={`ai-history-sidebar ${isMobileHistoryOpen ? 'mobile-open' : ''}`}>
+        <div className="ai-mobile-drawer-head">
+          <strong>{t('ai.history_title', 'История чатов')}</strong>
+
+          <button
+            type="button"
+            className="ai-mobile-drawer-close"
+            onClick={() => setIsMobileHistoryOpen(false)}
+          >
+            ×
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleNewChat}
           className="ai-new-chat-btn"
         >
           + {t('ai.new_chat', 'Новый чат')}
@@ -335,6 +388,7 @@ const AiAssistantPage = ({
 
       <style>{`
 .ai-page {
+  position: relative;
   display: flex;
   gap: 20px;
   width: 100%;
@@ -343,6 +397,12 @@ const AiAssistantPage = ({
   padding: 10px;
   box-sizing: border-box;
   min-width: 0;
+}
+
+.ai-mobile-toolbar,
+.ai-mobile-history-backdrop,
+.ai-mobile-drawer-head {
+  display: none;
 }
 
 .ai-history-sidebar {
@@ -410,18 +470,6 @@ const AiAssistantPage = ({
   border: 1px dashed rgba(255,255,255,0.1);
   text-align: center;
   font-size: 14px;
-}
-
-.ai-history-list::-webkit-scrollbar,
-.ai-messages-list::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.ai-history-list::-webkit-scrollbar-thumb,
-.ai-messages-list::-webkit-scrollbar-thumb {
-  background: rgba(97, 218, 251, 0.22);
-  border-radius: 999px;
 }
 
 .ai-chat-container {
@@ -552,7 +600,6 @@ const AiAssistantPage = ({
   font-size: 15px;
   line-height: 1.45;
   box-sizing: border-box;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
   appearance: none;
   -webkit-appearance: none;
   font-family: inherit;
@@ -569,11 +616,6 @@ const AiAssistantPage = ({
   box-shadow: 0 0 0 4px rgba(97, 218, 251, 0.12);
 }
 
-.ai-input:disabled {
-  opacity: 0.75;
-  cursor: not-allowed;
-}
-
 .ai-input:-webkit-autofill,
 .ai-input:-webkit-autofill:hover,
 .ai-input:-webkit-autofill:focus,
@@ -582,7 +624,6 @@ const AiAssistantPage = ({
   -webkit-text-fill-color: #f2f7ff !important;
   caret-color: #f2f7ff !important;
   transition: background-color 9999s ease-in-out 0s;
-  border: 1px solid rgba(97, 218, 251, 0.2) !important;
 }
 
 .ai-send-button {
@@ -598,25 +639,14 @@ const AiAssistantPage = ({
   background: linear-gradient(135deg, #69dfff 0%, #52bdf2 100%);
   transition: 0.25s ease;
   touch-action: manipulation;
-  box-shadow: 0 10px 24px rgba(97, 218, 251, 0.16);
-}
-
-.ai-send-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: brightness(1.03);
 }
 
 .ai-send-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
 @media (max-width: 1100px) {
-  .ai-page {
-    gap: 14px;
-  }
-
   .ai-history-sidebar {
     width: 260px;
     min-width: 260px;
@@ -627,29 +657,105 @@ const AiAssistantPage = ({
   }
 }
 
+/* PHONE UI */
 @media (max-width: 768px) {
   .ai-page {
     flex-direction: column;
     gap: 10px;
-    height: calc(100dvh - 118px);
+    height: calc(100dvh - 112px);
     min-height: 0;
-    padding: 0 0 calc(88px + env(safe-area-inset-bottom, 0px));
+    padding: 0 0 calc(86px + env(safe-area-inset-bottom, 0px));
     overflow: hidden;
   }
 
-  .ai-history-sidebar {
-    width: 100%;
-    min-width: 0;
-    padding: 10px;
-    border-radius: 18px;
+  .ai-mobile-toolbar {
+    display: flex;
+    align-items: center;
     gap: 10px;
     flex-shrink: 0;
   }
 
-  .ai-new-chat-btn {
-    min-height: 46px;
-    font-size: 15px;
+  .ai-mobile-history-btn {
+    min-height: 44px;
+    border: 1px solid rgba(97, 218, 251, 0.35);
     border-radius: 14px;
+    background: rgba(97, 218, 251, 0.12);
+    color: #72dfff;
+    font-size: 14px;
+    font-weight: 900;
+    padding: 0 14px;
+    cursor: pointer;
+  }
+
+  .ai-mobile-current-chat {
+    min-width: 0;
+    flex: 1;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #cdd6e5;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .ai-mobile-history-backdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 80;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  .ai-mobile-history-backdrop.show {
+    display: block;
+  }
+
+  .ai-history-sidebar {
+    position: absolute;
+    top: 54px;
+    left: 0;
+    bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+    width: min(88vw, 360px);
+    min-width: 0;
+    z-index: 90;
+    transform: translateX(calc(-100% - 16px));
+    transition: transform 0.25s ease;
+    padding: 12px;
+    border-radius: 20px;
+    background: rgba(20, 24, 32, 0.98);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+  }
+
+  .ai-history-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .ai-mobile-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 16px;
+    padding: 4px 2px 2px;
+  }
+
+  .ai-mobile-drawer-close {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
   }
 
   .ai-history-title {
@@ -657,18 +763,11 @@ const AiAssistantPage = ({
   }
 
   .ai-history-list {
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 8px;
-    max-height: 74px;
-    min-height: 74px;
-    padding-bottom: 4px;
-  }
-
-  .ai-history-list > * {
-    flex: 0 0 210px;
-    max-width: 210px;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 10px;
+    padding-right: 0;
   }
 
   .ai-chat-container {
@@ -678,21 +777,20 @@ const AiAssistantPage = ({
   }
 
   .ai-messages-list {
-    padding: 14px 12px;
+    padding: 12px 10px;
     gap: 10px;
   }
 
   .ai-message-bubble {
-    max-width: 92%;
+    max-width: 94%;
     padding: 12px 14px;
     font-size: 14px;
     line-height: 1.5;
   }
 
   .ai-input-area {
-    padding: 10px;
+    padding: 8px;
     background: rgba(15, 18, 25, 0.98);
-    backdrop-filter: blur(12px);
   }
 
   .ai-composer-box {
@@ -702,67 +800,32 @@ const AiAssistantPage = ({
   }
 
   .ai-input {
-    min-height: 50px;
+    min-height: 48px;
     max-height: 120px;
     font-size: 16px;
-    border-radius: 16px;
+    border-radius: 15px;
     padding: 13px 14px;
   }
 
   .ai-send-button {
     width: 100%;
     min-width: 0;
-    min-height: 48px;
-    border-radius: 16px;
+    min-height: 46px;
+    border-radius: 15px;
     font-size: 14px;
   }
 }
 
 @media (max-width: 430px) {
   .ai-page {
-    height: calc(100dvh - 112px);
+    height: calc(100dvh - 108px);
     padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
 
   .ai-history-sidebar {
-    padding: 8px;
-    border-radius: 16px;
-  }
-
-  .ai-history-list {
-    max-height: 68px;
-    min-height: 68px;
-  }
-
-  .ai-history-list > * {
-    flex-basis: 180px;
-    max-width: 180px;
-  }
-
-  .ai-messages-list {
-    padding: 12px 10px;
-  }
-
-  .ai-message-bubble {
-    max-width: 94%;
-    font-size: 13.5px;
-    padding: 11px 13px;
-  }
-
-  .ai-input-area {
-    padding: 8px;
-  }
-
-  .ai-input {
-    min-height: 48px;
-    font-size: 16px;
-    border-radius: 14px;
-  }
-
-  .ai-send-button {
-    min-height: 46px;
-    border-radius: 14px;
-    font-size: 13px;
+    top: 52px;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    width: min(90vw, 340px);
   }
 }
       `}</style>
