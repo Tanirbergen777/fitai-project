@@ -1,0 +1,41 @@
+{
+  "accuracy": 1.0,
+  "rows": 8790,
+  "train_rows": 7032,
+  "test_rows": 1758,
+  "classes": [
+    "fat_loss_cardio_focus",
+    "fat_loss_general",
+    "fat_loss_home_beginner_low",
+    "keep_fit_balanced",
+    "keep_fit_endurance",
+    "keep_fit_low_impact",
+    "muscle_general",
+    "muscle_gym_progressive",
+    "muscle_home_basic"
+  ],
+  "numeric_features": [
+    "age",
+    "height",
+    "weight",
+    "bmi",
+    "waist",
+    "hip",
+    "arm",
+    "activity_level",
+    "workouts_per_week",
+    "workout_duration_minutes"
+  ],
+  "categorical_features": [
+    "gender",
+    "limitations",
+    "primary_goal",
+    "training_level",
+    "training_location",
+    "equipment",
+    "training_focus",
+    "cardio_preference",
+    "impact_level"
+  ],
+  "model_path": "C:\\Users\\alizh\\PycharmProjects\\FastAPIProject\\ai_engine\\models_bin\\workout_plan_selector.pkl"
+}
