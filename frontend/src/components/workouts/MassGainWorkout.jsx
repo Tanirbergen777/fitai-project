@@ -592,12 +592,9 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
 
         <div className="bodypart-container">
           <div className="mg-hero">
-            <span className="mg-badge">Mass gain training</span>
+           <span className="mg-badge">{t('training.massGainPage.badge')}</span>
             <h2>{t('training.bodyParts.select')}</h2>
-            <p>
-              Выберите часть тела, а система откроет силовой план с видео,
-              таймером и AI camera coach.
-            </p>
+            <p>{t('training.massGainPage.subtitle')}</p>
           </div>
 
           <div className="bodypart-grid">
@@ -613,7 +610,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
                 <span className="bodypart-content">
                   <span className="bodypart-icon">{card.icon}</span>
                   <span className="bodypart-title">{card.title}</span>
-                  <span className="bodypart-hint">Start strength ›</span>
+                  <span className="bodypart-hint">{t('training.massGainPage.startButton')} ›</span>
                 </span>
               </button>
             ))}
