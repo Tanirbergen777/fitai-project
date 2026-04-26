@@ -3,140 +3,395 @@ import { useTranslation } from 'react-i18next';
 
 const ChatHistoryItem = ({ session, isActive, onClick, onRename, onDelete }) => {
   const { t } = useTranslation();
+
   const [showMenu, setShowMenu] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const itemRef = useRef(null);
   const menuRef = useRef(null);
 
-  // Используем правильный ID (либо id, либо session_id)
   const sessionId = session.id || session.session_id;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (
+        itemRef.current &&
+        !itemRef.current.contains(event.target) &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
         setShowMenu(false);
       }
     };
+
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [showMenu]);
+
+  const handleRename = (e) => {
+    e.stopPropagation();
+    setShowMenu(false);
+
+    if (onRename) {
+      onRename(e, sessionId);
+    }
+  };
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    setShowMenu(false);
+
+    if (onDelete) {
+      onDelete(e, sessionId);
+    }
+  };
 
   return (
     <div
+      ref={itemRef}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="chat-history-item"
-      style={{
-  ...itemStyle,
-  backgroundColor: isActive
-    ? 'rgba(97, 218, 251, 0.08)'
-    : (isHovered ? 'rgba(255, 255, 255, 0.03)' : 'transparent'),
-  borderColor: isActive ? 'rgba(97, 218, 251, 0.2)' : 'transparent',
-  color: isActive ? '#61dafb' : '#abb2bf',
-}}
+      className={`chat-history-item ${isActive ? 'active' : ''}`}
     >
-      <div style={{ display: 'flex', alignItems: 'center', overflow: 'hidden', flex: 1 }}>
-        <span style={{ marginRight: '10px', fontSize: '14px' }}>💬</span>
-        <span style={{
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          fontWeight: isActive ? 'bold' : 'normal'
-        }}>
-          {session.title || t('ai.new_chat')}
+      <div className="chat-history-main">
+        <span className="chat-history-icon">💬</span>
+
+        <span className="chat-history-title">
+          {session.title || t('ai.new_chat', 'Новый чат')}
         </span>
       </div>
 
-      <div style={{ position: 'relative' }} ref={menuRef}>
-        <div
-          onClick={(e) => {
-            e.stopPropagation(); // Важно! Чтобы не сработал onClick всего элемента
-            setShowMenu(!showMenu);
-          }}
-          style={{
-            ...threeDotsStyle,
-            opacity: isHovered || showMenu ? 1 : 0 // Показываем точки только при наведении
-          }}
-        >
-          ⋮
-        </div>
+      <button
+        type="button"
+        className="chat-history-dots"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowMenu((prev) => !prev);
+        }}
+        aria-label="Chat menu"
+      >
+        ⋮
+      </button>
 
-        {showMenu && (
-          <div style={dropdownStyle}>
-            <div style={menuOptionStyle} onClick={(e) => {
+      {showMenu && (
+        <div ref={menuRef} className="chat-history-dropdown">
+          <button
+            type="button"
+            className="chat-history-menu-option"
+            onClick={handleRename}
+          >
+            <span>✏️</span>
+            <span>{t('ai.rename', 'Переименовать')}</span>
+          </button>
+
+          <button
+            type="button"
+            className="chat-history-menu-option danger"
+            onClick={handleDelete}
+          >
+            <span>🗑️</span>
+            <span>{t('modal.delete', 'Удалить')}</span>
+          </button>
+        </div>
+      )}
+
+      {showMenu && (
+        <div className="chat-history-mobile-sheet" ref={menuRef}>
+          <div className="chat-history-mobile-sheet-title">
+            {session.title || t('ai.new_chat', 'Новый чат')}
+          </div>
+
+          <button
+            type="button"
+            className="chat-history-mobile-action"
+            onClick={handleRename}
+          >
+            <span>✏️</span>
+            <span>{t('ai.rename', 'Переименовать')}</span>
+          </button>
+
+          <button
+            type="button"
+            className="chat-history-mobile-action danger"
+            onClick={handleDelete}
+          >
+            <span>🗑️</span>
+            <span>{t('modal.delete', 'Удалить')}</span>
+          </button>
+
+          <button
+            type="button"
+            className="chat-history-mobile-action cancel"
+            onClick={(e) => {
               e.stopPropagation();
               setShowMenu(false);
-              if (onRename) onRename(e, sessionId); // Передаем правильный ID
-            }}>
-              <span style={{fontSize: '14px'}}>✏️</span> {t('ai.rename', 'Переименовать')}
-            </div>
-            <div
-              style={{ ...menuOptionStyle, color: '#ff4d4f', borderTop: '1px solid #333' }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowMenu(false);
-                if (onDelete) onDelete(e, sessionId); // Передаем правильный ID
-              }}
-            >
-              <span style={{fontSize: '14px'}}>🗑️</span> {t('modal.delete', 'Удалить')}
-            </div>
-          </div>
-        )}
-      </div>
+            }}
+          >
+            {t('modal.cancel', 'Отмена')}
+          </button>
+        </div>
+      )}
+
+      {showMenu && (
+        <div
+          className="chat-history-mobile-backdrop"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowMenu(false);
+          }}
+        />
+      )}
+
+      <style>{`
+.chat-history-item {
+  width: 100%;
+  min-width: 0;
+  min-height: 54px;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  transition: all 0.22s ease;
+  border-radius: 14px;
+  position: relative;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #abb2bf;
+  box-sizing: border-box;
+}
+
+.chat-history-item:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.chat-history-item.active {
+  background: rgba(97, 218, 251, 0.10);
+  border-color: rgba(97, 218, 251, 0.25);
+  color: #61dafb;
+}
+
+.chat-history-main {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+  gap: 10px;
+}
+
+.chat-history-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chat-history-title {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+}
+
+.chat-history-item.active .chat-history-title {
+  font-weight: 900;
+}
+
+.chat-history-dots {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #abb2bf;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chat-history-item:hover .chat-history-dots,
+.chat-history-dots:focus,
+.chat-history-item.active .chat-history-dots {
+  opacity: 1;
+}
+
+.chat-history-dots:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.chat-history-dropdown {
+  position: absolute;
+  top: 46px;
+  right: 8px;
+  background: #21252b;
+  border: 1px solid #3e4451;
+  border-radius: 14px;
+  z-index: 2000;
+  min-width: 190px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+  overflow: hidden;
+}
+
+.chat-history-menu-option {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 13px 15px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #abb2bf;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font-family: inherit;
+}
+
+.chat-history-menu-option:hover {
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+}
+
+.chat-history-menu-option.danger {
+  color: #ff6b6b;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.chat-history-mobile-sheet,
+.chat-history-mobile-backdrop {
+  display: none;
+}
+
+/* PHONE UI */
+@media (max-width: 768px) {
+  .chat-history-item {
+    min-height: 58px;
+    padding: 12px 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.035);
+    border-color: rgba(255,255,255,0.04);
+  }
+
+  .chat-history-item.active {
+    background: rgba(97, 218, 251, 0.11);
+    border-color: rgba(97, 218, 251, 0.30);
+  }
+
+  .chat-history-title {
+    font-size: 13px;
+  }
+
+  .chat-history-dots {
+    opacity: 1;
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .chat-history-dropdown {
+    display: none;
+  }
+
+  .chat-history-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 2998;
+    background: rgba(0,0,0,0.45);
+  }
+
+  .chat-history-mobile-sheet {
+    display: flex;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    z-index: 2999;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border-radius: 22px;
+    background: rgba(31, 36, 46, 0.98);
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+    backdrop-filter: blur(16px);
+    box-sizing: border-box;
+  }
+
+  .chat-history-mobile-sheet-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    padding: 6px 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chat-history-mobile-action {
+    width: 100%;
+    min-height: 50px;
+    border: none;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    color: #eef4ff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+  }
+
+  .chat-history-mobile-action.danger {
+    color: #ff7777;
+    background: rgba(255, 88, 88, 0.08);
+  }
+
+  .chat-history-mobile-action.cancel {
+    justify-content: center;
+    color: #abb2bf;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 430px) {
+  .chat-history-mobile-sheet {
+    left: 8px;
+    right: 8px;
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    padding: 12px;
+    border-radius: 20px;
+  }
+
+  .chat-history-mobile-action {
+    min-height: 48px;
+    font-size: 14px;
+  }
+}
+      `}</style>
     </div>
   );
 };
-
-// --- УЛУЧШЕННЫЕ СТИЛИ ---
-const itemStyle = {
-  padding: '12px 16px',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  fontSize: '13px',
-  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-  margin: '4px 12px',
-  borderRadius: '10px',
-  position: 'relative',
-  border: '1px solid transparent'
-};
-const threeDotsStyle = {
-  padding: '5px 10px',
-  fontSize: '18px',
-  cursor: 'pointer',
-  transition: 'opacity 0.2s',
-  color: '#abb2bf'
-};
-
-const dropdownStyle = {
-  position: 'absolute',
-  top: '30px',
-  right: '0',
-  backgroundColor: '#21252b',
-  border: '1px solid #3e4451',
-  borderRadius: '10px',
-  zIndex: 1000,
-  minWidth: '170px',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-  overflow: 'hidden'
-};
-
-const menuOptionStyle = {
-  padding: '12px 15px',
-  cursor: 'pointer',
-  fontSize: '13px',
-  color: '#abb2bf',
-  transition: 'all 0.2s',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  background: 'transparent'
-};
-
-// Добавь это в свой App.css или в секцию стилей, если хочешь эффект наведения на пункты меню:
-// .menu-option:hover { background-color: #3e4451; color: white; }
 
 export default ChatHistoryItem;
