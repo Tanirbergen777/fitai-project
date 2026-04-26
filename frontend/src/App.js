@@ -359,15 +359,16 @@ showLanding && !userId ? (
       formStyle={formStyle}
     />
   ) : authMode === 'login' ? (
-    <LoginPage
-      handleChange={handleChange}
-      handleLogin={handleLogin}
-      setIsLogin={switchAuthMode}
-      setAuthMode={setAuthMode}
-      inputStyle={inputStyle}
-      buttonStyle={buttonStyle}
-      formStyle={formStyle}
-    />
+<LoginPage
+  formData={formData}
+  handleChange={handleChange}
+  handleLogin={handleLogin}
+  setIsLogin={switchAuthMode}
+  setAuthMode={setAuthMode}
+  inputStyle={inputStyle}
+  buttonStyle={buttonStyle}
+  formStyle={formStyle}
+/>
   ) : authMode === 'register' ? (
     <RegisterPage
       handleChange={handleChange}

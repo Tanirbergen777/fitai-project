@@ -30,28 +30,30 @@ const LoginPage = ({
         </div>
 
         <form onSubmit={handleLogin} className="login-form" style={formStyle}>
-          <input
-            className="login-input"
-            name="email"
-            type="email"
-            placeholder={t('auth.email_placeholder', 'Email')}
-            onChange={handleChange}
-            style={inputStyle}
-            autoComplete="email"
-            inputMode="email"
-            required
-          />
+        <input
+          className="login-input"
+          name="email"
+          type="email"
+          value={formData?.email || ''}
+          placeholder={t('auth.email_placeholder', 'Email')}
+          onChange={handleChange}
+          style={inputStyle}
+          autoComplete="email"
+          inputMode="email"
+          required
+        />
 
-          <input
-            className="login-input"
-            name="password"
-            type="password"
-            placeholder={t('auth.password_placeholder', 'Пароль')}
-            onChange={handleChange}
-            style={inputStyle}
-            autoComplete="current-password"
-            required
-          />
+        <input
+          className="login-input"
+          name="password"
+          type="password"
+          value={formData?.password || ''}
+          placeholder={t('auth.password_placeholder', 'Пароль')}
+          onChange={handleChange}
+          style={inputStyle}
+          autoComplete="current-password"
+          required
+        />
 
           <button type="submit" className="login-submit" style={buttonStyle}>
             {t('auth.login_submit', 'Войти')}
