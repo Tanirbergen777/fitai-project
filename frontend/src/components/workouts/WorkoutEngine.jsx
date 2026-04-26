@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import beepSound from './sounds/beep.mp3';
 import CameraCoachPanel from './CameraCoachPanel';
@@ -22,25 +22,122 @@ const parseTargetReps = (repsValue) => {
   return Number(numbers[0]);
 };
 
+const clampPercent = (value) => {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
+};
+
+const getExerciseKey = (exercise, index) => {
+  return (
+    exercise?.key ||
+    exercise?.cameraMode ||
+    String(exercise?.name || `exercise_${index}`)
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+  );
+};
+
+const getSkipReasonLabel = (reason) => {
+  const labels = {
+    tired: 'Шаршадым',
+    unable: 'Қазір жасай алмаймын',
+    postpone: 'Кейінге қалдыру',
+    pain: 'Ауырсыну / ыңғайсыздық бар',
+    difficult: 'Жаттығу қиын болды',
+  };
+
+  return labels[reason] || reason;
+};
+
+const getExerciseGoalBenefit = (exercise, reason) => {
+  const name = exercise?.name || 'Бұл жаттығу';
+
+  if (reason === 'unable') {
+    return `${name} сіздің мақсатыңызға көмектеседі, себебі ол негізгі бұлшықеттерді іске қосып, жалпы физикалық дайындықты арттырады. Келесі жолы осы жаттығуға дайындық жасайтын жеңіл нұсқаларды ұсынамыз.`;
+  }
+
+  if (reason === 'pain') {
+    return `${name} кезінде ауырсыну белгіленді. Келесі жолы төмен жүктемелі және қауіпсіз балама жаттығулардан бастаған дұрыс.`;
+  }
+
+  if (reason === 'difficult') {
+    return `${name} қиын болды. Келесі жолы осы жаттығуға дайындық жасайтын beginner-friendly нұсқалар ұсынылады.`;
+  }
+
+  return `${name} сіздің жаттығу мақсатыңызға пайдалы, бірақ бүгін толық орындалмады.`;
+};
+
+const saveWeakExercisePreference = (exercise, reason) => {
+  if (!['unable', 'pain', 'difficult'].includes(reason)) return;
+
+  try {
+    const key = 'fitai_weak_exercises';
+    const saved = JSON.parse(localStorage.getItem(key) || '[]');
+
+    const payload = {
+      id: getExerciseKey(exercise, 0),
+      name: exercise?.name || 'Exercise',
+      cameraMode: exercise?.cameraMode || '',
+      reason,
+      reasonLabel: getSkipReasonLabel(reason),
+      benefit: getExerciseGoalBenefit(exercise, reason),
+      createdAt: new Date().toISOString(),
+    };
+
+    const filtered = saved.filter((item) => item.id !== payload.id);
+    localStorage.setItem(key, JSON.stringify([payload, ...filtered].slice(0, 5)));
+  } catch (error) {
+    console.warn('Weak exercise save error:', error);
+  }
+};
+
 const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
   const { t } = useTranslation();
   const beepRef = useRef(null);
   const cameraAutoFinishedRef = useRef(false);
+  const savedResultIdsRef = useRef(new Set());
+
+  const normalizedExercises = useMemo(() => {
+    return exercises.map((exercise, index) => ({
+      ...exercise,
+      _workoutId: `${index}-${getExerciseKey(exercise, index)}`,
+      _originalIndex: index,
+      _postponedCount: exercise._postponedCount || 0,
+    }));
+  }, [exercises]);
+
+  const [workoutQueue, setWorkoutQueue] = useState([]);
   const [cameraRepCount, setCameraRepCount] = useState(0);
+  const [exerciseResults, setExerciseResults] = useState([]);
+  const [skipModalOpen, setSkipModalOpen] = useState(false);
+  const [workoutReport, setWorkoutReport] = useState(null);
 
-  const totalWorkoutSeconds = exercises.reduce((sum, ex) => {
-    return sum + (ex.prepSeconds ?? 5) + (ex.workSeconds ?? 30) + (ex.restSeconds ?? 15);
-  }, 0);
-
-  const totalWorkoutMinutes = Math.ceil(totalWorkoutSeconds / 60);
-
-  const [step, setStep] = useState('preview'); // preview | active | rest
+  const [step, setStep] = useState('preview'); // preview | active | rest | summary
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [exercisePhase, setExercisePhase] = useState('prepare'); // prepare | work
   const [prepTimeLeft, setPrepTimeLeft] = useState(5);
 
-  const currentEx = exercises[currentIndex];
+  useEffect(() => {
+    setWorkoutQueue(normalizedExercises);
+    setExerciseResults([]);
+    setWorkoutReport(null);
+    savedResultIdsRef.current = new Set();
+    setCurrentIndex(0);
+    setCameraRepCount(0);
+    setSkipModalOpen(false);
+    setStep('preview');
+  }, [normalizedExercises]);
+
+  const queue = workoutQueue.length ? workoutQueue : normalizedExercises;
+
+  const totalWorkoutSeconds = queue.reduce((sum, ex) => {
+    return sum + (ex.prepSeconds ?? 5) + (ex.workSeconds ?? 30) + (ex.restSeconds ?? 15);
+  }, 0);
+
+  const totalWorkoutMinutes = Math.ceil(totalWorkoutSeconds / 60);
+
+  const currentEx = queue[currentIndex];
   const currentRestSeconds = currentEx?.restSeconds ?? 30;
   const currentWorkSeconds = currentEx?.workSeconds ?? 30;
   const targetReps = parseTargetReps(currentEx?.reps);
@@ -68,10 +165,152 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
     </>
   );
 
-  const nextExercise = useCallback(() => {
-    if (currentIndex < exercises.length - 1) {
+  const buildExerciseResult = useCallback(
+    (status, reason = 'completed') => {
+      if (!currentEx) return null;
+
+      let performancePercent = 100;
+      let performedValue = null;
+      let targetValue = null;
+
+      if (targetType === 'reps') {
+        targetValue = targetReps;
+
+        if (currentEx.cameraMode) {
+          performedValue = cameraRepCount;
+          performancePercent = targetReps
+            ? clampPercent((cameraRepCount / targetReps) * 100)
+            : 100;
+        } else {
+          performedValue = targetReps;
+          performancePercent = status === 'completed' ? 100 : 0;
+        }
+      } else {
+        targetValue = currentWorkSeconds;
+        performedValue = elapsedWorkSeconds;
+        performancePercent = currentWorkSeconds
+          ? clampPercent((elapsedWorkSeconds / currentWorkSeconds) * 100)
+          : 100;
+      }
+
+      if (status !== 'completed') {
+        performancePercent = 0;
+      }
+
+      return {
+        id: currentEx._workoutId || `${currentIndex}-${currentEx.name}`,
+        exerciseName: currentEx.name,
+        exerciseKey: getExerciseKey(currentEx, currentIndex),
+        cameraMode: currentEx.cameraMode || '',
+        targetType,
+        targetValue,
+        performedValue,
+        performancePercent,
+        status,
+        reason,
+        reasonLabel: getSkipReasonLabel(reason),
+        benefit: getExerciseGoalBenefit(currentEx, reason),
+        createdAt: new Date().toISOString(),
+      };
+    },
+    [
+      currentEx,
+      currentIndex,
+      targetType,
+      targetReps,
+      cameraRepCount,
+      currentWorkSeconds,
+      elapsedWorkSeconds,
+    ]
+  );
+
+  const addExerciseResult = useCallback(
+    (result) => {
+      if (!result) return exerciseResults;
+
+      if (savedResultIdsRef.current.has(result.id)) {
+        return exerciseResults;
+      }
+
+      savedResultIdsRef.current.add(result.id);
+
+      const nextResults = [...exerciseResults, result];
+      setExerciseResults(nextResults);
+
+      if (['unable', 'pain', 'difficult'].includes(result.reason)) {
+        saveWeakExercisePreference(currentEx, result.reason);
+      }
+
+      return nextResults;
+    },
+    [exerciseResults, currentEx]
+  );
+
+  const buildWorkoutReport = useCallback(
+    (resultsList) => {
+      const total = queue.length || 1;
+      const completed = resultsList.filter((item) => item.status === 'completed');
+      const skipped = resultsList.filter((item) => item.status === 'skipped');
+
+      const averagePerformance = completed.length
+        ? Math.round(
+            completed.reduce((sum, item) => sum + (item.performancePercent || 0), 0) /
+              completed.length
+          )
+        : 0;
+
+      const completionScore = clampPercent((completed.length / total) * 100);
+      const consistencyScore = clampPercent(((total - skipped.length) / total) * 100);
+
+      const score = clampPercent(
+        completionScore * 0.45 +
+          averagePerformance * 0.35 +
+          consistencyScore * 0.2
+      );
+
+      let summary = 'Жақсы жұмыс! Жаттығу қорытындысы дайын.';
+
+      if (score >= 90) {
+        summary = 'Өте жақсы! Жаттығулардың көп бөлігін толық әрі тұрақты орындадыңыз.';
+      } else if (score >= 75) {
+        summary = 'Жақсы нәтиже. Кейбір жаттығуларды толық орындауға көңіл бөлу керек.';
+      } else if (score >= 55) {
+        summary = 'Орташа нәтиже. Жаттығуларды біртіндеп жеңіл деңгейден бастаған дұрыс.';
+      } else {
+        summary = 'Бүгін толық орындау қиын болды. Келесі жолы жеңілдетілген жоспардан бастаймыз.';
+      }
+
+      return {
+        title,
+        score,
+        totalExercises: total,
+        completedCount: completed.length,
+        skippedCount: skipped.length,
+        completionScore,
+        performanceScore: averagePerformance,
+        consistencyScore,
+        results: resultsList,
+        skipped,
+        summary,
+        createdAt: new Date().toISOString(),
+      };
+    },
+    [queue.length, title]
+  );
+
+  const completeWorkoutFlow = useCallback(
+    (resultsList = exerciseResults) => {
+      const report = buildWorkoutReport(resultsList);
+      setWorkoutReport(report);
+      setStep('summary');
+    },
+    [buildWorkoutReport, exerciseResults]
+  );
+
+  const goToNextExercise = useCallback(() => {
+    if (currentIndex < queue.length - 1) {
       const nextIndex = currentIndex + 1;
-      const nextEx = exercises[nextIndex];
+      const nextEx = queue[nextIndex];
 
       setCurrentIndex(nextIndex);
       setPrepTimeLeft(nextEx?.prepSeconds ?? 5);
@@ -79,14 +318,66 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
       setExercisePhase('prepare');
       setStep('active');
     } else {
-      onComplete?.();
+      completeWorkoutFlow();
     }
-  }, [currentIndex, exercises, onComplete]);
+  }, [currentIndex, queue, completeWorkoutFlow]);
 
   const finishExercise = useCallback(() => {
+    const result = buildExerciseResult('completed', 'completed');
+    addExerciseResult(result);
+
     setTimeLeft(currentRestSeconds);
     setStep('rest');
-  }, [currentRestSeconds]);
+  }, [buildExerciseResult, addExerciseResult, currentRestSeconds]);
+
+  const handleSkipClick = () => {
+    setSkipModalOpen(true);
+  };
+
+  const skipCurrentExercise = (reason) => {
+    const result = buildExerciseResult('skipped', reason);
+    const nextResults = addExerciseResult(result);
+
+    setSkipModalOpen(false);
+
+    if (currentIndex < queue.length - 1) {
+      const nextIndex = currentIndex + 1;
+      const nextEx = queue[nextIndex];
+
+      setCurrentIndex(nextIndex);
+      setPrepTimeLeft(nextEx?.prepSeconds ?? 5);
+      setTimeLeft(nextEx?.workSeconds ?? 30);
+      setExercisePhase('prepare');
+      setStep('active');
+    } else {
+      completeWorkoutFlow(nextResults);
+    }
+  };
+
+  const postponeCurrentExercise = () => {
+    setSkipModalOpen(false);
+
+    if (currentIndex >= queue.length - 1) {
+      return;
+    }
+
+    const copy = [...queue];
+    const [postponed] = copy.splice(currentIndex, 1);
+
+    const updatedPostponed = {
+      ...postponed,
+      _postponedCount: (postponed._postponedCount || 0) + 1,
+    };
+
+    const nextQueue = [...copy, updatedPostponed];
+    const nextEx = nextQueue[currentIndex];
+
+    setWorkoutQueue(nextQueue);
+    setPrepTimeLeft(nextEx?.prepSeconds ?? 5);
+    setTimeLeft(nextEx?.workSeconds ?? 30);
+    setExercisePhase('prepare');
+    setStep('active');
+  };
 
   const handleCameraRepCountChange = useCallback((count) => {
     setCameraRepCount(typeof count === 'number' ? count : 0);
@@ -129,11 +420,11 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (step === 'rest' && timeLeft === 0) {
-      nextExercise();
+      goToNextExercise();
     }
 
     return () => clearInterval(timer);
-  }, [step, timeLeft, nextExercise]);
+  }, [step, timeLeft, goToNextExercise]);
 
   useEffect(() => {
     let timer;
@@ -169,12 +460,12 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
   }, [step, exercisePhase, timeLeft, finishExercise]);
 
   const startWorkout = () => {
-    if (!exercises.length) return;
+    if (!queue.length) return;
 
     setCurrentIndex(0);
-    setPrepTimeLeft(exercises[0]?.prepSeconds ?? 5);
+    setPrepTimeLeft(queue[0]?.prepSeconds ?? 5);
     setExercisePhase('prepare');
-    setTimeLeft(exercises[0]?.workSeconds ?? 30);
+    setTimeLeft(queue[0]?.workSeconds ?? 30);
     setStep('active');
   };
 
@@ -184,13 +475,13 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
     setTimeLeft(currentWorkSeconds);
   };
 
-  const progress = exercises.length
-    ? ((currentIndex + 1) / exercises.length) * 100
+  const progress = queue.length
+    ? ((currentIndex + 1) / queue.length) * 100
     : 0;
 
   const animationKey = `${step}-${exercisePhase}-${currentIndex}`;
 
-  if (!exercises.length) {
+  if (!queue.length) {
     return (
       <div className="we-page">
         {audioNodes}
@@ -246,7 +537,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
                   <span className="we-stat-icon">🔥</span>
                   <div className="we-stat-content">
                     <strong>
-                      {exercises.length} {t('training.exercisesCount')}
+                      {queue.length} {t('training.exercisesCount')}
                     </strong>
                     <p>{t('training.volume')}</p>
                   </div>
@@ -270,8 +561,8 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
               <h3>{t('training.plan')}</h3>
 
               <div className="we-plan-list">
-                {exercises.map((ex, i) => (
-                  <div key={i} className="we-plan-item">
+                {queue.map((ex, i) => (
+                  <div key={ex._workoutId || i} className="we-plan-item">
                     <div className="we-plan-index">{i + 1}</div>
 
                     <div className="we-plan-info">
@@ -310,7 +601,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
               </div>
 
               <span className="we-progress-text">
-                {currentIndex + 1} / {exercises.length}
+                {currentIndex + 1} / {queue.length}
               </span>
             </div>
           </div>
@@ -384,7 +675,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
                   )}
 
                   <div className="we-actions we-actions--bottom">
-                    <button className="we-secondary-btn" onClick={nextExercise}>
+                    <button className="we-secondary-btn" onClick={handleSkipClick}>
                       {t('training.skip')}
                     </button>
 
@@ -451,6 +742,46 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
           </div>
         </div>
 
+        {skipModalOpen && (
+          <div className="we-skip-overlay" onClick={() => setSkipModalOpen(false)}>
+            <div className="we-skip-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="we-skip-icon">⏭</div>
+
+              <h3>Неге бұл жаттығуды өткізгіңіз келеді?</h3>
+
+              <p>
+                Себебін таңдаңыз. Егер кейінге қалдырсаңыз, бұл жаттығу жоспардың соңына ауысады.
+              </p>
+
+              <div className="we-skip-options">
+                <button type="button" onClick={() => skipCurrentExercise('tired')}>
+                  😮‍💨 Шаршадым
+                </button>
+
+                <button type="button" onClick={() => skipCurrentExercise('unable')}>
+                  🚧 Қазір жасай алмаймын
+                </button>
+
+                <button type="button" onClick={postponeCurrentExercise}>
+                  🕒 Кейінге қалдыру
+                </button>
+
+                <button type="button" onClick={() => skipCurrentExercise('pain')}>
+                  ⚠️ Ауырсыну / ыңғайсыздық бар
+                </button>
+
+                <button type="button" onClick={() => skipCurrentExercise('difficult')}>
+                  📉 Жаттығу қиын болды
+                </button>
+              </div>
+
+              <button type="button" className="we-skip-cancel" onClick={() => setSkipModalOpen(false)}>
+                Бас тарту
+              </button>
+            </div>
+          </div>
+        )}
+
         <style>{styles}</style>
       </div>
     );
@@ -474,12 +805,103 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
 
           <div className="we-next-card">
             <p>{t('training.nextExercise')}</p>
-            <h4>{exercises[currentIndex + 1]?.name || t('training.finish')}</h4>
+            <h4>{queue[currentIndex + 1]?.name || t('training.finish')}</h4>
           </div>
 
-          <button className="we-primary-btn we-start-btn" onClick={nextExercise}>
+          <button className="we-primary-btn we-start-btn" onClick={goToNextExercise}>
             {t('training.skipRest')}
           </button>
+        </div>
+
+        <style>{styles}</style>
+      </div>
+    );
+  }
+
+  if (step === 'summary' && workoutReport) {
+    return (
+      <div className="we-page">
+        {audioNodes}
+
+        <div className="we-summary-shell">
+          <section className="we-summary-card">
+            <span className="we-preview-badge">AI Workout Report</span>
+
+            <h1 className="we-title">Жаттығу қорытындысы</h1>
+
+            <p className="we-subtitle">
+              {workoutReport.summary}
+            </p>
+
+            <div className="we-score-circle">
+              <strong>{workoutReport.score}</strong>
+              <span>/100</span>
+            </div>
+
+            <div className="we-summary-stats">
+              <div>
+                <span>Аяқталған</span>
+                <strong>{workoutReport.completedCount}/{workoutReport.totalExercises}</strong>
+              </div>
+
+              <div>
+                <span>Орындау сапасы</span>
+                <strong>{workoutReport.performanceScore}%</strong>
+              </div>
+
+              <div>
+                <span>Тұрақтылық</span>
+                <strong>{workoutReport.consistencyScore}%</strong>
+              </div>
+            </div>
+
+            <div className="we-checklist">
+              {workoutReport.results.map((item) => (
+                <div
+                  key={item.id}
+                  className={`we-check-item ${item.status === 'completed' ? 'done' : 'skipped'}`}
+                >
+                  <div className="we-check-main">
+                    <span>{item.status === 'completed' ? '✅' : '⏭'}</span>
+
+                    <div>
+                      <strong>{item.exerciseName}</strong>
+
+                      <p>
+                        {item.status === 'completed'
+                          ? `Орындалуы: ${item.performancePercent}%`
+                          : `Өткізілді: ${item.reasonLabel}`}
+                      </p>
+
+                      {item.status === 'skipped' && (
+                        <small>{item.benefit}</small>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {workoutReport.skipped.some((item) =>
+              ['unable', 'pain', 'difficult'].includes(item.reason)
+            ) && (
+              <div className="we-learning-box">
+                <h3>Келесі ұсыныс</h3>
+                <p>
+                  Сіз кейбір жаттығуларды орындау қиын екенін белгіледіңіз.
+                  Келесі жолы жүйе осы жаттығуларға дайындық жасауға көмектесетін
+                  жеңілдетілген жоспар ұсына алады.
+                </p>
+              </div>
+            )}
+
+            <button
+              className="we-primary-btn we-start-btn"
+              onClick={() => onComplete?.(workoutReport)}
+            >
+              Нәтижені сақтау және аяқтау
+            </button>
+          </section>
         </div>
 
         <style>{styles}</style>
@@ -1493,6 +1915,250 @@ const styles = `
     font-size: 44px;
   }
 }
+
+.we-skip-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(7, 10, 16, 0.72);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.we-skip-modal {
+  width: min(520px, 100%);
+  border-radius: 28px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top, rgba(97,218,251,0.12), transparent 34%),
+    linear-gradient(180deg, #252a35 0%, #1b2029 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 28px 80px rgba(0,0,0,0.48);
+}
+
+.we-skip-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  background: rgba(97,218,251,0.10);
+  border: 1px solid rgba(97,218,251,0.20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.we-skip-modal h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 950;
+}
+
+.we-skip-modal p {
+  margin: 0 0 18px;
+  color: #aab3c2;
+  line-height: 1.6;
+}
+
+.we-skip-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.we-skip-options button,
+.we-skip-cancel {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 850;
+  cursor: pointer;
+  text-align: left;
+  padding: 0 14px;
+  font-family: inherit;
+}
+
+.we-skip-options button:hover {
+  background: rgba(97,218,251,0.10);
+  border-color: rgba(97,218,251,0.25);
+}
+
+.we-skip-cancel {
+  margin-top: 12px;
+  text-align: center;
+  color: #aab3c2;
+  background: transparent;
+}
+
+.we-summary-shell {
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 0 100px;
+  box-sizing: border-box;
+}
+
+.we-summary-card {
+  width: min(980px, 100%);
+  border-radius: 30px;
+  padding: 30px;
+  background:
+    radial-gradient(circle at top right, rgba(97,218,251,0.12), transparent 34%),
+    linear-gradient(180deg, #232833 0%, #1b2029 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.32);
+  box-sizing: border-box;
+}
+
+.we-score-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 999px;
+  margin: 24px auto;
+  background: rgba(97,218,251,0.10);
+  border: 1px solid rgba(97,218,251,0.24);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  color: #61dafb;
+}
+
+.we-score-circle strong {
+  font-size: 48px;
+  font-weight: 950;
+}
+
+.we-score-circle span {
+  font-size: 18px;
+  color: #aab3c2;
+}
+
+.we-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.we-summary-stats div {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.we-summary-stats span {
+  display: block;
+  color: #aab3c2;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.we-summary-stats strong {
+  color: #fff;
+  font-size: 22px;
+}
+
+.we-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.we-check-item {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.we-check-item.done {
+  border-color: rgba(34,197,94,0.20);
+}
+
+.we-check-item.skipped {
+  border-color: rgba(245,158,11,0.22);
+}
+
+.we-check-main {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.we-check-main strong {
+  display: block;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.we-check-main p {
+  margin: 0;
+  color: #aab3c2;
+}
+
+.we-check-main small {
+  display: block;
+  margin-top: 8px;
+  color: #c8d1df;
+  line-height: 1.5;
+}
+
+.we-learning-box {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(198,120,221,0.10);
+  border: 1px solid rgba(198,120,221,0.22);
+}
+
+.we-learning-box h3 {
+  margin: 0 0 8px;
+  color: #d8a8ea;
+}
+
+.we-learning-box p {
+  margin: 0;
+  color: #c8d1df;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .we-skip-modal {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .we-summary-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .we-summary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .we-score-circle {
+    width: 120px;
+    height: 120px;
+  }
+
+  .we-score-circle strong {
+    font-size: 40px;
+  }
+}
+
 `;
 
 export default WorkoutEngine;

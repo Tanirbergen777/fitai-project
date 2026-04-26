@@ -5,17 +5,48 @@ import MassGainWorkout from './workouts/MassGainWorkout';
 import LoseWeightWorkout from './workouts/LoseWeightWorkout';
 import GeneralWorkout from './workouts/GeneralWorkout';
 import AITrainingWorkout from './workouts/AITrainingWorkout';
+
 const TrainingPage = ({ onComplete, setActiveTab }) => {
   const { t } = useTranslation();
   const [isFinished, setIsFinished] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState(null);
+  const [finishReport, setFinishReport] = useState(null);
   const hasAwardedRef = useRef(false);
 
-  const handleWorkoutComplete = () => {
+  const handleWorkoutComplete = (report = null) => {
     if (!hasAwardedRef.current) {
+      const score = report?.score || 50;
+
       hasAwardedRef.current = true;
+      setFinishReport(report);
       setIsFinished(true);
-      if (onComplete) onComplete(50);
+
+      if (onComplete) onComplete(score);
+    }
+  };
+
+  const resetWorkoutAwardState = () => {
+    hasAwardedRef.current = false;
+    setFinishReport(null);
+    setIsFinished(false);
+  };
+
+  const handleSelectGoal = (goalKey) => {
+    resetWorkoutAwardState();
+    setSelectedGoal(goalKey);
+  };
+
+  const handleBackToSelection = () => {
+    resetWorkoutAwardState();
+    setSelectedGoal(null);
+  };
+
+  const handleFinishContinue = () => {
+    resetWorkoutAwardState();
+    setSelectedGoal(null);
+
+    if (typeof setActiveTab === 'function') {
+      setActiveTab('main');
     }
   };
 
@@ -23,7 +54,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
     const props = {
       onAllStepsComplete: handleWorkoutComplete,
       isFinished,
-      onBack: () => setSelectedGoal(null),
+      onBack: handleBackToSelection,
     };
 
     if (selectedGoal === 'gain') return <MassGainWorkout {...props} />;
@@ -33,7 +64,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
       return (
         <AITrainingWorkout
           onAllStepsComplete={handleWorkoutComplete}
-          onBack={() => setSelectedGoal(null)}
+          onBack={handleBackToSelection}
         />
       );
     }
@@ -95,7 +126,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
                 type="button"
                 key={card.key}
                 className={`tp-card tp-card--${card.className}`}
-                onClick={() => setSelectedGoal(card.key)}
+                onClick={() => handleSelectGoal(card.key)}
               >
                 <div className="tp-card-icon">{card.icon}</div>
 
@@ -112,7 +143,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
       {selectedGoal && renderWorkout()}
 
       {isFinished && (
-        <div className="tp-modal-overlay" onClick={() => setIsFinished(false)}>
+        <div className="tp-modal-overlay" onClick={handleFinishContinue}>
           <div className="tp-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="tp-fire-circle">
               <span>🔥</span>
@@ -122,18 +153,39 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
             <p>
               {t('training.finishModal.received')}{' '}
-              <span className="tp-modal-stars">+50 ⭐</span>
+              <span className="tp-modal-stars">+{finishReport?.score || 50} ⭐</span>
             </p>
+
+            {finishReport && (
+              <div className="tp-finish-mini-report">
+                <div>
+                  <span>Аяқталған</span>
+                  <strong>
+                    {finishReport.completedCount}/{finishReport.totalExercises}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Орындау сапасы</span>
+                  <strong>{finishReport.performanceScore}%</strong>
+                </div>
+
+                <div>
+                  <span>Өткізілген</span>
+                  <strong>{finishReport.skippedCount}</strong>
+                </div>
+              </div>
+            )}
+
+            {finishReport?.summary && (
+              <p className="tp-finish-summary">
+                {finishReport.summary}
+              </p>
+            )}
 
             <button
               className="tp-continue-button"
-              onClick={() => {
-                if (typeof setActiveTab === 'function') {
-                  setActiveTab('main');
-                } else {
-                  setIsFinished(false);
-                }
-              }}
+              onClick={handleFinishContinue}
             >
               {t('training.finishModal.continue')}
             </button>
@@ -169,9 +221,9 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 .tp-title {
-           font-size: clamp(32px, 5vw, 48px);
-          font-weight: 900;
-          margin-bottom: 10px;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 900;
+  margin-bottom: 10px;
 }
 
 .tp-subtitle {
@@ -483,6 +535,43 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   font-weight: 900;
 }
 
+.tp-finish-mini-report {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.tp-finish-mini-report div {
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.tp-finish-mini-report span {
+  display: block;
+  color: #aab3c2;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.tp-finish-mini-report strong {
+  color: #61dafb;
+  font-size: 16px;
+}
+
+.tp-finish-summary {
+  margin: 0 0 20px !important;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(97,218,251,0.07);
+  border: 1px solid rgba(97,218,251,0.15);
+  color: #c8d1df !important;
+  font-size: 13px;
+  line-height: 1.55 !important;
+}
+
 .tp-continue-button {
   width: 100%;
   min-height: 54px;
@@ -621,6 +710,10 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 @media (max-width: 430px) {
+  .tp-finish-mini-report {
+    grid-template-columns: 1fr;
+  }
+
   .training-page {
     padding-left: 8px;
     padding-right: 8px;
