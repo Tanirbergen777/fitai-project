@@ -4,7 +4,7 @@ import Confetti from 'react-confetti';
 import MassGainWorkout from './workouts/MassGainWorkout';
 import LoseWeightWorkout from './workouts/LoseWeightWorkout';
 import GeneralWorkout from './workouts/GeneralWorkout';
-
+import AITrainingWorkout from './workouts/AITrainingWorkout';
 const TrainingPage = ({ onComplete, setActiveTab }) => {
   const { t } = useTranslation();
   const [isFinished, setIsFinished] = useState(false);
@@ -19,54 +19,6 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
     }
   };
 
-  const renderAITraining = () => {
-    return (
-      <div className="tp-ai-shell">
-        <div className="tp-ai-badge">{t('training.ai.badge')}</div>
-
-        <h2 className="tp-ai-title">{t('training.ai.title')}</h2>
-        <p className="tp-ai-text">{t('training.ai.subtitle')}</p>
-
-        <div className="tp-ai-grid">
-          <div className="tp-ai-card">
-            <div className="tp-ai-icon">🎯</div>
-            <h3>{t('training.ai.cards.goal.title')}</h3>
-            <p>{t('training.ai.cards.goal.text')}</p>
-          </div>
-
-          <div className="tp-ai-card">
-            <div className="tp-ai-icon">📈</div>
-            <h3>{t('training.ai.cards.level.title')}</h3>
-            <p>{t('training.ai.cards.level.text')}</p>
-          </div>
-
-          <div className="tp-ai-card">
-            <div className="tp-ai-icon">⏱️</div>
-            <h3>{t('training.ai.cards.duration.title')}</h3>
-            <p>{t('training.ai.cards.duration.text')}</p>
-          </div>
-
-          <div className="tp-ai-card">
-            <div className="tp-ai-icon">🛡️</div>
-            <h3>{t('training.ai.cards.limitations.title')}</h3>
-            <p>{t('training.ai.cards.limitations.text')}</p>
-          </div>
-        </div>
-
-        <div className="tp-ai-note">
-          <h3>{t('training.ai.futureTitle')}</h3>
-          <p>{t('training.ai.futureText')}</p>
-        </div>
-
-        <div className="tp-ai-actions">
-          <button className="tp-back-btn" onClick={() => setSelectedGoal(null)}>
-            ← {t('common.back')}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   const renderWorkout = () => {
     const props = {
       onAllStepsComplete: handleWorkoutComplete,
@@ -77,7 +29,14 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
     if (selectedGoal === 'gain') return <MassGainWorkout {...props} />;
     if (selectedGoal === 'lose') return <LoseWeightWorkout {...props} />;
     if (selectedGoal === 'general') return <GeneralWorkout {...props} />;
-    if (selectedGoal === 'ai') return renderAITraining();
+    if (selectedGoal === 'ai') {
+      return (
+        <AITrainingWorkout
+          onAllStepsComplete={handleWorkoutComplete}
+          onBack={() => setSelectedGoal(null)}
+        />
+      );
+    }
 
     return null;
   };
