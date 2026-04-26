@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import WorkoutEngine from './WorkoutEngine';
 import { supabase } from '../../lib/supabaseClient';
+import { API_BASE_URL } from '../../config/api';
 
 const getVideoUrl = (path) =>
   supabase.storage.from('exercise-videos').getPublicUrl(path).data.publicUrl;
@@ -24,6 +25,74 @@ const formatMinutes = (seconds) => {
   return Math.ceil(seconds / 60);
 };
 
+const safeJsonParse = (value) => {
+  try {
+    if (!value) return null;
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+
+const calculateAgeFromUser = (userData) => {
+  if (!userData) return null;
+
+  if (userData.age) {
+    const age = Number(userData.age);
+    return Number.isFinite(age) ? age : null;
+  }
+
+  if (userData.birth_date) {
+    const birth = new Date(userData.birth_date);
+    if (Number.isNaN(birth.getTime())) return null;
+
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age -= 1;
+    }
+
+    return age > 0 ? age : null;
+  }
+
+  if (userData.birth_year) {
+    const birthYear = Number(userData.birth_year);
+    if (!Number.isFinite(birthYear)) return null;
+    return new Date().getFullYear() - birthYear;
+  }
+
+  return null;
+};
+
+const getUserProfilePayload = () => {
+  const userData =
+    safeJsonParse(localStorage.getItem('userData')) ||
+    safeJsonParse(localStorage.getItem('fitai_user')) ||
+    {};
+
+  const age = calculateAgeFromUser(userData);
+
+  const height = Number(userData.height || userData.height_cm || 170);
+  const weight = Number(userData.weight || userData.weight_kg || 70);
+
+  const bmi =
+    Number(userData.bmi) ||
+    (height > 0 ? Number((weight / ((height / 100) * (height / 100))).toFixed(2)) : 24);
+
+  return {
+    age: Number.isFinite(age) ? age : 25,
+    gender: userData.gender || 'unknown',
+    height: Number.isFinite(height) ? height : 170,
+    weight: Number.isFinite(weight) ? weight : 70,
+    bmi: Number.isFinite(bmi) ? bmi : 24,
+    waist: Number(userData.waist || 0),
+    hip: Number(userData.hip || 0),
+    arm: Number(userData.arm || 0),
+  };
+};
+
 const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   const { t } = useTranslation();
 
@@ -41,6 +110,9 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   });
 
   const [plan, setPlan] = useState(null);
+  const [mlResult, setMlResult] = useState(null);
+  const [mlError, setMlError] = useState('');
+  const [isBuilding, setIsBuilding] = useState(false);
 
   const updateSurvey = (field, value) => {
     setSurvey((prev) => ({
@@ -259,12 +331,111 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
     ];
   }, [t]);
 
-  const buildPlan = () => {
+  const getTemplateBoost = (exercise, templateId) => {
+    if (!templateId) return 0;
+
+    let boost = 0;
+
+    if (templateId.includes('fat_loss') && exercise.goals.includes('lose_weight')) boost += 2;
+    if (templateId.includes('cardio') && exercise.focus.includes('cardio')) boost += 4;
+    if (templateId.includes('low') && exercise.impact === 'low') boost += 4;
+
+    if (templateId.includes('muscle') && exercise.goals.includes('gain_mass')) boost += 2;
+    if (templateId.includes('home') && exercise.level === 'beginner') boost += 2;
+    if (templateId.includes('general') && exercise.goals.includes('gain_mass')) boost += 1;
+    if (templateId.includes('progressive') && ['intermediate', 'advanced'].includes(exercise.level)) boost += 2;
+
+    if (templateId.includes('endurance') && exercise.focus.includes('cardio')) boost += 3;
+    if (templateId.includes('balanced') && exercise.goals.includes('keep_fit')) boost += 2;
+    if (templateId.includes('keep_fit') && exercise.goals.includes('keep_fit')) boost += 2;
+
+    return boost;
+  };
+
+  const buildReason = (seconds, backendMlResult) => {
+    const minutes = formatMinutes(seconds);
+
+    if (backendMlResult?.plan_template_id) {
+      return t(
+        'training.aiPlan.reasonWithMl',
+        `Жоспар ML модель болжаған ${backendMlResult.plan_template_id} шаблонына сүйеніп құрылды. Жалпы ұзақтығы шамамен ${minutes} минут, яғни таңдаған ${survey.duration} минуттан аспайды.`,
+        {
+          template: backendMlResult.plan_template_id,
+          minutes,
+          target: survey.duration,
+        }
+      );
+    }
+
+    return t(
+      'training.aiPlan.reason',
+      `Жоспар сіз таңдаған мақсат, дайындық деңгейі, уақыт және шектеулер бойынша құрылды. Жалпы ұзақтығы шамамен ${minutes} минут, яғни таңдаған ${survey.duration} минуттан аспайды.`,
+      {
+        minutes,
+        target: survey.duration,
+      }
+    );
+  };
+
+  const requestMlRecommendation = async () => {
+    const profilePayload = getUserProfilePayload();
+
+    const payload = {
+      ...survey,
+      ...profilePayload,
+      user_id: Number(localStorage.getItem('userId')) || null,
+      workout_duration_minutes: Number(survey.duration),
+      primary_goal: survey.goal,
+      training_level: survey.level,
+      training_location: survey.location,
+      cardio_preference: survey.cardio,
+      limitations: survey.limitation,
+    };
+
+    const res = await fetch(`${API_BASE_URL}/training-ai/recommend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data?.detail || 'ML model prediction failed');
+    }
+
+    return data;
+  };
+
+  const buildPlan = async () => {
+    if (isBuilding) return;
+
+    setIsBuilding(true);
+    setMlError('');
+    setMlResult(null);
+
+    let backendMlResult = null;
+
+    try {
+      backendMlResult = await requestMlRecommendation();
+      setMlResult(backendMlResult);
+    } catch (error) {
+      console.error('Training AI ML error:', error);
+      setMlError(
+        t(
+          'training.aiPlan.mlFallback',
+          'ML модель уақытша қолжетімсіз. Жоспар fallback planner арқылы құрылды.'
+        )
+      );
+    }
+
     const maxSeconds = Number(survey.duration) * 60;
     const userLevel = levelRank[survey.level] || 1;
 
     const avoidNormalImpact =
-      survey.limitation !== 'none' || survey.intensity === 'low';
+      survey.limitation !== 'none' ||
+      survey.intensity === 'low' ||
+      backendMlResult?.features?.impact_level === 'low';
 
     const filtered = exercisePool
       .filter((exercise) => {
@@ -300,9 +471,13 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
         if (exercise.key.includes('warmup')) score += 1;
         if (['cobra_stretch', 'child_pose'].includes(exercise.key)) score -= 1;
 
+        score += getTemplateBoost(exercise, backendMlResult?.plan_template_id);
+
         return { ...exercise, aiScore: score };
       })
       .sort((a, b) => b.aiScore - a.aiScore);
+
+    const lowImpactFallback = exercisePool.filter((exercise) => exercise.impact === 'low');
 
     const warmup = exercisePool.filter((exercise) =>
       ['warmup_arm_circles', 'torso_rotation'].includes(exercise.key)
@@ -326,8 +501,20 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
       }
     });
 
-    const minimumPlan = selected.length ? selected : filtered.slice(0, 3);
+    if (selected.length === 0) {
+      lowImpactFallback.forEach((exercise) => {
+        if (selected.some((item) => item.key === exercise.key)) return;
 
+        const nextTotal = currentSeconds + exerciseSeconds(exercise);
+
+        if (nextTotal <= maxSeconds) {
+          selected.push(exercise);
+          currentSeconds = nextTotal;
+        }
+      });
+    }
+
+    const minimumPlan = selected.length ? selected : filtered.slice(0, 3);
     const correctDuration = totalPlanSeconds(minimumPlan);
 
     const planTitle =
@@ -342,24 +529,15 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
       exercises: minimumPlan,
       totalSeconds: correctDuration,
       targetMinutes: Number(survey.duration),
-      reason: buildReason(minimumPlan, correctDuration),
+      reason: buildReason(correctDuration, backendMlResult),
+      ml: backendMlResult,
     });
 
     setStep('result');
+    setIsBuilding(false);
   };
 
-  const buildReason = (selectedExercises, seconds) => {
-    const minutes = formatMinutes(seconds);
-
-    return t(
-      'training.aiPlan.reason',
-      `Жоспар сіз таңдаған мақсат, дайындық деңгейі, уақыт және шектеулер бойынша құрылды. Жалпы ұзақтығы шамамен ${minutes} минут, яғни таңдаған ${survey.duration} минуттан аспайды.`,
-      {
-        minutes,
-        target: survey.duration,
-      }
-    );
-  };
+  const displayedMlResult = plan?.ml || mlResult;
 
   if (step === 'workout' && plan?.exercises?.length) {
     return (
@@ -487,8 +665,20 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
               </p>
             </div>
 
-            <button className="ai-training-primary" onClick={buildPlan}>
-              {t('training.aiSurvey.buildPlan', 'AI жоспар құру')}
+            {mlError && (
+              <div className="ai-training-error-box">
+                {mlError}
+              </div>
+            )}
+
+            <button
+              className="ai-training-primary"
+              onClick={buildPlan}
+              disabled={isBuilding}
+            >
+              {isBuilding
+                ? t('training.aiSurvey.building', 'AI жоспар құрылып жатыр...')
+                : t('training.aiSurvey.buildPlan', 'AI жоспар құру')}
             </button>
           </>
         )}
@@ -498,6 +688,32 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
             <div className="ai-training-result-card">
               <h3>{plan.title}</h3>
               <p>{plan.reason}</p>
+
+              {displayedMlResult && (
+                <div className="ai-training-ml-box">
+                  <span>ML model</span>
+                  <strong>{displayedMlResult.plan_template_id}</strong>
+                  <p>
+                    Confidence:{' '}
+                    {displayedMlResult.confidence !== null && displayedMlResult.confidence !== undefined
+                      ? `${Math.round(displayedMlResult.confidence * 100)}%`
+                      : 'N/A'}
+                    {' '}· Source: {displayedMlResult.label_source || 'ml_nhanes_workout_plan'}
+                  </p>
+
+                  {displayedMlResult.model_accuracy !== null && displayedMlResult.model_accuracy !== undefined && (
+                    <p>
+                      Model accuracy: {Math.round(displayedMlResult.model_accuracy * 100)}%
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {mlError && (
+                <div className="ai-training-error-box">
+                  {mlError}
+                </div>
+              )}
 
               <div className="ai-training-stats">
                 <div>
@@ -666,6 +882,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   font-weight: 900;
   cursor: pointer;
   margin-top: 22px;
+  transition: 0.25s ease;
 }
 
 .ai-training-primary {
@@ -673,6 +890,12 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   background: linear-gradient(135deg, #63e0ff 0%, #4e8fff 100%);
   color: #0f1720;
   box-shadow: 0 16px 34px rgba(97,218,251,0.24);
+}
+
+.ai-training-primary:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .ai-training-secondary {
@@ -697,6 +920,47 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   margin: 0;
   color: #c8d1df;
   line-height: 1.65;
+}
+
+.ai-training-ml-box {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(198, 120, 221, 0.10);
+  border: 1px solid rgba(198, 120, 221, 0.22);
+}
+
+.ai-training-ml-box span {
+  display: block;
+  color: #d8a8ea;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.ai-training-ml-box strong {
+  display: block;
+  color: #fff;
+  font-size: 18px;
+  margin-bottom: 5px;
+  overflow-wrap: anywhere;
+}
+
+.ai-training-ml-box p {
+  margin: 0;
+  color: #c8d1df;
+  font-size: 13px;
+}
+
+.ai-training-error-box {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 120, 120, 0.10);
+  border: 1px solid rgba(255, 120, 120, 0.22);
+  color: #ffb4b4;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .ai-training-stats {
