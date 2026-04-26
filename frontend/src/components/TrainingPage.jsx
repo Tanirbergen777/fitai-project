@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import Confetti from 'react-confetti';
+import SuccessModal from './SuccessModal';
 import MassGainWorkout from './workouts/MassGainWorkout';
 import LoseWeightWorkout from './workouts/LoseWeightWorkout';
 import GeneralWorkout from './workouts/GeneralWorkout';
@@ -105,14 +105,6 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
   return (
     <div className={`training-page ${selectedGoal ? 'training-page--session' : ''}`}>
-      {isFinished && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          recycle={false}
-        />
-      )}
-
       {!selectedGoal && (
         <>
           <div className="tp-header">
@@ -142,56 +134,12 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
       {selectedGoal && renderWorkout()}
 
-      {isFinished && (
-        <div className="tp-modal-overlay" onClick={handleFinishContinue}>
-          <div className="tp-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="tp-fire-circle">
-              <span>🔥</span>
-            </div>
-
-            <h2>{t('training.finishModal.title')}</h2>
-
-            <p>
-              {t('training.finishModal.received')}{' '}
-              <span className="tp-modal-stars">+{finishReport?.score || 50} ⭐</span>
-            </p>
-
-            {finishReport && (
-              <div className="tp-finish-mini-report">
-                <div>
-                  <span>Аяқталған</span>
-                  <strong>
-                    {finishReport.completedCount}/{finishReport.totalExercises}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>Орындау сапасы</span>
-                  <strong>{finishReport.performanceScore}%</strong>
-                </div>
-
-                <div>
-                  <span>Өткізілген</span>
-                  <strong>{finishReport.skippedCount}</strong>
-                </div>
-              </div>
-            )}
-
-            {finishReport?.summary && (
-              <p className="tp-finish-summary">
-                {finishReport.summary}
-              </p>
-            )}
-
-            <button
-              className="tp-continue-button"
-              onClick={handleFinishContinue}
-            >
-              {t('training.finishModal.continue')}
-            </button>
-          </div>
-        </div>
-      )}
+      <SuccessModal
+        isOpen={isFinished}
+        points={finishReport?.score || 50}
+        report={finishReport}
+        onClose={handleFinishContinue}
+      />
 
       <style>{`
 .training-page {
@@ -479,112 +427,6 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-shadow: 0 10px 30px rgba(97, 218, 251, 0.18);
 }
 
-.tp-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(7, 10, 16, 0.76);
-  backdrop-filter: blur(14px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
-  box-sizing: border-box;
-}
-
-.tp-modal-content {
-  width: min(420px, 100%);
-  background:
-    radial-gradient(circle at top, rgba(97,218,251,0.10), transparent 34%),
-    linear-gradient(180deg, #252a35 0%, #1b2029 100%);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 28px;
-  padding: 28px;
-  text-align: center;
-  box-shadow: 0 28px 80px rgba(0,0,0,0.48);
-}
-
-.tp-fire-circle {
-  width: 82px;
-  height: 82px;
-  border-radius: 999px;
-  margin: 0 auto 18px;
-  background: rgba(255, 126, 64, 0.12);
-  border: 1px solid rgba(255, 126, 64, 0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 38px;
-}
-
-.tp-modal-content h2 {
-  color: #fff;
-  margin: 0 0 10px;
-  font-size: 26px;
-  font-weight: 950;
-}
-
-.tp-modal-content p {
-  color: #abb2bf;
-  margin: 0 0 22px;
-  line-height: 1.55;
-}
-
-.tp-modal-stars {
-  color: #ffd700;
-  font-weight: 900;
-}
-
-.tp-finish-mini-report {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 18px;
-}
-
-.tp-finish-mini-report div {
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-}
-
-.tp-finish-mini-report span {
-  display: block;
-  color: #aab3c2;
-  font-size: 11px;
-  margin-bottom: 4px;
-}
-
-.tp-finish-mini-report strong {
-  color: #61dafb;
-  font-size: 16px;
-}
-
-.tp-finish-summary {
-  margin: 0 0 20px !important;
-  padding: 12px;
-  border-radius: 16px;
-  background: rgba(97,218,251,0.07);
-  border: 1px solid rgba(97,218,251,0.15);
-  color: #c8d1df !important;
-  font-size: 13px;
-  line-height: 1.55 !important;
-}
-
-.tp-continue-button {
-  width: 100%;
-  min-height: 54px;
-  border: none;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #63e0ff 0%, #4e8fff 100%);
-  color: #0f1720;
-  font-size: 16px;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 16px 34px rgba(97,218,251,0.24);
-}
-
 /* ноут / desktop */
 @media (max-width: 1400px) {
   .training-page {
@@ -703,16 +545,8 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
     min-height: 50px;
   }
 
-  .tp-modal-content {
-    border-radius: 24px;
-    padding: 24px 18px;
-  }
-}
-
+  
 @media (max-width: 430px) {
-  .tp-finish-mini-report {
-    grid-template-columns: 1fr;
-  }
 
   .training-page {
     padding-left: 8px;
