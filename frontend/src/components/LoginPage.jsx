@@ -34,7 +34,6 @@ const LoginPage = ({
             className="login-input"
             name="email"
             type="email"
-            value={formData?.email || ''}
             placeholder={t('auth.email_placeholder', 'Email')}
             onChange={handleChange}
             style={inputStyle}
@@ -47,7 +46,6 @@ const LoginPage = ({
             className="login-input"
             name="password"
             type="password"
-            value={formData?.password || ''}
             placeholder={t('auth.password_placeholder', 'Пароль')}
             onChange={handleChange}
             style={inputStyle}
@@ -89,11 +87,12 @@ const LoginPage = ({
   box-sizing: border-box;
 }
 
-/* Desktop / notebook: current UI сақталады */
 .login-auth-card {
   width: 100%;
   max-width: 430px;
   box-sizing: border-box;
+  position: relative;
+  z-index: 2;
 }
 
 .login-header {
@@ -121,15 +120,20 @@ const LoginPage = ({
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
+  z-index: 3;
 }
 
 .login-input {
   width: 100%;
   box-sizing: border-box;
+  pointer-events: auto;
+  user-select: text;
 }
 
 .login-submit {
   width: 100%;
+  pointer-events: auto;
 }
 
 .login-links {
@@ -138,6 +142,8 @@ const LoginPage = ({
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  position: relative;
+  z-index: 3;
 }
 
 .login-link {
@@ -150,6 +156,7 @@ const LoginPage = ({
   padding: 6px 10px;
   border-radius: 999px;
   transition: background 0.2s ease, color 0.2s ease;
+  pointer-events: auto;
 }
 
 .login-link:hover {
@@ -161,7 +168,7 @@ const LoginPage = ({
   margin-top: 2px;
 }
 
-/* Phone UI */
+/* Phone UI + scroll */
 @media (max-width: 768px) {
   .login-responsive-page {
     width: 100vw;
