@@ -567,7 +567,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 /* кіші ноут / планшет */
 @media (max-width: 1100px) {
   .training-page {
-    padding: 36px 28px 64px;
+    padding: 20px;
   }
 
   .tp-header {
