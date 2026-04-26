@@ -14,6 +14,7 @@ import {
   analyzeGeneric,
 } from './cameraAnalyzers';
 import { API_BASE_URL } from '../../config/api';
+
 const API_BASE = API_BASE_URL;
 
 const getStoredUserId = () => {
@@ -66,7 +67,7 @@ const POSE_CONNECTIONS = [
   [LANDMARKS.RIGHT_KNEE, LANDMARKS.RIGHT_ANKLE],
 ];
 
-const isVisiblePoint = (point, min = 0.45) =>
+const isVisiblePoint = (point, min = 0.35) =>
   point && (point.visibility ?? 1) >= min;
 
 const drawRoundedRect = (ctx, x, y, w, h, r = 14) => {
@@ -163,7 +164,7 @@ const drawConnection = (ctx, landmarks, startIdx, endIdx, width, height, tone) =
   ctx.beginPath();
   ctx.moveTo(start.x * width, start.y * height);
   ctx.lineTo(end.x * width, end.y * height);
-  ctx.lineWidth = 4;
+  ctx.lineWidth = width < 520 ? 3 : 4;
   ctx.strokeStyle = tone.line;
   ctx.stroke();
 };
@@ -173,14 +174,15 @@ const drawJoint = (ctx, point, width, height, tone) => {
 
   const x = point.x * width;
   const y = point.y * height;
+  const radius = width < 520 ? 4 : 5;
 
   ctx.beginPath();
-  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.fillStyle = tone.joint;
   ctx.fill();
 
   ctx.beginPath();
-  ctx.arc(x, y, 8, 0, Math.PI * 2);
+  ctx.arc(x, y, radius + 3, 0, Math.PI * 2);
   ctx.strokeStyle = 'rgba(15, 23, 32, 0.55)';
   ctx.lineWidth = 2;
   ctx.stroke();
@@ -189,8 +191,9 @@ const drawJoint = (ctx, point, width, height, tone) => {
 const drawChip = (ctx, x, y, label, value, tone, options = {}) => {
   const width = options.width ?? 160;
   const height = options.height ?? 56;
+  const compact = options.compact ?? false;
 
-  drawRoundedRect(ctx, x, y, width, height, 14);
+  drawRoundedRect(ctx, x, y, width, height, compact ? 12 : 14);
   ctx.fillStyle = 'rgba(10, 15, 25, 0.68)';
   ctx.fill();
   ctx.strokeStyle = tone.soft;
@@ -198,12 +201,12 @@ const drawChip = (ctx, x, y, label, value, tone, options = {}) => {
   ctx.stroke();
 
   ctx.fillStyle = 'rgba(168, 180, 200, 0.95)';
-  ctx.font = '700 12px Inter, Arial, sans-serif';
-  ctx.fillText(label, x + 12, y + 18);
+  ctx.font = `${compact ? 10 : 12}px Inter, Arial, sans-serif`;
+  ctx.fillText(label, x + 10, y + (compact ? 15 : 18));
 
   ctx.fillStyle = tone.text;
-  ctx.font = '900 22px Inter, Arial, sans-serif';
-  ctx.fillText(String(value), x + 12, y + 42);
+  ctx.font = `900 ${compact ? 16 : 22}px Inter, Arial, sans-serif`;
+  ctx.fillText(String(value), x + 10, y + (compact ? 36 : 42));
 };
 
 const drawPoseSkeleton = (ctx, landmarks, width, height, tone) => {
@@ -240,18 +243,24 @@ const drawHudOverlay = (ctx, width, height, overlay) => {
     isActive,
   } = overlay;
 
+  const compact = width < 650;
   const tone = getOverlayTone(errorType, isTargetReached);
 
   ctx.clearRect(0, 0, width, height);
   ctx.save();
 
-  const topGradient = ctx.createLinearGradient(0, 0, 0, 160);
+  const topGradient = ctx.createLinearGradient(0, 0, 0, compact ? 190 : 160);
   topGradient.addColorStop(0, 'rgba(8, 12, 20, 0.78)');
   topGradient.addColorStop(1, 'rgba(8, 12, 20, 0)');
   ctx.fillStyle = topGradient;
-  ctx.fillRect(0, 0, width, 160);
+  ctx.fillRect(0, 0, width, compact ? 190 : 160);
 
-  drawRoundedRect(ctx, 18, 16, 220, 42, 12);
+  const titleX = compact ? 12 : 18;
+  const titleY = compact ? 12 : 16;
+  const titleW = compact ? Math.min(width - 24, 220) : 220;
+  const titleH = compact ? 38 : 42;
+
+  drawRoundedRect(ctx, titleX, titleY, titleW, titleH, 12);
   ctx.fillStyle = 'rgba(8, 12, 20, 0.72)';
   ctx.fill();
   ctx.strokeStyle = tone.soft;
@@ -259,51 +268,66 @@ const drawHudOverlay = (ctx, width, height, overlay) => {
   ctx.stroke();
 
   ctx.fillStyle = '#f8fafc';
-  ctx.font = '800 18px Inter, Arial, sans-serif';
-  ctx.fillText(exerciseName || 'Camera Coach', 32, 42);
-
-  drawChip(
-    ctx,
-    18,
-    72,
-    'Target',
-    targetType === 'reps'
-      ? `${targetReps ?? '—'}`
-      : `${targetDurationSeconds ?? '—'}s`,
-    tone,
-    { width: 120 }
-  );
-
-  drawChip(ctx, 148, 72, 'Counter', String(repCount ?? 0), tone, { width: 120 });
-  drawChip(ctx, 278, 72, 'Stage', formatStage(stage), tone, { width: 150 });
-
-  const metricText = formatMetricValue(metricLabel, metricValue);
-  drawChip(ctx, 438, 72, metricLabel || 'Metric', metricText, tone, { width: 190 });
+  ctx.font = `800 ${compact ? 14 : 18}px Inter, Arial, sans-serif`;
+  ctx.fillText((exerciseName || 'Camera Coach').slice(0, compact ? 22 : 28), titleX + 12, titleY + (compact ? 25 : 26));
 
   const statusText = isTargetReached
-    ? 'Completed'
+    ? 'Done'
     : !isActive
     ? 'Prepare'
     : !errorType
     ? 'Good'
     : 'Warning';
 
-  drawRoundedRect(ctx, width - 160, 16, 142, 42, 12);
-  ctx.fillStyle = tone.soft;
-  ctx.fill();
-  ctx.strokeStyle = tone.accent;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
+  const statusW = compact ? 90 : 142;
+  const statusH = compact ? 38 : 42;
+  const statusX = Math.max(titleX + titleW + 8, width - statusW - 12);
 
-  ctx.fillStyle = tone.text;
-  ctx.font = '800 18px Inter, Arial, sans-serif';
-  ctx.fillText(statusText, width - 130, 42);
+  if (!compact || width > 360) {
+    drawRoundedRect(ctx, statusX, titleY, statusW, statusH, 12);
+    ctx.fillStyle = tone.soft;
+    ctx.fill();
+    ctx.strokeStyle = tone.accent;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.fillStyle = tone.text;
+    ctx.font = `800 ${compact ? 14 : 18}px Inter, Arial, sans-serif`;
+    ctx.fillText(statusText, statusX + 12, titleY + (compact ? 25 : 26));
+  }
+
+  const targetText =
+    targetType === 'reps'
+      ? `${targetReps ?? '—'}`
+      : `${targetDurationSeconds ?? '—'}s`;
+
+  const metricText = formatMetricValue(metricLabel, metricValue);
+
+  if (compact) {
+    const gap = 8;
+    const chipW = Math.max(92, (width - 32 - gap) / 2);
+    const chipH = 44;
+    const x1 = 12;
+    const x2 = 12 + chipW + gap;
+    const y1 = 62;
+    const y2 = 112;
+
+    drawChip(ctx, x1, y1, 'Target', targetText, tone, { width: chipW, height: chipH, compact: true });
+    drawChip(ctx, x2, y1, 'Counter', String(repCount ?? 0), tone, { width: chipW, height: chipH, compact: true });
+    drawChip(ctx, x1, y2, 'Stage', formatStage(stage), tone, { width: chipW, height: chipH, compact: true });
+    drawChip(ctx, x2, y2, metricLabel || 'Metric', metricText, tone, { width: chipW, height: chipH, compact: true });
+  } else {
+    drawChip(ctx, 18, 72, 'Target', targetText, tone, { width: 120 });
+    drawChip(ctx, 148, 72, 'Counter', String(repCount ?? 0), tone, { width: 120 });
+    drawChip(ctx, 278, 72, 'Stage', formatStage(stage), tone, { width: 150 });
+    drawChip(ctx, 438, 72, metricLabel || 'Metric', metricText, tone, { width: 190 });
+  }
 
   const progress = Math.max(0, Math.min(100, Number(completionPercent ?? 0)));
-  const barX = 18;
-  const barY = height - 34;
-  const barW = width - 36;
-  const barH = 14;
+  const barX = compact ? 12 : 18;
+  const barY = height - (compact ? 26 : 34);
+  const barW = width - barX * 2;
+  const barH = compact ? 10 : 14;
 
   drawRoundedRect(ctx, barX, barY, barW, barH, 999);
   ctx.fillStyle = 'rgba(255,255,255,0.12)';
@@ -313,10 +337,10 @@ const drawHudOverlay = (ctx, width, height, overlay) => {
   ctx.fillStyle = tone.accent;
   ctx.fill();
 
-  const feedbackWidth = Math.min(width - 36, 520);
-  const feedbackHeight = 56;
-  const feedbackX = 18;
-  const feedbackY = height - 100;
+  const feedbackWidth = Math.min(width - barX * 2, compact ? width - 24 : 520);
+  const feedbackHeight = compact ? 50 : 56;
+  const feedbackX = barX;
+  const feedbackY = height - (compact ? 86 : 100);
 
   drawRoundedRect(ctx, feedbackX, feedbackY, feedbackWidth, feedbackHeight, 14);
   ctx.fillStyle = 'rgba(8, 12, 20, 0.74)';
@@ -326,13 +350,13 @@ const drawHudOverlay = (ctx, width, height, overlay) => {
   ctx.stroke();
 
   ctx.fillStyle = 'rgba(168, 180, 200, 0.95)';
-  ctx.font = '700 12px Inter, Arial, sans-serif';
-  ctx.fillText('Feedback', feedbackX + 12, feedbackY + 18);
+  ctx.font = `700 ${compact ? 10 : 12}px Inter, Arial, sans-serif`;
+  ctx.fillText('Feedback', feedbackX + 12, feedbackY + (compact ? 15 : 18));
 
   ctx.fillStyle = '#f8fafc';
-  ctx.font = '700 16px Inter, Arial, sans-serif';
+  ctx.font = `700 ${compact ? 13 : 16}px Inter, Arial, sans-serif`;
   const feedbackText = feedback || 'Смотри в камеру и займи позицию.';
-  ctx.fillText(feedbackText.slice(0, 58), feedbackX + 12, feedbackY + 40);
+  ctx.fillText(feedbackText.slice(0, compact ? 42 : 58), feedbackX + 12, feedbackY + (compact ? 34 : 40));
 
   ctx.restore();
 };
@@ -367,6 +391,11 @@ export default function CameraCoachPanel({
   const metricLabelRef = useRef('Угол');
   const metricValueRef = useRef(null);
 
+  const lastLandmarksRef = useRef(null);
+  const lastOverlayRef = useRef(null);
+  const lastPoseSeenAtRef = useRef(0);
+  const lastNoPoseFeedbackAtRef = useRef(0);
+
   const sessionIdRef = useRef(null);
   const finishingSessionRef = useRef(false);
   const repCountRef = useRef(0);
@@ -393,13 +422,27 @@ export default function CameraCoachPanel({
   const [stage, setStage] = useState('up');
   const [metricLabel, setMetricLabel] = useState('Угол');
   const [metricValue, setMetricValue] = useState(null);
+  const [isSmallScreen, setIsSmallScreen] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+  );
 
-const exerciseMode = useMemo(() => {
-  if (exerciseModeOverride) return exerciseModeOverride;
-  return detectExerciseMode(exerciseName);
-}, [exerciseModeOverride, exerciseName]);
+  const exerciseMode = useMemo(() => {
+    if (exerciseModeOverride) return exerciseModeOverride;
+    return detectExerciseMode(exerciseName);
+  }, [exerciseModeOverride, exerciseName]);
 
-  const FIXED_LANDSCAPE_ROTATION = 90;
+  const isTouchDevice = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  }, []);
+
+  const isMobileCameraLayout = isSmallScreen || isTouchDevice;
+
+  // Маңызды: 90 градус бұрылуды алып тастадық.
+  // Ноутбукта да, телефонда да браузер камераны өзі дұрыс orientation-мен береді.
+  const CAMERA_ROTATION = 0;
+  const MIRROR_CAMERA = true;
+  const cameraTransform = `${MIRROR_CAMERA ? 'scaleX(-1)' : 'scaleX(1)'} rotate(${CAMERA_ROTATION}deg)`;
 
   const completionPercent = useMemo(() => {
     if (targetType === 'reps') {
@@ -431,6 +474,15 @@ const exerciseMode = useMemo(() => {
 
     return false;
   }, [targetType, targetReps, repCount, targetDurationSeconds, elapsedWorkSeconds]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     repCountRef.current = repCount;
@@ -815,9 +867,9 @@ const exerciseMode = useMemo(() => {
           },
           runningMode: 'VIDEO',
           numPoses: 1,
-          minPoseDetectionConfidence: 0.5,
-          minPosePresenceConfidence: 0.5,
-          minTrackingConfidence: 0.5,
+          minPoseDetectionConfidence: 0.45,
+          minPosePresenceConfidence: 0.45,
+          minTrackingConfidence: 0.45,
         });
 
         if (!mounted) return;
@@ -869,6 +921,11 @@ const exerciseMode = useMemo(() => {
     latestErrorTypeRef.current = null;
     lastLiveSampleSentAtRef.current = 0;
     squatMlPendingRef.current = false;
+    lastLandmarksRef.current = null;
+    lastOverlayRef.current = null;
+    lastPoseSeenAtRef.current = 0;
+    lastNoPoseFeedbackAtRef.current = 0;
+
     stageRef.current = exerciseMode === 'jumping_jacks' ? 'closed' : 'up';
     setStage(exerciseMode === 'jumping_jacks' ? 'closed' : 'up');
 
@@ -942,15 +999,20 @@ const exerciseMode = useMemo(() => {
     const hudCanvas = hudCanvasRef.current;
     const skeletonCtx = skeletonCanvas?.getContext('2d');
     const hudCtx = hudCanvas?.getContext('2d');
+
     if (skeletonCanvas && skeletonCtx) {
       skeletonCtx.clearRect(0, 0, skeletonCanvas.width, skeletonCanvas.height);
     }
+
     if (hudCanvas && hudCtx) {
       hudCtx.clearRect(0, 0, hudCanvas.width, hudCanvas.height);
     }
 
     lastVideoTimeRef.current = -1;
     targetReachedNotifiedRef.current = false;
+    lastLandmarksRef.current = null;
+    lastOverlayRef.current = null;
+    lastPoseSeenAtRef.current = 0;
     setCameraOn(false);
   };
 
@@ -1044,6 +1106,30 @@ const exerciseMode = useMemo(() => {
     });
   };
 
+  const buildOverlayPayload = ({
+    currentTargetType,
+    currentTargetReps,
+    currentTargetDurationSeconds,
+    currentElapsedWorkSeconds,
+    currentCompletionPercent,
+    currentIsTargetReached,
+  }) => ({
+    exerciseName: exerciseName || badgeText,
+    repCount: repCountRef.current,
+    targetType: currentTargetType,
+    targetReps: currentTargetReps,
+    targetDurationSeconds: currentTargetDurationSeconds,
+    elapsedWorkSeconds: currentElapsedWorkSeconds,
+    stage: stageRef.current,
+    feedback: feedbackRef.current,
+    metricLabel: metricLabelRef.current,
+    metricValue: metricValueRef.current,
+    errorType: latestErrorTypeRef.current,
+    isTargetReached: currentIsTargetReached,
+    completionPercent: currentCompletionPercent,
+    isActive: isActiveRef.current,
+  });
+
   const processFrame = () => {
     const video = videoRef.current;
     const skeletonCanvas = skeletonCanvasRef.current;
@@ -1093,7 +1179,41 @@ const exerciseMode = useMemo(() => {
         const landmarks = result?.landmarks?.[0];
         const worldLandmarks = result?.worldLandmarks?.[0] || null;
 
+        const currentTargetType = targetTypeRef.current;
+        const currentTargetReps = targetRepsRef.current;
+        const currentTargetDurationSeconds = targetDurationSecondsRef.current;
+        const currentElapsedWorkSeconds = elapsedWorkSecondsRef.current ?? 0;
+
+        const currentCompletionPercent =
+          currentTargetType === 'reps'
+            ? currentTargetReps && currentTargetReps > 0
+              ? Math.min(100, Math.round((repCountRef.current / currentTargetReps) * 100))
+              : 0
+            : currentTargetType === 'time'
+            ? currentTargetDurationSeconds && currentTargetDurationSeconds > 0
+              ? Math.min(
+                  100,
+                  Math.round(
+                    (currentElapsedWorkSeconds / currentTargetDurationSeconds) * 100
+                  )
+                )
+              : 0
+            : 0;
+
+        const currentIsTargetReached =
+          currentTargetType === 'reps'
+            ? Boolean(currentTargetReps && repCountRef.current >= currentTargetReps)
+            : currentTargetType === 'time'
+            ? Boolean(
+                currentTargetDurationSeconds &&
+                  currentElapsedWorkSeconds >= currentTargetDurationSeconds
+              )
+            : false;
+
         if (landmarks?.length) {
+          lastLandmarksRef.current = landmarks;
+          lastPoseSeenAtRef.current = performance.now();
+
           latestFeaturesRef.current = {
             ...buildPoseFeatures(landmarks, worldLandmarks),
             exercise_mode: exerciseModeRef.current,
@@ -1102,36 +1222,16 @@ const exerciseMode = useMemo(() => {
 
           runAnalyzer(landmarks);
 
-          const currentTargetType = targetTypeRef.current;
-          const currentTargetReps = targetRepsRef.current;
-          const currentTargetDurationSeconds = targetDurationSecondsRef.current;
-          const currentElapsedWorkSeconds = elapsedWorkSecondsRef.current ?? 0;
+          const overlayPayload = buildOverlayPayload({
+            currentTargetType,
+            currentTargetReps,
+            currentTargetDurationSeconds,
+            currentElapsedWorkSeconds,
+            currentCompletionPercent,
+            currentIsTargetReached,
+          });
 
-          const currentCompletionPercent =
-            currentTargetType === 'reps'
-              ? currentTargetReps && currentTargetReps > 0
-                ? Math.min(100, Math.round((repCountRef.current / currentTargetReps) * 100))
-                : 0
-              : currentTargetType === 'time'
-              ? currentTargetDurationSeconds && currentTargetDurationSeconds > 0
-                ? Math.min(
-                    100,
-                    Math.round(
-                      (currentElapsedWorkSeconds / currentTargetDurationSeconds) * 100
-                    )
-                  )
-                : 0
-              : 0;
-
-          const currentIsTargetReached =
-            currentTargetType === 'reps'
-              ? Boolean(currentTargetReps && repCountRef.current >= currentTargetReps)
-              : currentTargetType === 'time'
-              ? Boolean(
-                  currentTargetDurationSeconds &&
-                    currentElapsedWorkSeconds >= currentTargetDurationSeconds
-                )
-              : false;
+          lastOverlayRef.current = overlayPayload;
 
           const tone = getOverlayTone(
             latestErrorTypeRef.current,
@@ -1139,28 +1239,35 @@ const exerciseMode = useMemo(() => {
           );
 
           drawPoseSkeleton(skeletonCtx, landmarks, width, height, tone);
-          drawHudOverlay(hudCtx, width, height, {
-            exerciseName: exerciseName || badgeText,
-            repCount: repCountRef.current,
-            targetType: currentTargetType,
-            targetReps: currentTargetReps,
-            targetDurationSeconds: currentTargetDurationSeconds,
-            elapsedWorkSeconds: currentElapsedWorkSeconds,
-            stage: stageRef.current,
-            feedback: feedbackRef.current,
-            metricLabel: metricLabelRef.current,
-            metricValue: metricValueRef.current,
-            errorType: latestErrorTypeRef.current,
-            isTargetReached: currentIsTargetReached,
-            completionPercent: currentCompletionPercent,
-            isActive: isActiveRef.current,
-          });
+          drawHudOverlay(hudCtx, width, height, overlayPayload);
 
           void sendLiveSample();
         } else {
-          skeletonCtx.clearRect(0, 0, width, height);
-          hudCtx.clearRect(0, 0, width, height);
-          setFeedback('Поза не найдена. Отойди чуть дальше от камеры.');
+          const now = performance.now();
+          const lastLandmarks = lastLandmarksRef.current;
+          const lastOverlay = lastOverlayRef.current;
+          const recentlySeen = now - lastPoseSeenAtRef.current < 1200;
+
+          if (lastLandmarks?.length && lastOverlay && recentlySeen) {
+            const tone = getOverlayTone(
+              latestErrorTypeRef.current,
+              lastOverlay.isTargetReached
+            );
+
+            drawPoseSkeleton(skeletonCtx, lastLandmarks, width, height, tone);
+            drawHudOverlay(hudCtx, width, height, {
+              ...lastOverlay,
+              feedback: feedbackRef.current || lastOverlay.feedback,
+            });
+          } else {
+            skeletonCtx.clearRect(0, 0, width, height);
+            hudCtx.clearRect(0, 0, width, height);
+
+            if (now - lastNoPoseFeedbackAtRef.current > 900) {
+              lastNoPoseFeedbackAtRef.current = now;
+              setFeedback('Поза не найдена. Отойди чуть дальше, чтобы камера видела тело полностью.');
+            }
+          }
         }
 
         lastVideoTimeRef.current = video.currentTime;
@@ -1169,122 +1276,150 @@ const exerciseMode = useMemo(() => {
         setFeedback('Ошибка распознавания позы.');
       }
     } else {
-      skeletonCtx.clearRect(0, 0, width, height);
-      hudCtx.clearRect(0, 0, width, height);
+      const lastLandmarks = lastLandmarksRef.current;
+      const lastOverlay = lastOverlayRef.current;
+      const recentlySeen = performance.now() - lastPoseSeenAtRef.current < 1200;
+
+      if (lastLandmarks?.length && lastOverlay && recentlySeen) {
+        const tone = getOverlayTone(
+          latestErrorTypeRef.current,
+          lastOverlay.isTargetReached
+        );
+
+        drawPoseSkeleton(skeletonCtx, lastLandmarks, width, height, tone);
+        drawHudOverlay(hudCtx, width, height, lastOverlay);
+      } else {
+        skeletonCtx.clearRect(0, 0, width, height);
+        hudCtx.clearRect(0, 0, width, height);
+      }
     }
 
     rafRef.current = requestAnimationFrame(processFrame);
   };
 
-const startCamera = async () => {
-  try {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error('Браузер не поддерживает доступ к камере');
-    }
-
-    let stream = null;
-    let lastError = null;
-
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-
-    console.log(
-      'Available cameras:',
-      videoDevices.map((d, index) => ({
-        index,
-        label: d.label || `Camera ${index + 1}`,
-        deviceId: d.deviceId,
-      }))
-    );
-
-    const attempts = [];
-
-    // 1) Сначала пробуем все найденные камеры по очереди
-    videoDevices.forEach((device, index) => {
-      if (device.deviceId) {
-        attempts.push({
-          name: device.label || `Camera ${index + 1}`,
-          constraints: {
-            video: {
-              deviceId: { exact: device.deviceId },
-            },
-            audio: false,
-          },
-        });
+  const startCamera = async () => {
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Браузер не поддерживает доступ к камере');
       }
-    });
 
-    // 2) Потом пробуем обычную default camera
-    attempts.push({
-      name: 'Default camera',
-      constraints: {
-        video: true,
-        audio: false,
-      },
-    });
+      let stream = null;
+      let lastError = null;
 
-    // 3) Потом пробуем user-facing camera
-    attempts.push({
-      name: 'User facing camera',
-      constraints: {
-        video: {
-          facingMode: { ideal: 'user' },
-        },
-        audio: false,
-      },
-    });
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((d) => d.kind === 'videoinput');
 
-    for (const attempt of attempts) {
-      try {
-        console.log('Trying camera:', attempt.name);
-        stream = await navigator.mediaDevices.getUserMedia(attempt.constraints);
-        console.log('Camera opened:', attempt.name);
-        break;
-      } catch (err) {
-        console.warn('Camera attempt failed:', attempt.name, err);
-        lastError = err;
-      }
-    }
-
-    if (!stream) {
-      throw lastError || new Error('Камера табылмады немесе ашылмады');
-    }
-
-    streamRef.current = stream;
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
-    }
-
-    setCameraOn(true);
-    prevExerciseNameRef.current = exerciseName;
-    await startBackendSession();
-
-    rafRef.current = requestAnimationFrame(processFrame);
-  } catch (error) {
-    console.error('Camera start error:', error);
-
-    if (error?.name === 'NotAllowedError') {
-      setFeedback('Камераға рұқсат берілмеді. Chrome ішінде Camera → Allow қой.');
-      return;
-    }
-
-    if (error?.name === 'NotFoundError') {
-      setFeedback('Камера табылмады. Ноутбук камерасы қосулы екенін тексер.');
-      return;
-    }
-
-    if (error?.name === 'OverconstrainedError') {
-      setFeedback(
-        'Chrome таңдалған камераны аша алмады. Chrome Settings → Camera бөлімінен ноутбук камерасын таңда.'
+      console.log(
+        'Available cameras:',
+        videoDevices.map((d, index) => ({
+          index,
+          label: d.label || `Camera ${index + 1}`,
+          deviceId: d.deviceId,
+        }))
       );
-      return;
-    }
 
-    setFeedback(`Не удалось открыть камеру: ${error.message || error}`);
-  }
-};
+      const attempts = [];
+
+      videoDevices.forEach((device, index) => {
+        if (device.deviceId) {
+          attempts.push({
+            name: device.label || `Camera ${index + 1}`,
+            constraints: {
+              video: {
+                deviceId: { exact: device.deviceId },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+              },
+              audio: false,
+            },
+          });
+        }
+      });
+
+      attempts.push({
+        name: 'Default user camera',
+        constraints: {
+          video: {
+            facingMode: { ideal: 'user' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        },
+      });
+
+      attempts.push({
+        name: 'Default camera',
+        constraints: {
+          video: true,
+          audio: false,
+        },
+      });
+
+      for (const attempt of attempts) {
+        try {
+          console.log('Trying camera:', attempt.name);
+          stream = await navigator.mediaDevices.getUserMedia(attempt.constraints);
+          console.log('Camera opened:', attempt.name);
+          break;
+        } catch (err) {
+          console.warn('Camera attempt failed:', attempt.name, err);
+          lastError = err;
+        }
+      }
+
+      if (!stream) {
+        throw lastError || new Error('Камера табылмады немесе ашылмады');
+      }
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+
+      lastVideoTimeRef.current = -1;
+      lastLandmarksRef.current = null;
+      lastOverlayRef.current = null;
+      lastPoseSeenAtRef.current = 0;
+      lastNoPoseFeedbackAtRef.current = 0;
+
+      setCameraOn(true);
+      prevExerciseNameRef.current = exerciseName;
+      await startBackendSession();
+
+      rafRef.current = requestAnimationFrame(processFrame);
+    } catch (error) {
+      console.error('Camera start error:', error);
+
+      if (error?.name === 'NotAllowedError') {
+        setFeedback('Камераға рұқсат берілмеді. Chrome ішінде Camera → Allow қой.');
+        return;
+      }
+
+      if (error?.name === 'NotFoundError') {
+        setFeedback('Камера табылмады. Ноутбук камерасы немесе телефон камерасы қосулы екенін тексер.');
+        return;
+      }
+
+      if (error?.name === 'OverconstrainedError') {
+        setFeedback(
+          'Chrome таңдалған камераны аша алмады. Chrome Settings → Camera бөлімінен басқа камераны таңда.'
+        );
+        return;
+      }
+
+      setFeedback(`Не удалось открыть камеру: ${error.message || error}`);
+    }
+  };
+
+  const videoWrapStyle = {
+    ...styles.videoWrap,
+    maxWidth: isMobileCameraLayout ? 'min(100%, 430px)' : '560px',
+    aspectRatio: isMobileCameraLayout ? '9 / 16' : '4 / 3',
+    minHeight: isMobileCameraLayout ? 'min(70vh, 620px)' : '360px',
+  };
 
   return (
     <div style={styles.panel}>
@@ -1293,7 +1428,7 @@ const startCamera = async () => {
           <div style={styles.badge}>{badgeText}</div>
           <h3 style={styles.title}>Камера</h3>
           <p style={styles.subtitle}>
-            MVP: webcam + pose landmarks + базовый feedback
+            AI camera coach: pose landmarks + feedback + progress tracking
           </p>
         </div>
 
@@ -1310,7 +1445,7 @@ const startCamera = async () => {
         </div>
       </div>
 
-      <div style={styles.videoWrap}>
+      <div style={videoWrapStyle}>
         <video
           ref={videoRef}
           autoPlay
@@ -1318,7 +1453,7 @@ const startCamera = async () => {
           playsInline
           style={{
             ...styles.video,
-            transform: `scaleX(-1) rotate(${FIXED_LANDSCAPE_ROTATION}deg)`,
+            transform: cameraTransform,
             transformOrigin: 'center center',
           }}
         />
@@ -1327,7 +1462,7 @@ const startCamera = async () => {
           ref={skeletonCanvasRef}
           style={{
             ...styles.canvas,
-            transform: `scaleX(-1) rotate(${FIXED_LANDSCAPE_ROTATION}deg)`,
+            transform: cameraTransform,
             transformOrigin: 'center center',
           }}
         />
@@ -1432,7 +1567,7 @@ const styles = {
   },
   title: {
     margin: 0,
-    fontSize: '38px',
+    fontSize: 'clamp(28px, 5vw, 38px)',
     lineHeight: 1.05,
     fontWeight: 900,
   },
@@ -1466,29 +1601,26 @@ const styles = {
     background: 'transparent',
     color: '#fff',
     border: '1px solid rgba(255,255,255,0.12)',
-  },videoWrap: {
-  position: 'relative',
-  width: '100%',
-  maxWidth: '430px',
-  aspectRatio: '9 / 16',
-  minHeight: '620px',
-  margin: '0 auto',
-  background: '#11161f',
-  borderRadius: '22px',
-  overflow: 'hidden',
-  border: '1px solid rgba(255,255,255,0.08)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-},
-
-video: {
-  width: '100%',
-  height: '100%',
-  display: 'block',
-  background: '#000',
-  objectFit: 'contain',
-},
+  },
+  videoWrap: {
+    position: 'relative',
+    width: '100%',
+    margin: '0 auto',
+    background: '#11161f',
+    borderRadius: '22px',
+    overflow: 'hidden',
+    border: '1px solid rgba(255,255,255,0.08)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+    display: 'block',
+    background: '#000',
+    objectFit: 'cover',
+  },
   canvas: {
     position: 'absolute',
     inset: 0,
@@ -1509,6 +1641,7 @@ video: {
     display: 'flex',
     flexDirection: 'column',
     gap: '6px',
+    minWidth: 0,
   },
   statLabel: {
     color: '#9ea8b8',
@@ -1520,6 +1653,7 @@ video: {
     fontSize: '20px',
     fontWeight: 900,
     color: '#fff',
+    wordBreak: 'break-word',
   },
   progressCard: {
     borderRadius: '18px',
@@ -1535,6 +1669,7 @@ video: {
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: '12px',
+    flexWrap: 'wrap',
   },
   progressLabel: {
     color: '#9ea8b8',
