@@ -37,7 +37,6 @@ const RegisterPage = ({
     ...buttonStyle,
     backgroundColor: '#32363e',
     color: '#ccc',
-    marginTop: '-5px',
     fontSize: '14px',
     fontWeight: 'normal'
   };
@@ -226,7 +225,6 @@ const RegisterPage = ({
   box-sizing: border-box;
 }
 
-/* Desktop / notebook: негізгі дизайн сақталады */
 .register-auth-card {
   width: 100%;
   max-width: 520px;
@@ -321,86 +319,100 @@ const RegisterPage = ({
 /* Phone UI */
 @media (max-width: 768px) {
   .register-responsive-page {
-    min-height: 100dvh;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin-left: calc(50% - 50vw);
     align-items: flex-start;
-    padding: 18px 12px 96px;
+    justify-content: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 74px 16px 150px;
+    background: #1c1f24;
   }
 
   .register-auth-card {
     width: 100% !important;
-    max-width: 100% !important;
-    margin: 12px auto 0 !important;
-    padding: 22px !important;
+    max-width: 430px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
     border-radius: 24px !important;
     box-sizing: border-box !important;
   }
 
   .register-header {
     text-align: left;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
 
   .register-title {
-    font-size: clamp(30px, 9vw, 40px);
-    margin-bottom: 10px;
+    font-size: clamp(28px, 8vw, 36px);
+    margin-bottom: 8px;
   }
 
   .register-subtitle {
-    font-size: 14px;
-    line-height: 1.55;
+    font-size: 13px;
+    line-height: 1.5;
     color: rgba(255,255,255,0.72);
   }
 
   .register-form {
-    gap: 14px !important;
+    gap: 12px !important;
   }
 
   .register-name-row {
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
   }
 
   .register-birth-row {
     display: grid;
-    grid-template-columns: 0.9fr 1.4fr 1fr;
+    grid-template-columns: 0.85fr 1.35fr 0.95fr;
     gap: 8px;
   }
 
   .register-label {
-    font-size: 13px;
+    font-size: 12px;
     color: rgba(255,255,255,0.62);
-    margin-bottom: -8px;
+    margin-bottom: -7px;
   }
 
   .register-help {
-    font-size: 12px;
+    font-size: 11px;
     color: rgba(255,255,255,0.58);
-    margin-top: -6px;
-    margin-bottom: -4px;
+    margin-top: -5px;
+    margin-bottom: -3px;
   }
 
   .register-input {
     width: 100% !important;
-    min-height: 54px !important;
-    border-radius: 16px !important;
+    min-height: 50px !important;
+    border-radius: 15px !important;
     font-size: 16px !important;
-    padding: 0 16px !important;
+    padding: 0 14px !important;
     box-sizing: border-box !important;
   }
 
   .register-select {
     width: 100% !important;
     min-width: 0 !important;
-    min-height: 54px !important;
-    border-radius: 16px !important;
-    font-size: 15px !important;
-    padding: 0 12px !important;
+    min-height: 42px !important;
+    border-radius: 14px !important;
+    font-size: 14px !important;
+    padding: 0 10px !important;
     box-sizing: border-box !important;
+  }
+
+  .register-select-full {
+    min-height: 46px !important;
   }
 
   .register-submit {
     width: 100% !important;
-    min-height: 56px !important;
+    min-height: 54px !important;
     border-radius: 16px !important;
     font-size: 16px !important;
     font-weight: 900 !important;
@@ -409,17 +421,20 @@ const RegisterPage = ({
 
   .register-secondary {
     width: 100% !important;
-    min-height: 52px !important;
+    min-height: 50px !important;
     border-radius: 16px !important;
-    font-size: 15px !important;
+    font-size: 14px !important;
+    margin-top: 0 !important;
   }
 }
 
 /* Small phone */
 @media (max-width: 430px) {
   .register-responsive-page {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 72px;
+    padding-bottom: 150px;
   }
 
   .register-auth-card {
@@ -428,19 +443,21 @@ const RegisterPage = ({
   }
 
   .register-title {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .register-subtitle {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .register-birth-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 0.82fr 1.35fr 0.95fr;
+    gap: 6px;
   }
 
   .register-select {
-    font-size: 16px !important;
+    font-size: 13px !important;
+    padding: 0 8px !important;
   }
 }
       `}</style>
