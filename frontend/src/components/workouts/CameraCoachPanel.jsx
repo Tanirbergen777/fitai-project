@@ -1427,9 +1427,31 @@ export default function CameraCoachPanel({
         <div>
           <div style={styles.badge}>{badgeText}</div>
           <h3 style={styles.title}>Камера</h3>
-          <p style={styles.subtitle}>
-            AI camera coach: pose landmarks + feedback + progress tracking
-          </p>
+            <p style={styles.subtitle}>
+              MediaPipe Pose + Computer Vision: дене нүктелерін анықтау, қозғалысты талдау және feedback көрсету.
+            </p>
+
+            <div style={styles.techRow}>
+              <span style={styles.techChip}>🧠 MediaPipe Pose</span>
+              <span style={styles.techChip}>👁️ Computer Vision</span>
+
+              <span
+                style={{
+                  ...styles.techChip,
+                  ...(modelStatus === 'ready'
+                    ? styles.techChipReady
+                    : modelStatus === 'error'
+                    ? styles.techChipError
+                    : styles.techChipLoading),
+                }}
+              >
+                {modelStatus === 'ready'
+                  ? 'Model ready'
+                  : modelStatus === 'loading'
+                  ? 'Loading model'
+                  : 'Model error'}
+              </span>
+            </div>
         </div>
 
         <div style={styles.actions}>
@@ -1472,13 +1494,13 @@ export default function CameraCoachPanel({
 
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <span style={styles.statLabel}>Модель</span>
+          <span style={styles.statLabel}>MediaPipe Pose</span>
           <strong style={styles.statValue}>
             {modelStatus === 'ready'
-              ? 'готова'
+              ? 'Ready'
               : modelStatus === 'loading'
-              ? 'загрузка'
-              : 'ошибка'}
+              ? 'Loading'
+              : 'Error'}
           </strong>
         </div>
 
@@ -1578,6 +1600,45 @@ const styles = {
     fontSize: '15px',
     maxWidth: '420px',
   },
+    techRow: {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '8px',
+  marginTop: '12px',
+},
+
+techChip: {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '7px 11px',
+  borderRadius: '999px',
+  background: 'rgba(97, 218, 251, 0.08)',
+  border: '1px solid rgba(97, 218, 251, 0.20)',
+  color: '#9eeaff',
+  fontSize: '11px',
+  fontWeight: 900,
+  letterSpacing: '0.02em',
+  whiteSpace: 'nowrap',
+},
+
+techChipReady: {
+  background: 'rgba(34, 197, 94, 0.12)',
+  border: '1px solid rgba(34, 197, 94, 0.26)',
+  color: '#86efac',
+},
+
+techChipLoading: {
+  background: 'rgba(245, 158, 11, 0.12)',
+  border: '1px solid rgba(245, 158, 11, 0.28)',
+  color: '#fcd34d',
+},
+
+techChipError: {
+  background: 'rgba(239, 68, 68, 0.12)',
+  border: '1px solid rgba(239, 68, 68, 0.28)',
+  color: '#fca5a5',
+},
   actions: {
     display: 'flex',
     gap: '10px',
