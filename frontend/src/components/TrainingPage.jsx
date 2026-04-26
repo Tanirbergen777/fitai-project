@@ -190,7 +190,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-sizing: border-box;
   color: #ffffff;
   background: #1c1f24;
-  padding: 46px 34px 70px;
+  padding: 52px 70px 70px;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -205,13 +205,13 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 .tp-header {
   width: 100%;
   max-width: 1100px;
-  margin: 0 auto 70px;
+  margin: 0 auto 60px;
   text-align: center;
 }
 
 .tp-title {
-  margin: 0 0 18px;
-  font-size: clamp(46px, 5vw, 68px);
+  margin: 0 0 16px;
+  font-size: clamp(44px, 4.6vw, 62px);
   line-height: 1.05;
   font-weight: 950;
   letter-spacing: -0.035em;
@@ -222,7 +222,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   margin: 0 auto;
   max-width: 900px;
   color: #b8c7df;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.55;
 }
 
@@ -238,14 +238,14 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 .tp-card {
   width: 100%;
   min-width: 0;
-  min-height: 325px;
+  height: 305px;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 30px;
   background:
     radial-gradient(circle at top left, rgba(97,218,251,0.045), transparent 34%),
     linear-gradient(180deg, #22272f 0%, #20242c 100%);
   color: #ffffff;
-  padding: 34px 32px;
+  padding: 34px 32px 32px;
   box-sizing: border-box;
   text-align: left;
   cursor: pointer;
@@ -253,7 +253,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 34px;
+  gap: 24px;
   box-shadow: 0 18px 44px rgba(0,0,0,0.18);
   transition:
     transform 0.24s ease,
@@ -261,6 +261,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
     box-shadow 0.24s ease,
     background 0.24s ease;
   touch-action: manipulation;
+  overflow: hidden;
 }
 
 .tp-card:hover {
@@ -317,9 +318,9 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 .tp-card-content h3 {
-  margin: 0 0 18px;
+  margin: 0 0 16px;
   color: #ffffff;
-  font-size: clamp(25px, 1.8vw, 34px);
+  font-size: clamp(24px, 1.55vw, 31px);
   line-height: 1.14;
   font-weight: 950;
   letter-spacing: -0.02em;
@@ -331,7 +332,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 .tp-card-content p {
   margin: 0;
   color: #b8c7df;
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.55;
 }
 
@@ -542,20 +543,20 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 /* ноут / desktop */
 @media (max-width: 1400px) {
   .training-page {
-    padding: 42px 28px 64px;
+    padding: 52px 70px 70px;
   }
 
   .tp-grid {
-    gap: 22px;
+    gap: 26px;
   }
 
   .tp-card {
-    min-height: 300px;
-    padding: 30px 28px;
+    height: 305px;
+    padding: 34px 30px 30px;
   }
 
   .tp-card-content h3 {
-    font-size: clamp(23px, 1.75vw, 30px);
+    font-size: clamp(23px, 1.55vw, 30px);
   }
 
   .tp-card-content p {
@@ -565,11 +566,20 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
 /* кіші ноут / планшет */
 @media (max-width: 1100px) {
+  .training-page {
+    padding: 36px 28px 64px;
+  }
+
+  .tp-header {
+    margin-bottom: 42px;
+  }
+
   .tp-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .tp-card {
+    height: auto;
     min-height: 245px;
   }
 }
@@ -608,6 +618,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 
   .tp-card {
+    height: auto;
     min-height: 158px;
     border-radius: 22px;
     padding: 18px;
