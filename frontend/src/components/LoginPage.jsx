@@ -164,9 +164,19 @@ const LoginPage = ({
 /* Phone UI */
 @media (max-width: 768px) {
   .login-responsive-page {
-    min-height: 100dvh;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin-left: calc(50% - 50vw);
     align-items: flex-start;
-    padding: 18px 12px 96px;
+    justify-content: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 74px 12px 150px;
+    background: #1c1f24;
   }
 
   .login-auth-card {
@@ -236,6 +246,8 @@ const LoginPage = ({
   .login-responsive-page {
     padding-left: 8px;
     padding-right: 8px;
+    padding-top: 72px;
+    padding-bottom: 150px;
   }
 
   .login-auth-card {
