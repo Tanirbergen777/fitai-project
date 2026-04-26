@@ -50,6 +50,13 @@ const parseError = async (res, fallbackText) => {
 
 export const getNutritionProfile = async (userId) => {
   const res = await fetch(`${API_BASE}/nutrition/profile/${userId}`);
+
+  // 404 здесь не ошибка интерфейса.
+  // Это значит, что пользователь ещё не заполнял анкету питания.
+  if (res.status === 404) {
+    return null;
+  }
+
   if (!res.ok) {
     throw new Error(await parseError(res, 'Не удалось загрузить профиль питания'));
   }

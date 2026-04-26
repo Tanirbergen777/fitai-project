@@ -56,45 +56,59 @@ const AINutritionPage = ({ onBack, userId, onFoodSelected }) => {
     setRecommendations(data.recommendations || []);
   }, [userId]);
 
-  useEffect(() => {
-    const loadPageData = async () => {
-      setPageLoading(true);
+useEffect(() => {
+  const loadPageData = async () => {
+    setPageLoading(true);
+    setSelectedMessage('');
 
-      if (!userId) {
-        setProfile(null);
+    if (!userId) {
+      setProfile(null);
+      setHistory([]);
+      setRecommendations([]);
+      setShowSurvey(true);
+      setPageLoading(false);
+      return;
+    }
+
+    try {
+      try {
+        await loadHistory();
+      } catch (historyError) {
+        console.error('Nutrition history load error:', historyError);
         setHistory([]);
+      }
+
+      const profileData = await getNutritionProfile(userId);
+
+      if (!profileData) {
+        setProfile(null);
         setRecommendations([]);
         setShowSurvey(true);
-        setPageLoading(false);
         return;
       }
 
+      setProfile(profileData);
+      setShowSurvey(false);
+
       try {
-        await loadHistory();
-
-        try {
-          const profileData = await getNutritionProfile(userId);
-          setProfile(profileData);
-          setShowSurvey(false);
-          await loadRecommendations();
-        } catch {
-          setProfile(null);
-          setRecommendations([]);
-          setShowSurvey(true);
-        }
-      } catch (error) {
-        console.error('Nutrition page load error:', error);
-        setProfile(null);
-        setHistory([]);
+        await loadRecommendations();
+      } catch (recommendError) {
+        console.error('Nutrition recommendations load error:', recommendError);
         setRecommendations([]);
-        setShowSurvey(true);
-      } finally {
-        setPageLoading(false);
+        setSelectedMessage(t('nutrition.ai.messages.recommendationLoadError', 'Не удалось загрузить рекомендации'));
       }
-    };
+    } catch (error) {
+      console.error('Nutrition page load error:', error);
+      setProfile(null);
+      setRecommendations([]);
+      setShowSurvey(true);
+    } finally {
+      setPageLoading(false);
+    }
+  };
 
-    loadPageData();
-  }, [userId, loadHistory, loadRecommendations]);
+  loadPageData();
+}, [userId, loadHistory, loadRecommendations, t]);
 
   const todayFoods = history;
 
