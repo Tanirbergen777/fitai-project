@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import ChatHistoryItem from './ChatHistoryItem';
 import { API_BASE_URL } from '../config/api';
@@ -23,16 +23,21 @@ const AiAssistantPage = ({
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const safeSessions = Array.isArray(sessions) ? sessions : [];
+    const safeSessions = useMemo(() => {
+      return Array.isArray(sessions) ? sessions : [];
+    }, [sessions]);
 
-  const sessionExists = (sid) => {
-    if (!sid) return false;
+    const sessionExists = useCallback(
+      (sid) => {
+        if (!sid) return false;
 
-    return safeSessions.some((session) => {
-      const sessionId = session.id || session.session_id;
-      return Number(sessionId) === Number(sid);
-    });
-  };
+        return safeSessions.some((session) => {
+          const sessionId = session.id || session.session_id;
+          return Number(sessionId) === Number(sid);
+        });
+      },
+      [safeSessions]
+    );
 
   useEffect(() => {
     if (!currentSessionId) return;
@@ -50,7 +55,7 @@ const AiAssistantPage = ({
         }
       ]);
     }
-  }, [currentSessionId, safeSessions, setCurrentSessionId, t, aiResult]);
+  }, [currentSessionId, safeSessions, sessionExists, setCurrentSessionId, t, aiResult]);
 
   useEffect(() => {
     if (currentSessionId) {
