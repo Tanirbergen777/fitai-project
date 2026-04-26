@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import WorkoutEngine from './WorkoutEngine';
 import { supabase } from '../../lib/supabaseClient';
@@ -17,7 +17,10 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
   const [loading, setLoading] = useState(false);
   const [selectedBodyPart, setSelectedBodyPart] = useState(null);
 
-  const timedReps = (seconds = 30) => `${seconds} ${t('training.seconds')}`;
+  const timedReps = useCallback(
+    (seconds = 30) => `${seconds} ${t('training.seconds')}`,
+    [t]
+  );
 
   useEffect(() => {
     if (!selectedBodyPart) return;
@@ -497,7 +500,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
     };
 
     fetchLoseWeightExercises();
-  }, [selectedBodyPart, t]);
+  }, [selectedBodyPart, t, timedReps]);
 
   const selectedBodyPartLabel = (id) => {
     if (id === 'full') return t('training.bodyParts.full');
@@ -506,6 +509,37 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
     if (id === 'legs') return t('training.bodyParts.legs');
     return '';
   };
+
+  const bodyPartCards = [
+    {
+      id: 'full',
+      icon: '🔥',
+      title: t('training.bodyParts.full'),
+      image: fullImg,
+      accent: 'orange',
+    },
+    {
+      id: 'abs',
+      icon: '⚡',
+      title: t('training.bodyParts.abs'),
+      image: absImg,
+      accent: 'purple',
+    },
+    {
+      id: 'arms',
+      icon: '🥊',
+      title: t('training.bodyParts.arms'),
+      image: armsImg,
+      accent: 'blue',
+    },
+    {
+      id: 'legs',
+      icon: '🏃',
+      title: t('training.bodyParts.legs'),
+      image: legsImg,
+      accent: 'green',
+    },
+  ];
 
   if (!selectedBodyPart) {
     return (
@@ -517,40 +551,32 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
         </div>
 
         <div className="bodypart-container">
-          <h2>{t('training.loseSelectTitle')}</h2>
+          <div className="lw-hero">
+            <span className="lw-badge">Fat loss training</span>
+            <h2>{t('training.loseSelectTitle')}</h2>
+            <p>
+              Выберите направление, а система откроет энергичный план с видео,
+              таймером и контролем выполнения.
+            </p>
+          </div>
 
           <div className="bodypart-grid">
-            <div
-              className="bodypart-card"
-              style={{ backgroundImage: `url(${fullImg})` }}
-              onClick={() => setSelectedBodyPart('full')}
-            >
-              <span>🔥 {t('training.bodyParts.full')}</span>
-            </div>
-
-            <div
-              className="bodypart-card"
-              style={{ backgroundImage: `url(${absImg})` }}
-              onClick={() => setSelectedBodyPart('abs')}
-            >
-              <span>🔥 {t('training.bodyParts.abs')}</span>
-            </div>
-
-            <div
-              className="bodypart-card"
-              style={{ backgroundImage: `url(${armsImg})` }}
-              onClick={() => setSelectedBodyPart('arms')}
-            >
-              <span>⚡ {t('training.bodyParts.arms')}</span>
-            </div>
-
-            <div
-              className="bodypart-card"
-              style={{ backgroundImage: `url(${legsImg})` }}
-              onClick={() => setSelectedBodyPart('legs')}
-            >
-              <span>🏃 {t('training.bodyParts.legs')}</span>
-            </div>
+            {bodyPartCards.map((card) => (
+              <button
+                key={card.id}
+                type="button"
+                className={`bodypart-card bodypart-card--${card.accent}`}
+                style={{ backgroundImage: `url(${card.image})` }}
+                onClick={() => setSelectedBodyPart(card.id)}
+              >
+                <span className="bodypart-overlay" />
+                <span className="bodypart-content">
+                  <span className="bodypart-icon">{card.icon}</span>
+                  <span className="bodypart-title">{card.title}</span>
+                  <span className="bodypart-hint">Start fat burn ›</span>
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -580,13 +606,14 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
   }
 
   return (
-    <div className="lw-page">
+    <div className="lw-page lw-page--engine">
       <WorkoutEngine
         title={`${t('training.loseWeightTitle')} • ${selectedBodyPartLabel(selectedBodyPart)}`}
         exercises={exercises}
         onComplete={onAllStepsComplete}
         onBack={() => setSelectedBodyPart(null)}
       />
+
       <style>{styles}</style>
     </div>
   );
@@ -595,22 +622,36 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
 const styles = `
 .lw-page {
   width: 100%;
-  height: 100%;
-  min-height: 0;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  color: #fff;
+  background:
+    radial-gradient(circle at top left, rgba(255, 128, 80, 0.09), transparent 28%),
+    radial-gradient(circle at top right, rgba(97, 218, 251, 0.07), transparent 26%),
+    #1c1f24;
+  padding: 16px;
+}
+
+.lw-page--engine {
+  padding: 0;
+  background: transparent;
 }
 
 .lw-topbar {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+  width: 100%;
 }
 
 .lw-back-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: rgba(97, 218, 251, 0.08);
   border: 1px solid rgba(97, 218, 251, 0.35);
@@ -619,8 +660,10 @@ const styles = `
   border-radius: 999px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   transition: all 0.25s ease;
+  min-height: 44px;
+  touch-action: manipulation;
 }
 
 .lw-back-btn:hover {
@@ -629,33 +672,212 @@ const styles = `
   box-shadow: 0 10px 30px rgba(97, 218, 251, 0.18);
 }
 
-.lw-loading-card {
-  max-width: 760px;
+.bodypart-container {
+  width: min(1100px, 100%);
   margin: 0 auto;
-  background: linear-gradient(180deg, #232833 0%, #1b2029 100%);
+  padding: 4px 4px 40px;
+  box-sizing: border-box;
+}
+
+.lw-hero {
+  width: min(820px, 100%);
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.lw-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 128, 80, 0.11);
+  border: 1px solid rgba(255, 128, 80, 0.26);
+  color: #ffb08a;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 14px;
+  letter-spacing: 0.04em;
+}
+
+.lw-hero h2 {
+  margin: 0 0 12px;
+  font-size: clamp(32px, 5vw, 50px);
+  line-height: 1.05;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.lw-hero p {
+  margin: 0 auto;
+  color: #aab3c2;
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 680px;
+}
+
+.bodypart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.bodypart-card {
+  position: relative;
+  height: 260px;
+  border-radius: 28px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 0;
+  color: #fff;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 22px 50px rgba(0,0,0,0.32);
+  transition:
+    transform 0.32s ease,
+    box-shadow 0.32s ease,
+    border-color 0.32s ease,
+    filter 0.32s ease;
+  font-family: inherit;
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.bodypart-card:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.52);
+  border-color: rgba(255, 128, 80, 0.46);
+}
+
+.bodypart-card:active {
+  transform: scale(0.985);
+}
+
+.bodypart-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      to top,
+      rgba(0,0,0,0.88) 0%,
+      rgba(0,0,0,0.56) 42%,
+      rgba(0,0,0,0.10) 100%
+    );
+}
+
+.bodypart-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  height: 55%;
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+.bodypart-card--orange::after {
+  background: linear-gradient(to top, rgba(255,128,80,0.52), transparent);
+}
+
+.bodypart-card--purple::after {
+  background: linear-gradient(to top, rgba(198,120,221,0.46), transparent);
+}
+
+.bodypart-card--blue::after {
+  background: linear-gradient(to top, rgba(78,143,255,0.46), transparent);
+}
+
+.bodypart-card--green::after {
+  background: linear-gradient(to top, rgba(34,197,94,0.46), transparent);
+}
+
+.bodypart-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bodypart-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.16);
+  backdrop-filter: blur(10px);
+  font-size: 28px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+}
+
+.bodypart-title {
+  display: block;
+  font-weight: 950;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.08;
+  text-shadow: 0 4px 18px rgba(0,0,0,0.55);
+}
+
+.bodypart-hint {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  color: #fff2ea;
+  font-size: 14px;
+  font-weight: 850;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(10px);
+}
+
+.lw-loading-card {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  background:
+    radial-gradient(circle at top, rgba(255,128,80,0.10), transparent 34%),
+    linear-gradient(180deg, #232833 0%, #1b2029 100%);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 30px;
   padding: 48px 24px;
   text-align: center;
   box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+  box-sizing: border-box;
 }
 
 .lw-loading-card h3 {
   margin: 10px 0 8px;
   font-size: 24px;
   color: #fff;
+  font-weight: 900;
 }
 
 .lw-loading-card p {
   margin: 0;
   color: #aab3c2;
+  line-height: 1.6;
 }
 
 .lw-loader {
   width: 46px;
   height: 46px;
   border: 4px solid rgba(255,255,255,0.08);
-  border-top-color: #61dafb;
+  border-top-color: #ff8a5c;
   border-radius: 50%;
   animation: lw-spin 0.8s linear infinite;
   margin: 0 auto 18px;
@@ -667,58 +889,147 @@ const styles = `
   }
 }
 
-.bodypart-container {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 0 10px;
-  text-align: center;
+/* Tablet */
+@media (max-width: 1024px) {
+  .bodypart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bodypart-card {
+    height: 230px;
+  }
 }
 
-.bodypart-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  max-width: 1100px;
-  margin: 0 auto;
+/* Phone */
+@media (max-width: 768px) {
+  .lw-page {
+    min-height: 100dvh;
+    padding: 10px 10px 100px;
+    background:
+      radial-gradient(circle at top, rgba(255,128,80,0.11), transparent 28%),
+      #1c1f24;
+  }
+
+  .lw-page--engine {
+    padding: 0;
+    background: transparent;
+  }
+
+  .lw-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-bottom: 14px;
+    padding: 6px 0 10px;
+    background: linear-gradient(180deg, rgba(28,31,36,0.98), rgba(28,31,36,0.82));
+    backdrop-filter: blur(12px);
+  }
+
+  .lw-back-btn {
+    min-height: 42px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .bodypart-container {
+    padding: 0 0 24px;
+  }
+
+  .lw-hero {
+    text-align: left;
+    margin: 6px 0 20px;
+    padding: 0 4px;
+  }
+
+  .lw-badge {
+    padding: 7px 12px;
+    font-size: 11px;
+    margin-bottom: 12px;
+  }
+
+  .lw-hero h2 {
+    font-size: clamp(30px, 9vw, 40px);
+    line-height: 1.08;
+  }
+
+  .lw-hero p {
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 100%;
+  }
+
+  .bodypart-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .bodypart-card {
+    height: 170px;
+    border-radius: 22px;
+  }
+
+  .bodypart-content {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .bodypart-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+    font-size: 24px;
+  }
+
+  .bodypart-title {
+    font-size: 24px;
+  }
+
+  .bodypart-hint {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  .lw-loading-card {
+    margin-top: 16px;
+    padding: 34px 18px;
+    border-radius: 24px;
+  }
+
+  .lw-loading-card h3 {
+    font-size: 22px;
+  }
 }
 
-.bodypart-card {
-  position: relative;
-  height: 240px;
-  border-radius: 28px;
-  overflow: hidden;
-  cursor: pointer;
-  display: flex;
-  align-items: flex-end;
-  padding: 28px;
-  font-weight: 900;
-  font-size: 24px;
-  color: #fff;
-  background-size: cover;
-  background-position: center;
-  transition: all 0.35s ease;
-}
+/* Small phone */
+@media (max-width: 430px) {
+  .lw-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 
-.bodypart-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-}
+  .bodypart-card {
+    height: 154px;
+    border-radius: 20px;
+  }
 
-.bodypart-card span {
-  position: relative;
-  z-index: 2;
-}
+  .bodypart-content {
+    padding: 14px;
+  }
 
-.bodypart-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0,0,0,0.85),
-    rgba(0,0,0,0.4),
-    rgba(0,0,0,0.1)
-  );
+  .bodypart-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 22px;
+    border-radius: 14px;
+  }
+
+  .bodypart-title {
+    font-size: 22px;
+  }
+
+  .bodypart-hint {
+    font-size: 12px;
+  }
 }
 `;
 
