@@ -9,7 +9,7 @@ from app import models
 from app.database import engine
 from app.routers import auth, user_profile, ai, nutrition, camera_workout
 from app.routers import habit_reminders
-
+from app.routers import training_ai
 
 # Нужно для Render: создаём static/avatars, если папки нет
 os.makedirs("static/avatars", exist_ok=True)
@@ -34,7 +34,7 @@ app.include_router(ai.router)
 app.include_router(nutrition.router)
 app.include_router(camera_workout.router)
 app.include_router(habit_reminders.router)
-
+app.include_router(training_ai.router)
 
 async def reminder_scheduler():
     while True:
