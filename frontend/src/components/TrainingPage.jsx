@@ -210,12 +210,9 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 .tp-title {
-  margin: 0 0 16px;
-  font-size: clamp(44px, 4.6vw, 62px);
-  line-height: 1.05;
-  font-weight: 950;
-  letter-spacing: -0.035em;
-  color: #ffffff;
+           font-size: clamp(32px, 5vw, 48px);
+          font-weight: 900;
+          margin-bottom: 10px;
 }
 
 .tp-subtitle {
