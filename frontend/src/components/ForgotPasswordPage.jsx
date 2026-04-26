@@ -72,6 +72,8 @@ const ForgotPasswordPage = ({
         </form>
       </div>
 
+      <div className="forgot-mobile-scroll-spacer" aria-hidden="true" />
+
       <style>{`
 .forgot-responsive-page {
   width: 100%;
@@ -82,7 +84,6 @@ const ForgotPasswordPage = ({
   box-sizing: border-box;
 }
 
-/* Desktop / notebook: бұрынғы auth-card стилін сақтаймыз */
 .forgot-auth-card {
   width: 100%;
   max-width: 430px;
@@ -126,7 +127,11 @@ const ForgotPasswordPage = ({
   width: 100%;
 }
 
-/* Phone UI + міндетті scroll */
+.forgot-mobile-scroll-spacer {
+  display: none;
+}
+
+/* Phone UI + forced scroll */
 @media (max-width: 768px) {
   .forgot-responsive-page {
     width: 100vw;
@@ -135,12 +140,14 @@ const ForgotPasswordPage = ({
     max-height: 100dvh;
     margin-left: calc(50% - 50vw);
     align-items: flex-start;
-    justify-content: center;
-    overflow-y: auto;
-    overflow-x: hidden;
+    justify-content: flex-start;
+    flex-direction: column;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    padding: 74px 12px 150px;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    padding: 74px 12px 0;
     background: #1c1f24;
   }
 
@@ -151,6 +158,14 @@ const ForgotPasswordPage = ({
     padding: 22px !important;
     border-radius: 24px !important;
     box-sizing: border-box !important;
+    flex-shrink: 0;
+  }
+
+  .forgot-mobile-scroll-spacer {
+    display: block;
+    width: 100%;
+    height: 180px;
+    flex-shrink: 0;
   }
 
   .forgot-header {
@@ -206,12 +221,15 @@ const ForgotPasswordPage = ({
     padding-left: 8px;
     padding-right: 8px;
     padding-top: 72px;
-    padding-bottom: 150px;
   }
 
   .forgot-auth-card {
     padding: 18px !important;
     border-radius: 22px !important;
+  }
+
+  .forgot-mobile-scroll-spacer {
+    height: 190px;
   }
 
   .forgot-title {
