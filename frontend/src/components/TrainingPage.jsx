@@ -15,11 +15,15 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
   const handleWorkoutComplete = (report = null) => {
     if (!hasAwardedRef.current) {
-      const score = report?.score || 50;
+      const normalizedReport = report && typeof report === 'object' ? report : null;
+      const parsedScore = Number(normalizedReport?.score);
+      const score = Number.isFinite(parsedScore)
+        ? Math.max(0, Math.min(100, Math.round(parsedScore)))
+        : 0;
 
       hasAwardedRef.current = true;
-      setFinishReport(report);
-      setIsFinished(true);
+      setFinishReport(normalizedReport);
+      setIsFinished(Boolean(normalizedReport));
 
       if (onComplete) onComplete(score);
     }
@@ -135,8 +139,8 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
       {selectedGoal && renderWorkout()}
 
       <SuccessModal
-        isOpen={isFinished}
-        points={finishReport?.score || 50}
+        isOpen={isFinished && Boolean(finishReport)}
+        points={finishReport?.score ?? 0}
         report={finishReport}
         onClose={handleFinishContinue}
       />

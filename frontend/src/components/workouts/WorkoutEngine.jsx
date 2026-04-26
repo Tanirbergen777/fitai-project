@@ -110,9 +110,8 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
   const [cameraRepCount, setCameraRepCount] = useState(0);
   const [exerciseResults, setExerciseResults] = useState([]);
   const [skipModalOpen, setSkipModalOpen] = useState(false);
-  const [workoutReport, setWorkoutReport] = useState(null);
 
-  const [step, setStep] = useState('preview'); // preview | active | rest | summary
+  const [step, setStep] = useState('preview'); // preview | active | rest
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [exercisePhase, setExercisePhase] = useState('prepare'); // prepare | work
@@ -121,7 +120,6 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
   useEffect(() => {
     setWorkoutQueue(normalizedExercises);
     setExerciseResults([]);
-    setWorkoutReport(null);
     savedResultIdsRef.current = new Set();
     setCurrentIndex(0);
     setCameraRepCount(0);
@@ -301,10 +299,9 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
   const completeWorkoutFlow = useCallback(
     (resultsList = exerciseResults) => {
       const report = buildWorkoutReport(resultsList);
-      setWorkoutReport(report);
-      setStep('summary');
+      onComplete?.(report);
     },
-    [buildWorkoutReport, exerciseResults]
+    [buildWorkoutReport, exerciseResults, onComplete]
   );
 
   const goToNextExercise = useCallback(() => {
@@ -811,97 +808,6 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
           <button className="we-primary-btn we-start-btn" onClick={goToNextExercise}>
             {t('training.skipRest')}
           </button>
-        </div>
-
-        <style>{styles}</style>
-      </div>
-    );
-  }
-
-  if (step === 'summary' && workoutReport) {
-    return (
-      <div className="we-page">
-        {audioNodes}
-
-        <div className="we-summary-shell">
-          <section className="we-summary-card">
-            <span className="we-preview-badge">AI Workout Report</span>
-
-            <h1 className="we-title">Жаттығу қорытындысы</h1>
-
-            <p className="we-subtitle">
-              {workoutReport.summary}
-            </p>
-
-            <div className="we-score-circle">
-              <strong>{workoutReport.score}</strong>
-              <span>/100</span>
-            </div>
-
-            <div className="we-summary-stats">
-              <div>
-                <span>Аяқталған</span>
-                <strong>{workoutReport.completedCount}/{workoutReport.totalExercises}</strong>
-              </div>
-
-              <div>
-                <span>Орындау сапасы</span>
-                <strong>{workoutReport.performanceScore}%</strong>
-              </div>
-
-              <div>
-                <span>Тұрақтылық</span>
-                <strong>{workoutReport.consistencyScore}%</strong>
-              </div>
-            </div>
-
-            <div className="we-checklist">
-              {workoutReport.results.map((item) => (
-                <div
-                  key={item.id}
-                  className={`we-check-item ${item.status === 'completed' ? 'done' : 'skipped'}`}
-                >
-                  <div className="we-check-main">
-                    <span>{item.status === 'completed' ? '✅' : '⏭'}</span>
-
-                    <div>
-                      <strong>{item.exerciseName}</strong>
-
-                      <p>
-                        {item.status === 'completed'
-                          ? `Орындалуы: ${item.performancePercent}%`
-                          : `Өткізілді: ${item.reasonLabel}`}
-                      </p>
-
-                      {item.status === 'skipped' && (
-                        <small>{item.benefit}</small>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {workoutReport.skipped.some((item) =>
-              ['unable', 'pain', 'difficult'].includes(item.reason)
-            ) && (
-              <div className="we-learning-box">
-                <h3>Келесі ұсыныс</h3>
-                <p>
-                  Сіз кейбір жаттығуларды орындау қиын екенін белгіледіңіз.
-                  Келесі жолы жүйе осы жаттығуларға дайындық жасауға көмектесетін
-                  жеңілдетілген жоспар ұсына алады.
-                </p>
-              </div>
-            )}
-
-            <button
-              className="we-primary-btn we-start-btn"
-              onClick={() => onComplete?.(workoutReport)}
-            >
-              Нәтижені сақтау және аяқтау
-            </button>
-          </section>
         </div>
 
         <style>{styles}</style>
