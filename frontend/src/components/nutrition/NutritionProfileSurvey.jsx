@@ -406,11 +406,12 @@ const NutritionProfileSurvey = ({
         </div>
       </div>
 
-      <style>{`
+<style>{`
 .nutrition-survey-section {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .nutrition-survey-topbar {
@@ -476,12 +477,17 @@ const NutritionProfileSurvey = ({
   transition: all 0.25s ease;
   min-height: 190px;
   box-sizing: border-box;
+  touch-action: manipulation;
 }
 
 .nutrition-survey-option:hover {
   transform: translateY(-3px);
   border-color: rgba(97,218,251,0.32);
   background: rgba(255,255,255,0.055);
+}
+
+.nutrition-survey-option:active {
+  transform: scale(0.985);
 }
 
 .nutrition-survey-option.active {
@@ -537,6 +543,7 @@ const NutritionProfileSurvey = ({
   font-size: 13px;
   font-weight: 800;
   transition: all 0.22s ease;
+  touch-action: manipulation;
 }
 
 .nutrition-survey-chip.active {
@@ -601,6 +608,7 @@ const NutritionProfileSurvey = ({
   cursor: pointer;
   transition: all 0.25s ease;
   min-height: 52px;
+  touch-action: manipulation;
 }
 
 .nutrition-survey-primary-btn {
@@ -629,87 +637,235 @@ const NutritionProfileSurvey = ({
   }
 }
 
+/* PHONE UI */
 @media (max-width: 768px) {
   .nutrition-survey-section {
     width: 100%;
     max-width: 100%;
-    padding-bottom: 104px;
+    min-height: auto;
+    padding: 0 0 112px;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: visible;
   }
 
   .nutrition-survey-topbar {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 30;
     flex-direction: column;
     align-items: stretch;
-    margin-bottom: 14px;
-    padding: 8px 0 10px;
-    background: linear-gradient(180deg, rgba(28,31,36,0.98), rgba(28,31,36,0.78));
+    gap: 12px;
+    margin: -4px -2px 14px;
+    padding: 8px 2px 12px;
+    background: linear-gradient(
+      180deg,
+      rgba(28,31,36,0.98) 0%,
+      rgba(28,31,36,0.90) 72%,
+      rgba(28,31,36,0.00) 100%
+    );
     backdrop-filter: blur(12px);
   }
 
+  .nutrition-survey-topbar .nutrition-back-btn {
+    width: fit-content;
+    min-height: 42px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
   .nutrition-survey-step-indicator {
+    width: 100%;
     justify-content: center;
+    gap: 7px;
+  }
+
+  .nutrition-survey-dot {
+    width: 42px;
+    height: 7px;
   }
 
   .nutrition-survey-card {
+    width: 100%;
     padding: 18px;
     border-radius: 22px;
+    box-shadow: 0 16px 38px rgba(0,0,0,0.28);
+  }
+
+  .nutrition-ai-badge {
+    font-size: 11px;
+    padding: 7px 12px;
+    margin-bottom: 12px;
+  }
+
+  .nutrition-ai-title {
+    font-size: clamp(28px, 9vw, 38px);
+    line-height: 1.08;
+    margin-bottom: 10px;
+  }
+
+  .nutrition-ai-text {
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 18px;
   }
 
   .nutrition-survey-question {
     font-size: 21px;
+    line-height: 1.18;
+    margin-bottom: 14px;
+  }
+
+  .nutrition-survey-options-grid {
+    gap: 12px;
   }
 
   .nutrition-survey-option {
-    min-height: 145px;
-    padding: 18px;
+    min-height: auto;
+    padding: 16px;
     border-radius: 20px;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: start;
+  }
+
+  .nutrition-survey-option-icon {
+    grid-row: span 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+    background: rgba(97,218,251,0.09);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    margin: 0;
   }
 
   .nutrition-survey-option h4 {
     font-size: 18px;
+    line-height: 1.18;
+    margin: 0;
   }
 
   .nutrition-survey-option p {
-    font-size: 13px;
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+
+  .nutrition-survey-block {
+    margin-bottom: 18px;
+  }
+
+  .nutrition-survey-label,
+  .nutrition-survey-field label {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .nutrition-survey-chip-row {
+    gap: 8px;
   }
 
   .nutrition-survey-chip {
     width: 100%;
-    min-height: 44px;
+    min-height: 46px;
     border-radius: 16px;
     text-align: left;
+    padding: 12px 14px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+  }
+
+  .nutrition-survey-form-grid {
+    grid-template-columns: 1fr;
+    gap: 13px;
   }
 
   .nutrition-survey-input {
     min-height: 52px;
+    border-radius: 16px;
     font-size: 16px;
+    padding: 0 14px;
+  }
+
+  .nutrition-survey-error {
+    font-size: 13px;
+    border-radius: 14px;
+    padding: 11px 12px;
   }
 
   .nutrition-survey-actions {
-    flex-direction: column;
+    position: sticky;
+    bottom: calc(78px + env(safe-area-inset-bottom));
+    z-index: 25;
+    flex-direction: column-reverse;
     gap: 10px;
+    margin: 22px -6px 0;
+    padding: 12px 6px 4px;
+    background: linear-gradient(
+      0deg,
+      rgba(28,31,36,0.98) 0%,
+      rgba(28,31,36,0.92) 78%,
+      rgba(28,31,36,0.00) 100%
+    );
+    backdrop-filter: blur(12px);
   }
 
   .nutrition-survey-primary-btn,
   .nutrition-survey-secondary-btn {
     width: 100%;
     min-width: 0;
+    min-height: 54px;
+    border-radius: 17px;
+    font-size: 15px;
   }
 }
 
+/* SMALL PHONE */
 @media (max-width: 430px) {
+  .nutrition-survey-section {
+    padding-bottom: 116px;
+  }
+
   .nutrition-survey-card {
     padding: 16px;
     border-radius: 20px;
   }
 
   .nutrition-survey-dot {
-    width: 26px;
+    width: 34px;
+  }
+
+  .nutrition-survey-option {
+    padding: 14px;
+    border-radius: 18px;
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .nutrition-survey-option-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 23px;
+    border-radius: 14px;
+  }
+
+  .nutrition-survey-option h4 {
+    font-size: 17px;
+  }
+
+  .nutrition-survey-option p {
+    font-size: 12px;
+  }
+
+  .nutrition-survey-actions {
+    bottom: calc(74px + env(safe-area-inset-bottom));
   }
 }
-      `}</style>
+`}</style>
     </div>
   );
 };
