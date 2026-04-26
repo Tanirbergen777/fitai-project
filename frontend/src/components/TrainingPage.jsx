@@ -192,9 +192,13 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
       <style>{`
 .workout-page-container {
-  width: 100%;
+  width: calc(100vw - 92px);
+  max-width: calc(100vw - 92px);
   min-width: 0;
-  min-height: 100dvh;
+  min-height: calc(100dvh - 80px);
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   color: white;
@@ -202,7 +206,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
     radial-gradient(circle at top left, rgba(97, 218, 251, 0.08), transparent 28%),
     radial-gradient(circle at top right, rgba(198, 120, 221, 0.08), transparent 26%),
     #1c1f24;
-  padding: 24px;
+  padding: 36px 48px 56px;
   box-sizing: border-box;
   align-items: stretch;
   overflow-x: hidden;
@@ -210,14 +214,19 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 .workout-page-container--session {
-  padding: 14px;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  left: auto;
+  transform: none;
+  padding: 0;
   background: transparent;
 }
 
 .training-header {
   width: 100%;
   text-align: center;
-  margin: 8px auto 42px;
+  margin: 0 auto 44px;
   max-width: 980px;
 }
 
@@ -237,7 +246,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 .workout-header {
-  font-size: clamp(42px, 5vw, 72px);
+  font-size: clamp(44px, 4.8vw, 72px);
   line-height: 1.02;
   font-weight: 950;
   margin: 0 0 14px;
@@ -265,12 +274,13 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   min-height: 0;
 }
 
-/* DESKTOP: ескі формат сияқты 4 карточка бір қатарда */
+/* DESKTOP: old wide notebook style */
 .selection-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(230px, 1fr));
   gap: 24px;
-  width: min(1680px, 100%);
+  width: 100%;
+  max-width: 1680px;
   margin: 0 auto;
   align-items: stretch;
 }
@@ -354,11 +364,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
 .selection-card h3 {
   margin: auto 0 14px 0;
-  font-size: clamp(24px, 1.8vw, 34px);
+  font-size: clamp(24px, 1.65vw, 32px);
   font-weight: 950;
   line-height: 1.16;
   word-break: normal;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
   hyphens: none;
 }
 
@@ -614,14 +624,13 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   box-shadow: 0 16px 34px rgba(97,218,251,0.24);
 }
 
-/* Smaller laptop: still desktop style, 4 cards */
+/* Normal laptop */
 @media (max-width: 1350px) {
   .workout-page-container {
-    padding: 22px;
+    padding: 34px 32px 52px;
   }
 
   .selection-grid {
-    width: min(1180px, 100%);
     gap: 20px;
   }
 
@@ -631,7 +640,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 
   .selection-card h3 {
-    font-size: clamp(22px, 1.9vw, 30px);
+    font-size: clamp(22px, 1.8vw, 30px);
   }
 
   .selection-card p {
@@ -639,12 +648,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 }
 
-/* Small laptop: keep 4 cards, but make them compact */
-@media (max-width: 1120px) {
+/* Smaller laptop */
+@media (max-width: 1150px) {
   .selection-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
     gap: 16px;
-    width: 100%;
   }
 
   .selection-card {
@@ -654,15 +662,15 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 
   .selection-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
+    width: 54px;
+    height: 54px;
+    border-radius: 17px;
     font-size: 28px;
   }
 
   .selection-card h3 {
-    font-size: clamp(20px, 2vw, 26px);
-    line-height: 1.15;
+    font-size: 22px;
+    line-height: 1.16;
   }
 
   .selection-card p {
@@ -670,9 +678,14 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 }
 
-/* Tablet: 2 columns */
+/* Tablet */
 @media (max-width: 900px) {
   .workout-page-container {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+    left: auto;
+    transform: none;
     padding: 18px;
   }
 
@@ -695,10 +708,14 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   }
 }
 
-/* Phone: 1 column */
+/* Phone */
 @media (max-width: 768px) {
   .workout-page-container {
+    width: 100%;
+    max-width: 100%;
     min-height: 100dvh;
+    left: auto;
+    transform: none;
     padding: 12px 10px 96px;
     background:
       radial-gradient(circle at top, rgba(97,218,251,0.10), transparent 28%),
