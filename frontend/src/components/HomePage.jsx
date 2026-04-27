@@ -48,7 +48,6 @@ const HomePage = ({ aiResult, user, userId, handleLogout, onProfileUpdate }) => 
 
   const [currentRating, setCurrentRating] = useState(user?.rating || 0);
   const [currentStreak, setCurrentStreak] = useState(user?.streak_count || 0);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('main');
   const [sessions, setSessions] = useState([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
@@ -164,7 +163,6 @@ const HomePage = ({ aiResult, user, userId, handleLogout, onProfileUpdate }) => 
             aiResult={aiResult}
             setActiveTab={setActiveTab}
             onComplete={async (points) => {
-              setShowSuccess(true);
 
               try {
                 const response = await fetch(
@@ -361,11 +359,6 @@ const HomePage = ({ aiResult, user, userId, handleLogout, onProfileUpdate }) => 
         </div>
       )}
 
-      <SuccessModal
-        isOpen={showSuccess}
-        points={50}
-        onClose={() => setShowSuccess(false)}
-      />
 
       <style>{`
 .hp-header-left,
