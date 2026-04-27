@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
@@ -15,6 +16,8 @@ FEATURES_PATH = PROJECT_ROOT / "ai_engine" / "models_bin" / "squat_pose_feature_
 
 _MODEL_BUNDLE: Optional[Any] = None
 _FEATURE_COLUMNS: Optional[list[str]] = None
+
+logger = logging.getLogger(__name__)
 
 
 def _to_number(value: Any) -> float | None:
@@ -275,6 +278,32 @@ def evaluate_squat_features(features_json: Dict[str, Any]) -> Dict[str, Any]:
         }
 
     except Exception as error:
+        try:
+            _, _, feature_columns = _ensure_loaded()
+        except Exception:
+            feature_columns = []
+
+        feature_keys = sorted(list(features_json.keys()))
+        missing_features = [
+            col for col in feature_columns
+            if _get_feature_value(features_json, col) is None
+        ] if feature_columns else []
+
+        logger.exception(
+            "SQUAT_ML_FALLBACK | error_type=%s | error=%s | model_path=%s | features_path=%s | feature_columns=%s | received_keys_sample=%s | missing_features_count=%s | missing_features_sample=%s",
+            type(error).__name__,
+            str(error),
+            MODEL_PATH,
+            FEATURES_PATH,
+            len(feature_columns),
+            feature_keys[:40],
+            len(missing_features),
+            missing_features[:30],
+        )
+
         fallback = _rule_fallback(features_json, "backend_rule_fallback")
-        fallback["feedback"] = f"{fallback['feedback']} ML уақытша fallback режимінде: {error}"
+        fallback["feedback"] = (
+            f"{fallback['feedback']} "
+            f"ML fallback: {type(error).__name__}: {error}"
+        )
         return fallback
