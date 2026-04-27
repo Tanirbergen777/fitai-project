@@ -17,7 +17,7 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
 
   const performanceScore = report?.performanceScore ?? null;
   const skippedCount = report?.skippedCount ?? null;
-  const checklistItems = Array.isArray(report?.results) ? report.results.slice(0, 4) : [];
+  const checklistItems = Array.isArray(report?.results) ? report.results : [];
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -132,7 +132,14 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
 
         {checklistItems.length > 0 && (
           <div className="success-modal-checklist">
-            <h3>{t('training.report.shortChecklist', 'Қысқаша чек-лист')}</h3>
+            <h3>
+              {t('training.report.shortChecklist', 'Қысқаша чек-лист')}
+              {report?.totalExercises ? (
+                <span className="success-modal-check-count">
+                  {checklistItems.length}/{report.totalExercises}
+                </span>
+              ) : null}
+            </h3>
 
             {checklistItems.map((item) => (
               <div
@@ -194,12 +201,14 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
   background: rgba(7, 10, 16, 0.78);
   backdrop-filter: blur(16px);
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .success-modal-card {
-  width: min(520px, 100%);
+  width: min(560px, 100%);
   max-height: calc(100dvh - 36px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 28px;
   border-radius: 30px;
   text-align: center;
@@ -324,6 +333,23 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
   color: #fff;
   font-size: 16px;
   font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.success-modal-check-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(97, 218, 251, 0.10);
+  border: 1px solid rgba(97, 218, 251, 0.20);
+  color: #7ce3ff;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .success-modal-check-item {
@@ -385,6 +411,8 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
 
 
 .success-modal-button {
+  position: sticky;
+  bottom: 0;
   width: 100%;
   min-height: 54px;
   border: none;
@@ -417,14 +445,14 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
 @media (max-width: 520px) {
   .success-modal-overlay {
     align-items: flex-end;
-    padding: 10px;
+    padding: 10px 8px calc(84px + env(safe-area-inset-bottom));
   }
 
   .success-modal-card {
     width: 100%;
-    max-height: calc(100dvh - 20px);
-    padding: 22px 16px 16px;
-    border-radius: 26px;
+    max-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+    padding: 18px 14px 14px;
+    border-radius: 24px;
   }
 
   .success-modal-fire-circle {
@@ -443,6 +471,20 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
   .success-modal-score {
     width: 100%;
     box-sizing: border-box;
+    margin-bottom: 14px;
+  }
+
+  .success-modal-checklist {
+    margin-bottom: 14px;
+  }
+
+  .success-modal-check-item {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .success-modal-button {
+    min-height: 52px;
   }
 }
       `}</style>
