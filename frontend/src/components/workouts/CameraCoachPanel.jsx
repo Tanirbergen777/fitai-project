@@ -477,9 +477,12 @@ export default function CameraCoachPanel({
     const currentTargetDuration = targetDurationSecondsRef.current;
     const currentElapsed = elapsedWorkSecondsRef.current;
 
+    // Completion көрсеткіші барлық attempt бойынша есептеледі.
+    // Мысалы 10 мақсат, 7 дұрыс + 2 қате = 9 attempt => completion 90%.
+    // Technique бөлек: correct / totalAttempts.
     const repCompletionPercent =
       currentTargetType === 'reps' && currentTargetReps && currentTargetReps > 0
-        ? Math.min(100, Math.round((correctReps / currentTargetReps) * 100))
+        ? Math.min(100, Math.round((totalAttempts / currentTargetReps) * 100))
         : null;
 
     const timeCompletionPercent =
@@ -864,10 +867,15 @@ export default function CameraCoachPanel({
 
       if (isCorrect) {
         correctRepCountRef.current += 1;
-        setRepCount((prev) => prev + 1);
       } else {
         incorrectRepCountRef.current += 1;
       }
+
+      // Counter тек дұрыс rep емес, барлық аяқталған attempt-ті санайды.
+      // Сондықтан қате squat та 1 attempt болып есептеледі,
+      // ал correct/incorrect бөлек summary-де сақталады.
+      repCountRef.current = currentAttemptIndex;
+      setRepCount(currentAttemptIndex);
 
       void sendRepEvent({
         repIndex: currentAttemptIndex,
