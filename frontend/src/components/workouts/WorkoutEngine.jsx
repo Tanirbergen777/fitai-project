@@ -557,12 +557,17 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
       timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (step === 'active' && exercisePhase === 'work' && timeLeft === 0) {
+    } else if (
+      step === 'active' &&
+      exercisePhase === 'work' &&
+      timeLeft === 0 &&
+      targetType !== 'reps'
+    ) {
       finishExercise();
     }
 
     return () => clearInterval(timer);
-  }, [step, exercisePhase, timeLeft, finishExercise]);
+  }, [step, exercisePhase, timeLeft, targetType, finishExercise]);
 
   const startWorkout = () => {
     if (!queue.length) return;
@@ -755,6 +760,12 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
                       {timeLeft} {t('training.seconds')}
                     </div>
                   </div>
+
+                  {targetType === 'reps' && timeLeft === 0 && (
+                    <div className="we-rep-overtime-hint">
+                      Уақыт аяқталды, бірақ жаттығу толық орындалғанша жалғастыра беріңіз.
+                    </div>
+                  )}
 
                   {targetType === 'reps' && (
                     <div className="we-ai-counter">
@@ -1314,6 +1325,22 @@ const styles = `
   margin-bottom: 22px;
   max-width: 760px;
   font-size: 18px;
+}
+
+.we-rep-overtime-hint {
+  width: 100%;
+  max-width: 760px;
+  margin: -8px 0 14px;
+  padding: 11px 14px;
+  border-radius: 16px;
+  background: rgba(97, 218, 251, 0.08);
+  border: 1px solid rgba(97, 218, 251, 0.20);
+  color: #8ee9ff;
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.45;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .we-muscles,
