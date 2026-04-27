@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import SuccessModal from './SuccessModal';
 import MassGainWorkout from './workouts/MassGainWorkout';
 import LoseWeightWorkout from './workouts/LoseWeightWorkout';
 import GeneralWorkout from './workouts/GeneralWorkout';
@@ -138,12 +137,6 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
       {selectedGoal && renderWorkout()}
 
-      <SuccessModal
-        isOpen={isFinished && Boolean(finishReport)}
-        points={finishReport?.score ?? 0}
-        report={finishReport}
-        onClose={handleFinishContinue}
-      />
 
       <style>{`
 .training-page {
