@@ -148,6 +148,24 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
                       ? `${t('training.report.donePercent', 'Орындалуы')}: ${item.performancePercent ?? 0}%`
                       : `${t('training.report.skipReason', 'Себебі')}: ${item.reasonLabel || '-'}`}
                   </p>
+
+                  {item.status === 'completed' && item.cameraSummary && (
+                    <div className="success-modal-camera-details">
+                      {typeof item.techniqueScore === 'number' && (
+                        <span>Technique: {item.techniqueScore}%</span>
+                      )}
+
+                      {typeof item.correctReps === 'number' && (
+                        <span>Correct: {item.correctReps}</span>
+                      )}
+
+                      {typeof item.incorrectReps === 'number' && (
+                        <span>Incorrect: {item.incorrectReps}</span>
+                      )}
+
+                      {item.labelSource && <span>{item.labelSource}</span>}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -341,6 +359,26 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
   font-size: 12.5px;
   line-height: 1.45;
 }
+
+.success-modal-camera-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.success-modal-camera-details span {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(97, 218, 251, 0.09);
+  border: 1px solid rgba(97, 218, 251, 0.18);
+  color: #7ce3ff;
+  font-size: 11px;
+  font-weight: 850;
+}
+
 
 .success-modal-button {
   width: 100%;

@@ -108,6 +108,8 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
 
   const [workoutQueue, setWorkoutQueue] = useState([]);
   const [cameraRepCount, setCameraRepCount] = useState(0);
+  const [, setCameraSummaryByExercise] = useState({});
+  const cameraSummaryByExerciseRef = useRef({});
   const [exerciseResults, setExerciseResults] = useState([]);
   const [skipModalOpen, setSkipModalOpen] = useState(false);
 
@@ -123,6 +125,8 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
     savedResultIdsRef.current = new Set();
     setCurrentIndex(0);
     setCameraRepCount(0);
+    setCameraSummaryByExercise({});
+    cameraSummaryByExerciseRef.current = {};
     setSkipModalOpen(false);
     setStep('preview');
   }, [normalizedExercises]);
@@ -146,6 +150,32 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
       ? Math.max(0, currentWorkSeconds - timeLeft)
       : 0;
 
+  const currentExerciseId = currentEx?._workoutId || `${currentIndex}-${currentEx?.name || 'exercise'}`;
+
+  const getCameraDrivenPerformance = useCallback(
+    (cameraSummary, fallbackPerformance) => {
+      if (!cameraSummary) return fallbackPerformance;
+
+      const completion =
+        typeof cameraSummary.completionPercent === 'number'
+          ? cameraSummary.completionPercent
+          : fallbackPerformance;
+
+      const technique =
+        typeof cameraSummary.techniqueScore === 'number'
+          ? cameraSummary.techniqueScore
+          : completion;
+
+      if (cameraSummary.targetType === 'reps') {
+        return clampPercent(completion * 0.45 + technique * 0.55);
+      }
+
+      return clampPercent(completion);
+    },
+    []
+  );
+
+
   useEffect(() => {
     cameraAutoFinishedRef.current = false;
     setCameraRepCount(0);
@@ -167,36 +197,64 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
     (status, reason = 'completed') => {
       if (!currentEx) return null;
 
+      const resultId = currentEx._workoutId || `${currentIndex}-${currentEx.name}`;
+      const cameraSummary = cameraSummaryByExerciseRef.current[resultId] || null;
+
       let performancePercent = 100;
       let performedValue = null;
       let targetValue = null;
+      let completionPercent = null;
+      let techniqueScore = null;
 
       if (targetType === 'reps') {
         targetValue = targetReps;
 
         if (currentEx.cameraMode) {
-          performedValue = cameraRepCount;
-          performancePercent = targetReps
-            ? clampPercent((cameraRepCount / targetReps) * 100)
+          performedValue =
+            typeof cameraSummary?.totalReps === 'number'
+              ? cameraSummary.totalReps
+              : cameraRepCount;
+
+          const fallbackCompletion = targetReps
+            ? clampPercent((performedValue / targetReps) * 100)
             : 100;
+
+          completionPercent =
+            typeof cameraSummary?.completionPercent === 'number'
+              ? cameraSummary.completionPercent
+              : fallbackCompletion;
+
+          techniqueScore =
+            typeof cameraSummary?.techniqueScore === 'number'
+              ? cameraSummary.techniqueScore
+              : null;
+
+          performancePercent = getCameraDrivenPerformance(
+            cameraSummary,
+            fallbackCompletion
+          );
         } else {
           performedValue = targetReps;
+          completionPercent = status === 'completed' ? 100 : 0;
           performancePercent = status === 'completed' ? 100 : 0;
         }
       } else {
         targetValue = currentWorkSeconds;
         performedValue = elapsedWorkSeconds;
-        performancePercent = currentWorkSeconds
+        completionPercent = currentWorkSeconds
           ? clampPercent((elapsedWorkSeconds / currentWorkSeconds) * 100)
           : 100;
+        performancePercent = completionPercent;
       }
 
       if (status !== 'completed') {
         performancePercent = 0;
+        completionPercent = 0;
+        techniqueScore = null;
       }
 
       return {
-        id: currentEx._workoutId || `${currentIndex}-${currentEx.name}`,
+        id: resultId,
         exerciseName: currentEx.name,
         exerciseKey: getExerciseKey(currentEx, currentIndex),
         cameraMode: currentEx.cameraMode || '',
@@ -204,6 +262,15 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
         targetValue,
         performedValue,
         performancePercent,
+        completionPercent,
+        techniqueScore,
+        cameraSummary,
+        correctReps: cameraSummary?.correctReps ?? null,
+        incorrectReps: cameraSummary?.incorrectReps ?? null,
+        totalAttempts: cameraSummary?.totalAttempts ?? null,
+        labelSource: cameraSummary?.labelSource || null,
+        cameraFeedback: cameraSummary?.feedback || '',
+        errorTypes: cameraSummary?.errorTypes || {},
         status,
         reason,
         reasonLabel: getSkipReasonLabel(reason),
@@ -219,6 +286,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
       cameraRepCount,
       currentWorkSeconds,
       elapsedWorkSeconds,
+      getCameraDrivenPerformance,
     ]
   );
 
@@ -257,12 +325,23 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
           )
         : 0;
 
+      const techniqueItems = completed.filter(
+        (item) => typeof item.techniqueScore === 'number'
+      );
+
+      const averageTechnique = techniqueItems.length
+        ? Math.round(
+            techniqueItems.reduce((sum, item) => sum + item.techniqueScore, 0) /
+              techniqueItems.length
+          )
+        : null;
+
       const completionScore = clampPercent((completed.length / total) * 100);
       const consistencyScore = clampPercent(((total - skipped.length) / total) * 100);
 
       const score = clampPercent(
-        completionScore * 0.45 +
-          averagePerformance * 0.35 +
+        completionScore * 0.35 +
+          averagePerformance * 0.45 +
           consistencyScore * 0.2
       );
 
@@ -286,6 +365,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
         skippedCount: skipped.length,
         completionScore,
         performanceScore: averagePerformance,
+        techniqueScore: averageTechnique,
         consistencyScore,
         results: resultsList,
         skipped,
@@ -379,6 +459,34 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
   const handleCameraRepCountChange = useCallback((count) => {
     setCameraRepCount(typeof count === 'number' ? count : 0);
   }, []);
+
+  const handleCameraSummaryChange = useCallback(
+    (summary) => {
+      if (!summary || !currentEx) return;
+
+      const exerciseId = currentEx._workoutId || `${currentIndex}-${currentEx.name}`;
+
+      const normalizedSummary = {
+        ...summary,
+        exerciseId,
+        exerciseName: currentEx.name,
+        targetReps,
+        targetType,
+      };
+
+      cameraSummaryByExerciseRef.current = {
+        ...cameraSummaryByExerciseRef.current,
+        [exerciseId]: normalizedSummary,
+      };
+
+      setCameraSummaryByExercise((prev) => ({
+        ...prev,
+        [exerciseId]: normalizedSummary,
+      }));
+    },
+    [currentEx, currentIndex, targetReps, targetType]
+  );
+
 
   const handleCameraTargetReached = useCallback(() => {
     if (targetType !== 'reps') return;
@@ -733,6 +841,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
                   exerciseModeOverride={currentEx?.cameraMode || ''}
                   onRepCountChange={handleCameraRepCountChange}
                   onTargetReached={handleCameraTargetReached}
+                  onCameraSummary={handleCameraSummaryChange}
                 />
               </section>
             </div>

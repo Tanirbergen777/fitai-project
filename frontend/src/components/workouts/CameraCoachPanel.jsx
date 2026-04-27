@@ -373,6 +373,7 @@ export default function CameraCoachPanel({
   exerciseModeOverride = '',
   onRepCountChange = null,
   onTargetReached = null,
+  onCameraSummary = null,
 }) {
   const videoRef = useRef(null);
   const skeletonCanvasRef = useRef(null);
@@ -403,6 +404,12 @@ export default function CameraCoachPanel({
   const prevExerciseNameRef = useRef('');
 
   const attemptCountRef = useRef(0);
+  const correctRepCountRef = useRef(0);
+  const incorrectRepCountRef = useRef(0);
+  const lastAttemptScoreRef = useRef(null);
+  const lastLabelSourceRef = useRef('rule');
+  const lastAttemptFeedbackRef = useRef('');
+  const errorTypeCountsRef = useRef({});
   const squatMlPendingRef = useRef(false);
   const cycleStartedRef = useRef(false);
   const cycleHadErrorRef = useRef(false);
@@ -461,6 +468,68 @@ export default function CameraCoachPanel({
     return null;
   }, [repCount, targetReps, targetType, targetDurationSeconds, elapsedWorkSeconds]);
 
+  const buildCameraSummary = useCallback(() => {
+    const totalAttempts = attemptCountRef.current;
+    const correctReps = correctRepCountRef.current;
+    const incorrectReps = incorrectRepCountRef.current;
+    const currentTargetReps = targetRepsRef.current;
+    const currentTargetType = targetTypeRef.current;
+    const currentTargetDuration = targetDurationSecondsRef.current;
+    const currentElapsed = elapsedWorkSecondsRef.current;
+
+    const repCompletionPercent =
+      currentTargetType === 'reps' && currentTargetReps && currentTargetReps > 0
+        ? Math.min(100, Math.round((correctReps / currentTargetReps) * 100))
+        : null;
+
+    const timeCompletionPercent =
+      currentTargetType === 'time' && currentTargetDuration && currentTargetDuration > 0
+        ? Math.min(100, Math.round((currentElapsed / currentTargetDuration) * 100))
+        : null;
+
+    const techniqueScore =
+      totalAttempts > 0 ? Math.round((correctReps / totalAttempts) * 100) : null;
+
+    const completionScore =
+      currentTargetType === 'reps' ? repCompletionPercent : timeCompletionPercent;
+
+    const cameraPerformance =
+      currentTargetType === 'reps' && completionScore !== null && techniqueScore !== null
+        ? Math.round(completionScore * 0.45 + techniqueScore * 0.55)
+        : completionScore;
+
+    return {
+      exerciseName,
+      exerciseOrderIndex,
+      exerciseMode: exerciseModeRef.current,
+      targetType: currentTargetType,
+      targetReps: currentTargetReps,
+      targetDurationSeconds: currentTargetDuration,
+      elapsedWorkSeconds: currentElapsed,
+      totalAttempts,
+      totalReps: totalAttempts,
+      correctReps,
+      incorrectReps,
+      completionPercent: completionScore,
+      techniqueScore,
+      cameraPerformance,
+      lastAttemptScore: lastAttemptScoreRef.current,
+      labelSource: lastLabelSourceRef.current,
+      feedback: lastAttemptFeedbackRef.current || feedbackRef.current || '',
+      errorTypes: { ...errorTypeCountsRef.current },
+      metricLabel: metricLabelRef.current,
+      metricValue: metricValueRef.current,
+      stage: stageRef.current,
+    };
+  }, [exerciseName, exerciseOrderIndex]);
+
+  const publishCameraSummary = useCallback(() => {
+    if (typeof onCameraSummary !== 'function') return;
+    onCameraSummary(buildCameraSummary());
+  }, [buildCameraSummary, onCameraSummary]);
+
+
+
   const isTargetReached = useMemo(() => {
     if (targetType === 'reps') {
       return targetReps ? repCount >= targetReps : false;
@@ -493,6 +562,11 @@ export default function CameraCoachPanel({
       onRepCountChange(repCount);
     }
   }, [repCount, onRepCountChange]);
+
+  useEffect(() => {
+    publishCameraSummary();
+  }, [completionPercent, elapsedWorkSeconds, publishCameraSummary]);
+
 
   useEffect(() => {
     feedbackRef.current = feedback;
@@ -776,9 +850,23 @@ export default function CameraCoachPanel({
       const currentAttemptIndex = attemptCountRef.current;
 
       latestErrorTypeRef.current = errorType;
+      lastAttemptScoreRef.current = score;
+      lastLabelSourceRef.current = labelSource;
+      lastAttemptFeedbackRef.current =
+        feedbackText || (isCorrect ? 'Повтор засчитан.' : 'Повтор с ошибкой.');
+
+      if (errorType) {
+        errorTypeCountsRef.current = {
+          ...errorTypeCountsRef.current,
+          [errorType]: (errorTypeCountsRef.current[errorType] || 0) + 1,
+        };
+      }
 
       if (isCorrect) {
+        correctRepCountRef.current += 1;
         setRepCount((prev) => prev + 1);
+      } else {
+        incorrectRepCountRef.current += 1;
       }
 
       void sendRepEvent({
@@ -790,10 +878,12 @@ export default function CameraCoachPanel({
         labelSource,
       });
 
+      publishCameraSummary();
+
       cycleStartedRef.current = false;
       cycleHadErrorRef.current = false;
     },
-    [sendRepEvent]
+    [sendRepEvent, publishCameraSummary]
   );
 
   const evaluateSquatAttempt = useCallback(
@@ -914,6 +1004,13 @@ export default function CameraCoachPanel({
     setRepCount(0);
     setMetricValue(null);
     attemptCountRef.current = 0;
+    correctRepCountRef.current = 0;
+    incorrectRepCountRef.current = 0;
+    lastAttemptScoreRef.current = null;
+    lastLabelSourceRef.current = 'rule';
+    lastAttemptFeedbackRef.current = '';
+    errorTypeCountsRef.current = {};
+    publishCameraSummary();
     cycleStartedRef.current = false;
     cycleHadErrorRef.current = false;
     repCooldownRef.current = 0;
@@ -954,7 +1051,7 @@ export default function CameraCoachPanel({
       setMetricLabel('Landmarks');
       setFeedback('Для этого упражнения пока включён только общий pose tracking.');
     }
-  }, [exerciseMode, exerciseName]);
+  }, [exerciseMode, exerciseName, publishCameraSummary]);
 
   useEffect(() => {
     if (!cameraOn) {
