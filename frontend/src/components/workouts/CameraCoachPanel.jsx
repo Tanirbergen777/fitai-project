@@ -803,7 +803,7 @@ export default function CameraCoachPanel({
     if (!sessionId) return;
 
     const now = performance.now();
-    if (now - lastLiveSampleSentAtRef.current < 700) return;
+    if (now - lastLiveSampleSentAtRef.current < 2500) return;
 
     lastLiveSampleSentAtRef.current = now;
 
@@ -901,7 +901,9 @@ export default function CameraCoachPanel({
       fallbackErrorType = null,
       features = null,
     }) => {
-      if (squatMlPendingRef.current) return;
+      // Бұрын мұнда squatMlPendingRef guard болды.
+      // Ол ML сұранысы ұзақ жауап берсе, келесі squat repeat-терді өткізіп жіберетін.
+      // Сондықтан әр аяқталған repeat үшін жеке ML сұранысын жібереміз.
       squatMlPendingRef.current = true;
 
       try {
