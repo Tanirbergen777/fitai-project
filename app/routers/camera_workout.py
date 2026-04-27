@@ -6,6 +6,7 @@ import csv
 import io
 from fastapi.responses import StreamingResponse
 from app.ml.squat_inference import evaluate_squat_features
+from app.ml.pushup_inference import evaluate_pushup_features
 from app.schemas import (
     CameraSessionStartRequest,
     CameraSessionLiveUpdateRequest,
@@ -404,3 +405,16 @@ async def ml_squat_evaluate(payload: CameraMlSquatEvaluateRequest):
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ML squat evaluate error: {e}")
+
+@router.post("/ml/pushup-evaluate", response_model=CameraMlSquatEvaluateResponse)
+async def ml_pushup_evaluate(payload: CameraMlSquatEvaluateRequest):
+    if not payload.features_json:
+        raise HTTPException(status_code=400, detail="features_json обязателен")
+
+    try:
+        result = evaluate_pushup_features(payload.features_json)
+        return result
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ML pushup evaluate error: {e}")

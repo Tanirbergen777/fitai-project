@@ -411,6 +411,7 @@ export default function CameraCoachPanel({
   const lastAttemptFeedbackRef = useRef('');
   const errorTypeCountsRef = useRef({});
   const squatMlPendingRef = useRef(false);
+  const pushupMlPendingRef = useRef(false);
   const cycleStartedRef = useRef(false);
   const cycleHadErrorRef = useRef(false);
   const repCooldownRef = useRef(0);
@@ -951,6 +952,65 @@ export default function CameraCoachPanel({
     [finalizeAttempt]
   );
 
+
+  const evaluatePushupAttempt = useCallback(
+    async ({
+      isCorrect: fallbackIsCorrect,
+      feedbackText: fallbackFeedbackText,
+      errorType: fallbackErrorType = null,
+      score: fallbackScore = null,
+      labelSource: fallbackLabelSource = 'rule',
+      features = null,
+    }) => {
+      // Push-up-та да squat сияқты ML сұранысы counter-ді блоктамауы керек.
+      // Әр аяқталған repeat үшін жеке ML бағалау жібереміз.
+      pushupMlPendingRef.current = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/camera-workout/ml/pushup-evaluate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            features_json: features || latestFeaturesRef.current || {},
+            phase: stageRef.current,
+            exercise_mode: 'pushup',
+          }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || 'ML pushup evaluate failed');
+        }
+
+        const data = await response.json();
+        const finalFeedback = data.feedback || fallbackFeedbackText;
+        setFeedback(finalFeedback);
+
+        finalizeAttempt({
+          isCorrect: Boolean(data.is_correct),
+          feedbackText: finalFeedback,
+          errorType: data.error_type ?? fallbackErrorType ?? null,
+          score: data.score ?? fallbackScore ?? null,
+          labelSource: data.label_source || 'ml_rf_pushup',
+        });
+      } catch (error) {
+        console.error('Push-up ML evaluate error:', error);
+        setFeedback(fallbackFeedbackText);
+
+        finalizeAttempt({
+          isCorrect: fallbackIsCorrect,
+          feedbackText: fallbackFeedbackText,
+          errorType: fallbackErrorType,
+          score: fallbackScore,
+          labelSource: fallbackLabelSource || 'rule_fallback_pushup',
+        });
+      } finally {
+        pushupMlPendingRef.current = false;
+      }
+    },
+    [finalizeAttempt]
+  );
+
   useEffect(() => {
     let mounted = true;
 
@@ -1028,6 +1088,7 @@ export default function CameraCoachPanel({
     latestErrorTypeRef.current = null;
     lastLiveSampleSentAtRef.current = 0;
     squatMlPendingRef.current = false;
+    pushupMlPendingRef.current = false;
     lastLandmarksRef.current = null;
     lastOverlayRef.current = null;
     lastPoseSeenAtRef.current = 0;
@@ -1174,7 +1235,11 @@ export default function CameraCoachPanel({
     }
 
     if (currentMode === 'pushup') {
-      analyzePushup({ landmarks, ...currentAnalyzerContext });
+      analyzePushup({
+        landmarks,
+        ...currentAnalyzerContext,
+        finalizeAttempt: evaluatePushupAttempt,
+      });
       return;
     }
 
