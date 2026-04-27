@@ -12,6 +12,51 @@ import legsImg from './photo/legs.jpg';
 const getVideoUrl = (path) =>
   supabase.storage.from('exercise-videos').getPublicUrl(path).data.publicUrl;
 
+const CAMERA_EXERCISE_META = {
+  jumpingJacks: { cameraMode: 'jumping_jacks', reps: '20 reps', workSeconds: 40 },
+  run: { cameraMode: 'high_knees', reps: '20 reps', workSeconds: 35 },
+  highKnees: { cameraMode: 'high_knees', reps: '20 reps', workSeconds: 35 },
+
+  squatLegRaise: { cameraMode: 'squat', reps: '10 reps', workSeconds: 45 },
+  squat1: { cameraMode: 'squat', reps: '10 reps', workSeconds: 45 },
+  squat2: { cameraMode: 'squat', reps: '10 reps', workSeconds: 45 },
+
+  lungeTwist: { cameraMode: 'lunge', reps: '10 reps', workSeconds: 40 },
+  lunge1: { cameraMode: 'lunge', reps: '10 reps', workSeconds: 40 },
+  lunge2: { cameraMode: 'lunge', reps: '10 reps', workSeconds: 40 },
+
+  pushUps: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  widePushUps: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  kneePushUps: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  inclinePushUps: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  pushupRotation: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  inchwormDiamond: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  push1: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  push2: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  push3: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+
+  sitUps: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+  bicycle: { cameraMode: 'crunch', reps: '16 reps', workSeconds: 35 },
+  reverseCrunch: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+  crunches: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+  legRaise: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+};
+
+const applyCameraAnalysisMeta = (exercise) => {
+  const meta = CAMERA_EXERCISE_META[exercise.key];
+
+  if (!meta) {
+    return exercise;
+  }
+
+  return {
+    ...exercise,
+    ...meta,
+    analysisEnabled: true,
+  };
+};
+
+
 const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
   const { t } = useTranslation();
   const [randomExercises, setRandomExercises] = useState([]);
@@ -60,6 +105,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             { key: 'lowerBackLeft', video: 'fullbody/skruchivanie-poyasnica-levo.mp4' },
             { key: 'lowerBackRight', video: 'fullbody/skruchivanie-poyasnica-pravo.mp4' },
           ].map((item) => ({
+            key: item.key,
             name: t(`training.fullbody.${item.key}.title`),
             description: t(`training.fullbody.${item.key}.desc`),
             reps: '30 сек',
@@ -69,7 +115,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             restSeconds: 10,
           }));
 
-          setRandomExercises(pool);
+          setRandomExercises(pool.map(applyCameraAnalysisMeta));
           return;
         }
 
@@ -124,6 +170,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
           baseExercises.forEach((exercise) => {
             for (let i = 0; i < exercise.repeat; i++) {
               expanded.push({
+                key: exercise.key,
                 name: t(`training.chest.${exercise.key}.title`),
                 description: t(`training.chest.${exercise.key}.desc`),
                 reps: '30 сек',
@@ -137,7 +184,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             }
           });
 
-          setRandomExercises(expanded);
+          setRandomExercises(expanded.map(applyCameraAnalysisMeta));
           return;
         }
 
@@ -248,6 +295,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
           ];
 
           const expanded = baseExercises.map((exercise) => ({
+            key: exercise.key,
             name: t(`training.abs.${exercise.key}.title`),
             description: t(`training.abs.${exercise.key}.desc`),
             reps: '30 сек',
@@ -259,7 +307,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             equipment: exercise.equipment,
           }));
 
-          setRandomExercises(expanded);
+          setRandomExercises(expanded.map(applyCameraAnalysisMeta));
           return;
         }
 
@@ -382,6 +430,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             }
 
             return {
+              key: item.key,
               name: t(`training.legs.${item.key}.title`),
               description: t(`training.legs.${item.key}.desc`),
               reps: '30 сек',
@@ -394,7 +443,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             };
           });
 
-          setRandomExercises(expanded);
+          setRandomExercises(expanded.map(applyCameraAnalysisMeta));
           return;
         }
 
@@ -515,6 +564,7 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             }
 
             return {
+              key: item.key,
               name: t(`training.arms.${item.key}.title`),
               description: t(`training.arms.${item.key}.desc`),
               reps: '30 сек',
@@ -527,12 +577,12 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             };
           });
 
-          setRandomExercises(expanded);
+          setRandomExercises(expanded.map(applyCameraAnalysisMeta));
           return;
         }
 
         const shuffled = [...pool].sort(() => 0.5 - Math.random());
-        setRandomExercises(shuffled.slice(0, 3));
+        setRandomExercises(shuffled.slice(0, 3).map(applyCameraAnalysisMeta));
       } catch (err) {
         console.error('Ошибка загрузки упражнений:', err);
       } finally {

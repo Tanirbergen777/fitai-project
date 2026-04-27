@@ -841,7 +841,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
                   exerciseModeOverride={currentEx?.cameraMode || ''}
                   onRepCountChange={handleCameraRepCountChange}
                   onTargetReached={handleCameraTargetReached}
-                  onCameraSummary={handleCameraSummaryChange}
+                  onCameraSummary={currentEx?.cameraMode ? handleCameraSummaryChange : null}
                 />
               </section>
             </div>

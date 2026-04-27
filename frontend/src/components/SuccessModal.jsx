@@ -149,23 +149,27 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
                       : `${t('training.report.skipReason', 'Себебі')}: ${item.reasonLabel || '-'}`}
                   </p>
 
-                  {item.status === 'completed' && item.cameraSummary && (
-                    <div className="success-modal-camera-details">
-                      {typeof item.techniqueScore === 'number' && (
-                        <span>Technique: {item.techniqueScore}%</span>
-                      )}
+                  {item.status === 'completed' &&
+                    item.cameraSummary &&
+                    ((item.totalAttempts ?? 0) > 0 || typeof item.techniqueScore === 'number') && (
+                      <div className="success-modal-camera-details">
+                        {typeof item.techniqueScore === 'number' && (
+                          <span>Technique: {item.techniqueScore}%</span>
+                        )}
 
-                      {typeof item.correctReps === 'number' && (
-                        <span>Correct: {item.correctReps}</span>
-                      )}
+                        {(item.totalAttempts ?? 0) > 0 && typeof item.correctReps === 'number' && (
+                          <span>Correct: {item.correctReps}</span>
+                        )}
 
-                      {typeof item.incorrectReps === 'number' && (
-                        <span>Incorrect: {item.incorrectReps}</span>
-                      )}
+                        {(item.totalAttempts ?? 0) > 0 && typeof item.incorrectReps === 'number' && (
+                          <span>Incorrect: {item.incorrectReps}</span>
+                        )}
 
-                      {item.labelSource && <span>{item.labelSource}</span>}
-                    </div>
-                  )}
+                        {(item.totalAttempts ?? 0) > 0 && item.labelSource && (
+                          <span>{item.labelSource}</span>
+                        )}
+                      </div>
+                    )}
                 </div>
               </div>
             ))}
