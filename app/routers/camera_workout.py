@@ -23,7 +23,7 @@ from app.schemas import (
 
 from ..database import get_db
 from .. import models
-
+from app.ml.lunge_inference import evaluate_lunge_features
 router = APIRouter(prefix="/camera-workout", tags=["Camera Workout"])
 
 
@@ -418,3 +418,16 @@ async def ml_pushup_evaluate(payload: CameraMlSquatEvaluateRequest):
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ML pushup evaluate error: {e}")
+
+@router.post("/ml/lunge-evaluate", response_model=CameraMlSquatEvaluateResponse)
+async def ml_lunge_evaluate(payload: CameraMlSquatEvaluateRequest):
+    if not payload.features_json:
+        raise HTTPException(status_code=400, detail="features_json обязателен")
+
+    try:
+        result = evaluate_lunge_features(payload.features_json)
+        return result
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ML lunge evaluate error: {e}")
