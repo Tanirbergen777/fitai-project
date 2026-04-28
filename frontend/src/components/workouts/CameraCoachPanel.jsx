@@ -67,7 +67,7 @@ const POSE_CONNECTIONS = [
   [LANDMARKS.RIGHT_KNEE, LANDMARKS.RIGHT_ANKLE],
 ];
 
-const isVisiblePoint = (point, min = 0.35) =>
+const isVisiblePoint = (point, min = 0.22) =>
   point && (point.visibility ?? 1) >= min;
 
 const drawRoundedRect = (ctx, x, y, w, h, r = 14) => {
@@ -153,6 +153,22 @@ const formatMetricValue = (label, value) => {
   }
 
   return `${Math.round(Number(value))}`;
+};
+
+const getNoPoseFeedback = (mode) => {
+  if (mode === 'pushup') {
+    return 'Поза табылмады. Push-up үшін камераны бүйір жаққа 2–3 метрге қой: бас, қол, бел, тізе және аяқ толық көрінсін.';
+  }
+
+  if (mode === 'squat') {
+    return 'Поза табылмады. Squat үшін камераны бүйірге қойып, денені толық кадрға сыйдыр.';
+  }
+
+  if (mode === 'plank') {
+    return 'Поза табылмады. Plank үшін дене толық көрінуі керек: иық, бел және аяқ кадр ішінде болсын.';
+  }
+
+  return 'Поза табылмады. Камера денені толық көруі керек, сәл алысырақ тұрып көр.';
 };
 
 const drawConnection = (ctx, landmarks, startIdx, endIdx, width, height, tone) => {
@@ -1027,9 +1043,11 @@ export default function CameraCoachPanel({
           },
           runningMode: 'VIDEO',
           numPoses: 1,
-          minPoseDetectionConfidence: 0.45,
-          minPosePresenceConfidence: 0.45,
-          minTrackingConfidence: 0.45,
+          // Төмен ракурстағы push-up кезінде MediaPipe кейде адамды жоғалтады.
+          // Сондықтан confidence сәл төмендетілді: landmarks жиі табылуы үшін.
+          minPoseDetectionConfidence: 0.28,
+          minPosePresenceConfidence: 0.25,
+          minTrackingConfidence: 0.25,
         });
 
         if (!mounted) return;
@@ -1418,7 +1436,7 @@ export default function CameraCoachPanel({
           const now = performance.now();
           const lastLandmarks = lastLandmarksRef.current;
           const lastOverlay = lastOverlayRef.current;
-          const recentlySeen = now - lastPoseSeenAtRef.current < 1200;
+          const recentlySeen = now - lastPoseSeenAtRef.current < 2500;
 
           if (lastLandmarks?.length && lastOverlay && recentlySeen) {
             const tone = getOverlayTone(
@@ -1437,7 +1455,7 @@ export default function CameraCoachPanel({
 
             if (now - lastNoPoseFeedbackAtRef.current > 900) {
               lastNoPoseFeedbackAtRef.current = now;
-              setFeedback('Поза не найдена. Отойди чуть дальше, чтобы камера видела тело полностью.');
+              setFeedback(getNoPoseFeedback(exerciseModeRef.current));
             }
           }
         }
@@ -1450,7 +1468,7 @@ export default function CameraCoachPanel({
     } else {
       const lastLandmarks = lastLandmarksRef.current;
       const lastOverlay = lastOverlayRef.current;
-      const recentlySeen = performance.now() - lastPoseSeenAtRef.current < 1200;
+      const recentlySeen = performance.now() - lastPoseSeenAtRef.current < 2500;
 
       if (lastLandmarks?.length && lastOverlay && recentlySeen) {
         const tone = getOverlayTone(
@@ -1506,6 +1524,19 @@ export default function CameraCoachPanel({
             },
           });
         }
+      });
+
+      // Телефонмен push-up түсіргенде артқы камера көбіне денені жақсырақ көреді.
+      attempts.push({
+        name: 'Default environment camera',
+        constraints: {
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        },
       });
 
       attempts.push({
