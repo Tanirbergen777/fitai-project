@@ -168,6 +168,10 @@ const getNoPoseFeedback = (mode) => {
     return 'Поза табылмады. Plank үшін дене толық көрінуі керек: иық, бел және аяқ кадр ішінде болсын.';
   }
 
+  if (mode === 'lunge') {
+    return 'Поза табылмады. Lunge үшін камераны бүйірге қойып, толық денені кадрға сыйдыр: иық, жамбас, тізе және аяқ көрінсін.';
+  }
+
   return 'Поза табылмады. Камера денені толық көруі керек, сәл алысырақ тұрып көр.';
 };
 
@@ -428,11 +432,13 @@ export default function CameraCoachPanel({
   const errorTypeCountsRef = useRef({});
   const squatMlPendingRef = useRef(false);
   const pushupMlPendingRef = useRef(false);
+  const lungeMlPendingRef = useRef(false);
   const cycleStartedRef = useRef(false);
   const cycleHadErrorRef = useRef(false);
   const repCooldownRef = useRef(0);
   const squatBottomSnapshotRef = useRef(null);
   const pushupBottomSnapshotRef = useRef(null);
+  const lungeBottomSnapshotRef = useRef(null);
 
   const targetRepsRef = useRef(targetReps);
   const targetTypeRef = useRef(targetType);
@@ -1028,6 +1034,62 @@ export default function CameraCoachPanel({
     [finalizeAttempt]
   );
 
+  const evaluateLungeAttempt = useCallback(
+    async ({
+      fallbackIsCorrect,
+      fallbackFeedbackText,
+      fallbackErrorType = null,
+      features = null,
+    }) => {
+      // Lunge-та да әр аяқталған attempt үшін жеке ML сұранысы жіберіледі.
+      // Бұл counter-ді блоктамайды және Render backend endpoint-іне барады.
+      lungeMlPendingRef.current = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/camera-workout/ml/lunge-evaluate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            features_json: features || latestFeaturesRef.current || {},
+            phase: stageRef.current,
+            exercise_mode: 'lunge',
+          }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || 'ML lunge evaluate failed');
+        }
+
+        const data = await response.json();
+        const finalFeedback = data.feedback || fallbackFeedbackText;
+        setFeedback(finalFeedback);
+
+        finalizeAttempt({
+          isCorrect: Boolean(data.is_correct),
+          feedbackText: finalFeedback,
+          errorType: data.error_type ?? fallbackErrorType ?? null,
+          score: data.score ?? null,
+          labelSource: data.label_source || 'ml_rf_lunge',
+        });
+      } catch (error) {
+        console.error('Lunge ML evaluate error:', error);
+        setFeedback(fallbackFeedbackText);
+
+        finalizeAttempt({
+          isCorrect: fallbackIsCorrect,
+          feedbackText: fallbackFeedbackText,
+          errorType: fallbackErrorType,
+          score: null,
+          labelSource: 'rule_fallback_lunge',
+        });
+      } finally {
+        lungeMlPendingRef.current = false;
+      }
+    },
+    [finalizeAttempt]
+  );
+
   useEffect(() => {
     let mounted = true;
 
@@ -1105,10 +1167,12 @@ export default function CameraCoachPanel({
     repCooldownRef.current = 0;
     squatBottomSnapshotRef.current = null;
     pushupBottomSnapshotRef.current = null;
+    lungeBottomSnapshotRef.current = null;
     latestErrorTypeRef.current = null;
     lastLiveSampleSentAtRef.current = 0;
     squatMlPendingRef.current = false;
     pushupMlPendingRef.current = false;
+    lungeMlPendingRef.current = false;
     lastLandmarksRef.current = null;
     lastOverlayRef.current = null;
     lastPoseSeenAtRef.current = 0;
@@ -1288,7 +1352,13 @@ export default function CameraCoachPanel({
     }
 
     if (currentMode === 'lunge') {
-      analyzeLunge({ landmarks, ...currentAnalyzerContext });
+      analyzeLunge({
+        landmarks,
+        ...currentAnalyzerContext,
+        finalizeLungeAttempt: evaluateLungeAttempt,
+        repCooldownRef,
+        lungeBottomSnapshotRef,
+      });
       return;
     }
 

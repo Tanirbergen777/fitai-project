@@ -1115,124 +1115,236 @@ export const analyzeLunge = ({
   cycleStartedRef,
   cycleHadErrorRef,
   finalizeAttempt,
-  finalizeSquatAttempt,
+  finalizeLungeAttempt,
+  repCooldownRef,
+  lungeBottomSnapshotRef,
 }) => {
-  const side = pickBetterSide(
-    landmarks,
-    [LANDMARKS.LEFT_HIP, LANDMARKS.LEFT_KNEE, LANDMARKS.LEFT_ANKLE],
-    [LANDMARKS.RIGHT_HIP, LANDMARKS.RIGHT_KNEE, LANDMARKS.RIGHT_ANKLE]
+  const leftHip = landmarks[LANDMARKS.LEFT_HIP];
+  const rightHip = landmarks[LANDMARKS.RIGHT_HIP];
+  const leftKnee = landmarks[LANDMARKS.LEFT_KNEE];
+  const rightKnee = landmarks[LANDMARKS.RIGHT_KNEE];
+  const leftAnkle = landmarks[LANDMARKS.LEFT_ANKLE];
+  const rightAnkle = landmarks[LANDMARKS.RIGHT_ANKLE];
+  const leftShoulder = landmarks[LANDMARKS.LEFT_SHOULDER];
+  const rightShoulder = landmarks[LANDMARKS.RIGHT_SHOULDER];
+
+  const leftKneeAngle = getAngle(leftHip, leftKnee, leftAnkle);
+  const rightKneeAngle = getAngle(rightHip, rightKnee, rightAnkle);
+
+  const validKneeAngles = [leftKneeAngle, rightKneeAngle].filter(
+    (value) => typeof value === 'number' && value >= 45 && value <= 178
   );
 
-  const hip = landmarks[side[0]];
-  const knee = landmarks[side[1]];
-  const ankle = landmarks[side[2]];
+  if (!validKneeAngles.length) return;
 
-  const angle = getAngle(hip, knee, ankle);
-  if (!angle) return;
+  // Lunge кезінде алдыңғы аяқтың тізесі көбірек бүгіледі.
+  // Сондықтан rep cycle үшін ең кіші knee angle-ді front knee деп аламыз.
+  const frontKneeAngle = Math.min(...validKneeAngles);
+  const backKneeAngle = Math.max(...validKneeAngles);
 
-  setMetricValue(angle);
-  latestFeaturesRef.current = {
+  let torsoLeanAngle = null;
+  if (leftShoulder && rightShoulder && leftHip && rightHip) {
+    const shoulderMid = {
+      x: (leftShoulder.x + rightShoulder.x) / 2,
+      y: (leftShoulder.y + rightShoulder.y) / 2,
+    };
+    const hipMid = {
+      x: (leftHip.x + rightHip.x) / 2,
+      y: (leftHip.y + rightHip.y) / 2,
+    };
+
+    const dx = hipMid.x - shoulderMid.x;
+    const dy = hipMid.y - shoulderMid.y;
+    torsoLeanAngle = Math.round(
+      (Math.atan2(Math.abs(dx), Math.max(Math.abs(dy), 0.0001)) * 180) /
+        Math.PI
+    );
+  }
+
+  const MIN_VALID_ANGLE = 45;
+  const MAX_VALID_ANGLE = 178;
+  const DOWN_ANGLE = 125;
+  const MID_ANGLE = 145;
+  const UP_ANGLE = 158;
+  const REP_COOLDOWN_MS = 900;
+  const now = performance.now();
+
+  if (frontKneeAngle < MIN_VALID_ANGLE || frontKneeAngle > MAX_VALID_ANGLE) {
+    return;
+  }
+
+  const buildLungeSnapshot = (phase) => ({
+    ...(latestFeaturesRef.current || {}),
     exercise_mode: 'lunge',
-    knee_angle: angle,
-    phase: stageRef.current,
-  };
+    knee_angle: frontKneeAngle,
+    front_knee_angle: frontKneeAngle,
+    back_knee_angle: backKneeAngle,
+    left_knee_angle: leftKneeAngle,
+    right_knee_angle: rightKneeAngle,
+    torso_lean_angle: torsoLeanAngle,
+    phase,
+    rep_timestamp_ms: now,
+  });
+
+  setMetricValue(frontKneeAngle);
+  latestFeaturesRef.current = buildLungeSnapshot(stageRef.current);
 
   if (!isActive) {
     cycleStartedRef.current = false;
     cycleHadErrorRef.current = false;
     latestErrorTypeRef.current = null;
+    if (lungeBottomSnapshotRef) lungeBottomSnapshotRef.current = null;
     setFeedback('Сейчас prepare phase. Прими позицию для выпадов.');
     return;
   }
 
-  if (angle < 105) {
-    cycleStartedRef.current = true;
-    latestErrorTypeRef.current = null;
-
-    if (stageRef.current !== 'down') {
-      stageRef.current = 'down';
-      setStage('down');
-    }
-
-    latestFeaturesRef.current = {
-      exercise_mode: 'lunge',
-      knee_angle: angle,
-      phase: 'down',
-    };
-
-    setFeedback('Хорошая нижняя точка выпада.');
-    return;
-  }
-
-  if (angle >= 105 && angle < 140) {
-    latestFeaturesRef.current = {
-      exercise_mode: 'lunge',
-      knee_angle: angle,
-      phase: 'mid',
-    };
-
-    if (stageRef.current === 'down') {
-      latestErrorTypeRef.current = null;
-      setFeedback('Поднимайся вверх плавно.');
+  if (stageRef.current === 'up' && frontKneeAngle <= DOWN_ANGLE) {
+    if (repCooldownRef?.current && now - repCooldownRef.current < REP_COOLDOWN_MS) {
       return;
     }
 
     cycleStartedRef.current = true;
-    cycleHadErrorRef.current = true;
-    latestErrorTypeRef.current = 'not_low_enough';
-    setFeedback('Опустись ниже, чтобы колено согнулось сильнее.');
+    cycleHadErrorRef.current = false;
+    latestErrorTypeRef.current = null;
+    stageRef.current = 'down';
+    setStage('down');
+
+    const downSnapshot = buildLungeSnapshot('down');
+    latestFeaturesRef.current = downSnapshot;
+    if (lungeBottomSnapshotRef) lungeBottomSnapshotRef.current = downSnapshot;
+
+    setFeedback('Нижняя точка выпада анықталды. Енді жоғары көтеріл.');
     return;
   }
 
-  if (angle > 160) {
-    if (stageRef.current === 'down') {
+  if (stageRef.current === 'down' && frontKneeAngle > DOWN_ANGLE && frontKneeAngle < UP_ANGLE) {
+    cycleStartedRef.current = true;
+    latestErrorTypeRef.current = null;
+
+    if (
+      lungeBottomSnapshotRef &&
+      (!lungeBottomSnapshotRef.current ||
+        frontKneeAngle < (lungeBottomSnapshotRef.current.front_knee_angle ?? 999))
+    ) {
+      const midSnapshot = buildLungeSnapshot('down');
+      latestFeaturesRef.current = midSnapshot;
+      lungeBottomSnapshotRef.current = midSnapshot;
+    } else {
+      latestFeaturesRef.current = buildLungeSnapshot('mid');
+    }
+
+    setFeedback('Жоғары көтеріліп жатырсың, қозғалысты аяқта.');
+    return;
+  }
+
+  if (stageRef.current === 'up' && frontKneeAngle > DOWN_ANGLE && frontKneeAngle < UP_ANGLE) {
+    cycleStartedRef.current = true;
+    cycleHadErrorRef.current = true;
+    latestErrorTypeRef.current = 'not_low_enough';
+    latestFeaturesRef.current = buildLungeSnapshot('mid');
+
+    if (frontKneeAngle < MID_ANGLE) {
+      setFeedback('Төмен түсу басталды. Толық төмен түссең ғана lunge саналады.');
+    } else {
+      setFeedback('Lunge үшін тізені көбірек бүк, төменірек түс.');
+    }
+    return;
+  }
+
+  if (frontKneeAngle >= UP_ANGLE) {
+    if (stageRef.current === 'down' && cycleStartedRef.current) {
+      if (repCooldownRef?.current && now - repCooldownRef.current < REP_COOLDOWN_MS) {
+        return;
+      }
+
       stageRef.current = 'up';
       setStage('up');
+      if (repCooldownRef) repCooldownRef.current = now;
+
+      const featuresSnapshot =
+        lungeBottomSnapshotRef?.current || buildLungeSnapshot('up');
 
       latestFeaturesRef.current = {
-        exercise_mode: 'lunge',
-        knee_angle: angle,
+        ...featuresSnapshot,
         phase: 'up',
+        rep_finish_timestamp_ms: now,
       };
 
-      if (cycleHadErrorRef.current) {
-        setFeedback('Выпад завершён, но с ошибкой.');
-        finalizeAttempt({
-          isCorrect: false,
-          feedbackText: 'Выпад выполнен не полностью.',
-          errorType: latestErrorTypeRef.current || 'not_low_enough',
-        });
+      const fallbackPayload = cycleHadErrorRef.current
+        ? {
+            fallbackIsCorrect: false,
+            fallbackFeedbackText: 'Выпад завершён, бірақ тереңдігі жеткіліксіз.',
+            fallbackErrorType: latestErrorTypeRef.current || 'not_low_enough',
+            features: latestFeaturesRef.current,
+          }
+        : {
+            fallbackIsCorrect: true,
+            fallbackFeedbackText: 'Lunge attempt аяқталды. Повтор засчитан.',
+            fallbackErrorType: null,
+            features: latestFeaturesRef.current,
+          };
+
+      cycleStartedRef.current = false;
+      cycleHadErrorRef.current = false;
+      if (lungeBottomSnapshotRef) lungeBottomSnapshotRef.current = null;
+
+      if (typeof finalizeLungeAttempt === 'function') {
+        setFeedback('ML lunge техникасын бағалап жатыр...');
+        void finalizeLungeAttempt(fallbackPayload);
       } else {
-        setFeedback('Повтор выпада засчитан.');
+        setFeedback(fallbackPayload.fallbackFeedbackText);
         finalizeAttempt({
-          isCorrect: true,
-          feedbackText: 'Повтор выпада засчитан.',
-          errorType: null,
+          isCorrect: fallbackPayload.fallbackIsCorrect,
+          feedbackText: fallbackPayload.fallbackFeedbackText,
+          errorType: fallbackPayload.fallbackErrorType,
         });
       }
       return;
     }
 
     if (cycleStartedRef.current) {
+      if (repCooldownRef?.current && now - repCooldownRef.current < REP_COOLDOWN_MS) {
+        return;
+      }
+
       stageRef.current = 'up';
       setStage('up');
+      if (repCooldownRef) repCooldownRef.current = now;
 
-      setFeedback('Попытка не засчитана: выпад был неполный.');
-      finalizeAttempt({
-        isCorrect: false,
-        feedbackText: 'Попытка не засчитана: неполный выпад.',
-        errorType: latestErrorTypeRef.current || 'range_incomplete',
-      });
+      const fallbackPayload = {
+        fallbackIsCorrect: false,
+        fallbackFeedbackText: 'Попытка не засчитана: lunge толық төмен түспеді.',
+        fallbackErrorType: latestErrorTypeRef.current || 'range_incomplete',
+        features: lungeBottomSnapshotRef?.current || buildLungeSnapshot('up'),
+      };
+
+      latestFeaturesRef.current = fallbackPayload.features;
+      cycleStartedRef.current = false;
+      cycleHadErrorRef.current = false;
+      if (lungeBottomSnapshotRef) lungeBottomSnapshotRef.current = null;
+
+      if (typeof finalizeLungeAttempt === 'function') {
+        setFeedback('ML lunge техникасын бағалап жатыр...');
+        void finalizeLungeAttempt(fallbackPayload);
+      } else {
+        setFeedback(fallbackPayload.fallbackFeedbackText);
+        finalizeAttempt({
+          isCorrect: false,
+          feedbackText: fallbackPayload.fallbackFeedbackText,
+          errorType: fallbackPayload.fallbackErrorType,
+        });
+      }
       return;
     }
 
     latestErrorTypeRef.current = null;
-    setFeedback('Исходная позиция нормальная.');
+    if (lungeBottomSnapshotRef) lungeBottomSnapshotRef.current = null;
+    setFeedback('Бастапқы позиция дайын. Төмен түссең lunge санау басталады.');
     return;
   }
 
   latestErrorTypeRef.current = 'unstable_motion';
-  setFeedback('Держи движение стабильно и контролируй колено.');
+  setFeedback('Қозғалысты тұрақты жаса және тізені бақыла.');
 };
 
 export const analyzeGeneric = ({
