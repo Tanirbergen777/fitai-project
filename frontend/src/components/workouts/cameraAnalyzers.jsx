@@ -456,6 +456,8 @@ export const analyzePushup = ({
   cycleHadErrorRef,
   finalizeAttempt,
   finalizeSquatAttempt,
+  repCooldownRef,
+  pushupBottomSnapshotRef,
 }) => {
   const side = pickBetterSide(
     landmarks,
@@ -470,8 +472,22 @@ export const analyzePushup = ({
   const angle = getAngle(shoulder, elbow, wrist);
   if (!angle) return;
 
+  const MIN_VALID_ANGLE = 45;
+  const MAX_VALID_ANGLE = 178;
+  const DOWN_ANGLE = 105;
+  const MID_ANGLE = 135;
+  const UP_ANGLE = 155;
+  const REP_COOLDOWN_MS = 900;
+  const now = performance.now();
+
+  if (angle < MIN_VALID_ANGLE || angle > MAX_VALID_ANGLE) {
+    return;
+  }
+
   setMetricValue(angle);
+
   latestFeaturesRef.current = {
+    ...(latestFeaturesRef.current || {}),
     exercise_mode: 'pushup',
     elbow_angle: angle,
     phase: stageRef.current,
@@ -481,12 +497,21 @@ export const analyzePushup = ({
     cycleStartedRef.current = false;
     cycleHadErrorRef.current = false;
     latestErrorTypeRef.current = null;
+    if (pushupBottomSnapshotRef) pushupBottomSnapshotRef.current = null;
     setFeedback('Сейчас prepare phase. Прими позицию для отжиманий.');
     return;
   }
 
-  if (angle < 95) {
+  // Fake count fix:
+  // Камера қосылған сәттегі жай pose саналмайды.
+  // Тек толық цикл саналады: UP -> DOWN -> UP.
+  if (angle <= DOWN_ANGLE) {
+    if (repCooldownRef?.current && now - repCooldownRef.current < REP_COOLDOWN_MS) {
+      return;
+    }
+
     cycleStartedRef.current = true;
+    cycleHadErrorRef.current = false;
     latestErrorTypeRef.current = null;
 
     if (stageRef.current !== 'down') {
@@ -494,85 +519,80 @@ export const analyzePushup = ({
       setStage('down');
     }
 
-    latestFeaturesRef.current = {
+    const downSnapshot = {
+      ...(latestFeaturesRef.current || {}),
       exercise_mode: 'pushup',
       elbow_angle: angle,
       phase: 'down',
+      rep_timestamp_ms: now,
     };
 
-    setFeedback('Нижняя точка хорошая.');
+    latestFeaturesRef.current = downSnapshot;
+    if (pushupBottomSnapshotRef) pushupBottomSnapshotRef.current = downSnapshot;
+
+    setFeedback('Нижняя точка анықталды. Енді жоғары көтеріл.');
     return;
   }
 
-  if (angle >= 95 && angle < 135) {
+  if (angle > DOWN_ANGLE && angle < UP_ANGLE) {
     latestFeaturesRef.current = {
+      ...(latestFeaturesRef.current || {}),
       exercise_mode: 'pushup',
       elbow_angle: angle,
       phase: 'mid',
     };
 
     if (stageRef.current === 'down') {
-      latestErrorTypeRef.current = null;
-      setFeedback('Поднимайся вверх плавно.');
-      return;
+      setFeedback('Жоғары көтеріліп жатырсың, қозғалысты аяқта.');
+    } else if (angle < MID_ANGLE) {
+      setFeedback('Төмен түсу басталды, бірақ толық төмен түскенде ғана саналады.');
+    } else {
+      setFeedback('Push-up үшін алдымен төмен түс, сосын жоғары көтеріл.');
     }
-
-    cycleStartedRef.current = true;
-    cycleHadErrorRef.current = true;
-    latestErrorTypeRef.current = 'not_low_enough';
-    setFeedback('Опустись ещё немного ниже.');
     return;
   }
 
-  if (angle > 155) {
-    if (stageRef.current === 'down') {
+  if (angle >= UP_ANGLE) {
+    if (stageRef.current === 'down' && cycleStartedRef.current) {
       stageRef.current = 'up';
       setStage('up');
 
-      latestFeaturesRef.current = {
+      const finishFeatures = {
+        ...(pushupBottomSnapshotRef?.current || latestFeaturesRef.current || {}),
         exercise_mode: 'pushup',
         elbow_angle: angle,
         phase: 'up',
+        rep_finish_timestamp_ms: now,
       };
 
-      if (cycleHadErrorRef.current) {
-        setFeedback('Повтор завершён, но с ошибкой.');
-        finalizeAttempt({
-          isCorrect: false,
-          feedbackText: 'Повтор с ошибкой: отжимание было неполным.',
-          errorType: latestErrorTypeRef.current || 'not_low_enough',
-        });
-      } else {
-        setFeedback('Повтор засчитан.');
-        finalizeAttempt({
-          isCorrect: true,
-          feedbackText: 'Повтор засчитан.',
-          errorType: null,
-        });
-      }
-      return;
-    }
+      latestFeaturesRef.current = finishFeatures;
+      if (repCooldownRef) repCooldownRef.current = now;
 
-    if (cycleStartedRef.current) {
-      stageRef.current = 'up';
-      setStage('up');
+      setFeedback('Push-up attempt аяқталды. ML техникасын бағалап жатыр.');
 
-      setFeedback('Попытка не засчитана: отжимание было неполным.');
       finalizeAttempt({
-        isCorrect: false,
-        feedbackText: 'Попытка не засчитана: неполное отжимание.',
-        errorType: latestErrorTypeRef.current || 'range_incomplete',
+        isCorrect: true,
+        feedbackText: 'Push-up attempt аяқталды.',
+        errorType: null,
+        score: null,
+        labelSource: 'rule_pushup_cycle',
+        features: finishFeatures,
       });
+
+      if (pushupBottomSnapshotRef) pushupBottomSnapshotRef.current = null;
       return;
     }
 
+    cycleStartedRef.current = false;
+    cycleHadErrorRef.current = false;
     latestErrorTypeRef.current = null;
-    setFeedback('Верхняя позиция нормальная.');
+    if (pushupBottomSnapshotRef) pushupBottomSnapshotRef.current = null;
+    setFeedback('Верхняя позиция дайын. Төмен түссең ғана санау басталады.');
     return;
   }
 
-  latestErrorTypeRef.current = 'unstable_motion';
-  setFeedback('Старайся держать локоть под контролем.');
+  latestErrorTypeRef.current = null;
+  setFeedback('Push-up қозғалысын камера бақылап тұр.');
 };
 
 export const analyzeJumpingJacks = ({

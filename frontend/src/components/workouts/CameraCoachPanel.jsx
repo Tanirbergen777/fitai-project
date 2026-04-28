@@ -432,6 +432,7 @@ export default function CameraCoachPanel({
   const cycleHadErrorRef = useRef(false);
   const repCooldownRef = useRef(0);
   const squatBottomSnapshotRef = useRef(null);
+  const pushupBottomSnapshotRef = useRef(null);
 
   const targetRepsRef = useRef(targetReps);
   const targetTypeRef = useRef(targetType);
@@ -1103,6 +1104,7 @@ export default function CameraCoachPanel({
     cycleHadErrorRef.current = false;
     repCooldownRef.current = 0;
     squatBottomSnapshotRef.current = null;
+    pushupBottomSnapshotRef.current = null;
     latestErrorTypeRef.current = null;
     lastLiveSampleSentAtRef.current = 0;
     squatMlPendingRef.current = false;
@@ -1257,6 +1259,8 @@ export default function CameraCoachPanel({
         landmarks,
         ...currentAnalyzerContext,
         finalizeAttempt: evaluatePushupAttempt,
+        repCooldownRef,
+        pushupBottomSnapshotRef,
       });
       return;
     }
@@ -1510,8 +1514,29 @@ export default function CameraCoachPanel({
 
       const attempts = [];
 
+      // Артқы камераны қолданбаймыз. Алдымен фронт камераны ашамыз.
+      attempts.push({
+        name: 'Default user camera',
+        constraints: {
+          video: {
+            facingMode: { ideal: 'user' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        },
+      });
+
       videoDevices.forEach((device, index) => {
-        if (device.deviceId) {
+        const label = String(device.label || '').toLowerCase();
+        const looksLikeBackCamera =
+          label.includes('back') ||
+          label.includes('rear') ||
+          label.includes('environment') ||
+          label.includes('зад') ||
+          label.includes('арт');
+
+        if (device.deviceId && !looksLikeBackCamera) {
           attempts.push({
             name: device.label || `Camera ${index + 1}`,
             constraints: {
@@ -1524,31 +1549,6 @@ export default function CameraCoachPanel({
             },
           });
         }
-      });
-
-      // Телефонмен push-up түсіргенде артқы камера көбіне денені жақсырақ көреді.
-      attempts.push({
-        name: 'Default environment camera',
-        constraints: {
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        },
-      });
-
-      attempts.push({
-        name: 'Default user camera',
-        constraints: {
-          video: {
-            facingMode: { ideal: 'user' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        },
       });
 
       attempts.push({
