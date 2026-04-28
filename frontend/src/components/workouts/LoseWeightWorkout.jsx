@@ -11,6 +11,51 @@ import legsImg from './photo/legs.jpg';
 const getVideoUrl = (path) =>
   supabase.storage.from('exercise-videos').getPublicUrl(path).data.publicUrl;
 
+
+const CAMERA_EXERCISE_META = {
+  // Full body / cardio
+  jumpingJacks: { cameraMode: 'jumping_jacks', reps: '20 reps', workSeconds: 40 },
+  highKnees: { cameraMode: 'high_knees', reps: '20 reps', workSeconds: 35 },
+  run: { cameraMode: 'high_knees', reps: '20 reps', workSeconds: 35 },
+
+  // Squat
+  squatLegRaise: { cameraMode: 'squat', reps: '10 reps', workSeconds: 45 },
+  squat1: { cameraMode: 'squat', reps: '10 reps', workSeconds: 45 },
+  squat2: { cameraMode: 'squat', reps: '10 reps', workSeconds: 45 },
+
+  // Lunge
+  lungeTwist: { cameraMode: 'lunge', reps: '10 reps', workSeconds: 40 },
+  lunge1: { cameraMode: 'lunge', reps: '10 reps', workSeconds: 40 },
+  lunge2: { cameraMode: 'lunge', reps: '10 reps', workSeconds: 40 },
+
+  // Push-up
+  push1: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  push2: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+  push3: { cameraMode: 'pushup', reps: '8 reps', workSeconds: 40 },
+
+  // Core / abs
+  plankClassic: { cameraMode: 'plank' },
+  sitUps: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+  reverseCrunch: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+  crunches: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+  bicycle: { cameraMode: 'crunch', reps: '16 reps', workSeconds: 35 },
+  legRaise: { cameraMode: 'crunch', reps: '12 reps', workSeconds: 35 },
+};
+
+const applyCameraAnalysisMeta = (exercise) => {
+  const meta = CAMERA_EXERCISE_META[exercise.key];
+
+  if (!meta) {
+    return exercise;
+  }
+
+  return {
+    ...exercise,
+    ...meta,
+    analysisEnabled: true,
+  };
+};
+
 const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
   const { t } = useTranslation();
   const [exercises, setExercises] = useState([]);
@@ -45,6 +90,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'jumpingJacks',
               name: t('training.lose.full.jumpingJacks.title'),
               description: t('training.lose.full.jumpingJacks.desc'),
               reps: timedReps(30),
@@ -56,6 +102,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'highKnees',
               name: t('training.lose.full.highKnees.title'),
               description: t('training.lose.full.highKnees.desc'),
               reps: timedReps(30),
@@ -67,6 +114,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'squatLegRaise',
               name: t('training.lose.full.squatLegRaise.title'),
               description: t('training.lose.full.squatLegRaise.desc'),
               reps: timedReps(30),
@@ -78,6 +126,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'lungeTwist',
               name: t('training.lose.full.lungeTwist.title'),
               description: t('training.lose.full.lungeTwist.desc'),
               reps: timedReps(30),
@@ -111,6 +160,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'bicycle',
               name: t('training.lose.full.bicycle.title'),
               description: t('training.lose.full.bicycle.desc'),
               reps: timedReps(30),
@@ -122,6 +172,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.mat'),
             },
             {
+              key: 'reverseCrunch',
               name: t('training.lose.full.reverseCrunch.title'),
               description: t('training.lose.full.reverseCrunch.desc'),
               reps: timedReps(30),
@@ -149,6 +200,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
         if (selectedBodyPart === 'abs') {
           prepared = [
             {
+              key: 'plankClassic',
               name: t('training.lose.abs.plankClassic.title'),
               description: t('training.lose.abs.plankClassic.desc'),
               reps: timedReps(30),
@@ -171,6 +223,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.mat'),
             },
             {
+              key: 'sitUps',
               name: t('training.lose.abs.sitUps.title'),
               description: t('training.lose.abs.sitUps.desc'),
               reps: timedReps(30),
@@ -182,6 +235,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.mat'),
             },
             {
+              key: 'reverseCrunch',
               name: t('training.lose.abs.reverseCrunch.title'),
               description: t('training.lose.abs.reverseCrunch.desc'),
               reps: timedReps(30),
@@ -193,6 +247,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.mat'),
             },
             {
+              key: 'crunches',
               name: t('training.lose.abs.crunches.title'),
               description: t('training.lose.abs.crunches.desc'),
               reps: timedReps(30),
@@ -204,6 +259,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.mat'),
             },
             {
+              key: 'bicycle',
               name: t('training.lose.abs.bicycle.title'),
               description: t('training.lose.abs.bicycle.desc'),
               reps: timedReps(30),
@@ -226,6 +282,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.mat'),
             },
             {
+              key: 'legRaise',
               name: t('training.lose.abs.legRaise.title'),
               description: t('training.lose.abs.legRaise.desc'),
               reps: timedReps(30),
@@ -264,6 +321,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
         if (selectedBodyPart === 'legs') {
           prepared = [
             {
+              key: 'run',
               name: t('training.lose.legs.run.title'),
               description: t('training.lose.legs.run.desc'),
               reps: timedReps(30),
@@ -319,6 +377,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'squat1',
               name: t('training.lose.legs.squat1.title'),
               description: t('training.lose.legs.squat1.desc'),
               reps: timedReps(30),
@@ -330,6 +389,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'squat2',
               name: t('training.lose.legs.squat2.title'),
               description: t('training.lose.legs.squat2.desc'),
               reps: timedReps(30),
@@ -341,6 +401,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'lunge1',
               name: t('training.lose.legs.lunge1.title'),
               description: t('training.lose.legs.lunge1.desc'),
               reps: timedReps(30),
@@ -352,6 +413,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'lunge2',
               name: t('training.lose.legs.lunge2.title'),
               description: t('training.lose.legs.lunge2.desc'),
               reps: timedReps(30),
@@ -412,6 +474,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'push1',
               name: t('training.lose.arms.push1.title'),
               description: t('training.lose.arms.push1.desc'),
               reps: timedReps(30),
@@ -423,6 +486,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'push2',
               name: t('training.lose.arms.push2.title'),
               description: t('training.lose.arms.push2.desc'),
               reps: timedReps(30),
@@ -434,6 +498,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
               equipment: t('training.labels.noEquipment'),
             },
             {
+              key: 'push3',
               name: t('training.lose.arms.push3.title'),
               description: t('training.lose.arms.push3.desc'),
               reps: timedReps(30),
@@ -491,7 +556,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
           ];
         }
 
-        setExercises(prepared);
+        setExercises(prepared.map(applyCameraAnalysisMeta));
       } catch (err) {
         console.error('Workout loading error:', err);
       } finally {
