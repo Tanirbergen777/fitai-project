@@ -105,12 +105,52 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   const [mlResult, setMlResult] = useState(null);
   const [mlError, setMlError] = useState('');
   const [isBuilding, setIsBuilding] = useState(false);
+  const [isAiAnalyzingIntensity, setIsAiAnalyzingIntensity] = useState(false);
+  const [aiIntensitySuggestion, setAiIntensitySuggestion] = useState(null);
+
+  const fetchAiIntensityRecommendation = async () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      setSurvey((prev) => ({ ...prev, intensity: 'normal' }));
+      return;
+    }
+    setIsAiAnalyzingIntensity(true);
+    setAiIntensitySuggestion(null);
+    try {
+      const res = await fetch(`${API_BASE_URL}/training-ai/recommend-intensity/${userId}`);
+      if (!res.ok) throw new Error('AI error');
+      const data = await res.json();
+      setAiIntensitySuggestion(data);
+    } catch (e) {
+      console.error(e);
+      setSurvey((prev) => ({ ...prev, intensity: 'normal' }));
+    } finally {
+      setIsAiAnalyzingIntensity(false);
+    }
+  };
 
   const updateSurvey = (field, value) => {
+    if (field === 'intensity' && value === 'ai_auto') {
+      fetchAiIntensityRecommendation();
+      setSurvey((prev) => ({ ...prev, intensity: 'ai_auto' }));
+      return;
+    }
     setSurvey((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const acceptAiIntensity = () => {
+    if (aiIntensitySuggestion) {
+      setSurvey((prev) => ({ ...prev, intensity: aiIntensitySuggestion.recommended_intensity }));
+    }
+    setAiIntensitySuggestion(null);
+  };
+
+  const declineAiIntensity = () => {
+    setSurvey((prev) => ({ ...prev, intensity: 'normal' }));
+    setAiIntensitySuggestion(null);
   };
 
   const exercisePool = useMemo(() => {
@@ -541,6 +581,32 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
                   <option value="high">{t('training.intensity.high', 'Қарқынды')}</option>
                   <option value="ai_auto">AI арқылы таңдау</option>
                 </select>
+                {isAiAnalyzingIntensity && (
+                  <p style={{ marginTop: '10px', fontSize: '14px', color: '#64ffda' }}>
+                    AI ойланып жатыр...
+                  </p>
+                )}
+                {aiIntensitySuggestion && !isAiAnalyzingIntensity && (
+                  <div style={{ marginTop: '10px', padding: '15px', backgroundColor: 'rgba(100, 255, 218, 0.1)', borderRadius: '8px', border: '1px solid rgba(100, 255, 218, 0.3)' }}>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '14px', lineHeight: '1.4', color: '#e6f1ff' }}>
+                      <strong>AI ұсынысы:</strong> {aiIntensitySuggestion.reason}
+                    </p>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button 
+                        onClick={acceptAiIntensity}
+                        style={{ padding: '8px 16px', background: '#64ffda', color: '#0a192f', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                      >
+                        Келісемін
+                      </button>
+                      <button 
+                        onClick={declineAiIntensity}
+                        style={{ padding: '8px 16px', background: 'transparent', color: '#64ffda', border: '1px solid rgba(100, 255, 218, 0.5)', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        Келіспеймін
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

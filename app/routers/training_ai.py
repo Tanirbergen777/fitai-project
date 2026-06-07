@@ -56,6 +56,26 @@ class TrainingAIRecommendResponse(BaseModel):
     ai_safety_warning: Optional[str] = None
 
 
+class IntensityRecommendationResponse(BaseModel):
+    recommended_intensity: str
+    reason: str
+
+
+@router.get("/recommend-intensity/{user_id}", response_model=IntensityRecommendationResponse)
+async def recommend_intensity(user_id: int, db: Session = Depends(get_db)):
+    past_workouts = db.query(models.WorkoutCameraSession).filter(
+        models.WorkoutCameraSession.user_id == user_id,
+        models.WorkoutCameraSession.status == "finished"
+    ).count()
+
+    if past_workouts == 0:
+        return {"recommended_intensity": "low", "reason": "Сіз бұрын біздің платформада жаттығу жасамағандықтан, қауіпсіздік үшін бүгін 'Жеңіл' қарқын ұсынылады."}
+    elif past_workouts <= 5:
+        return {"recommended_intensity": "normal", "reason": "Жүйе сіздің тәжірибеңізді талдап, 'Орташа' қарқынды таңдады."}
+    else:
+        return {"recommended_intensity": "high", "reason": "Жүйе сіздің жоғары тәжірибеңізді талдап, 'Қарқынды' деңгей таңдалды."}
+
+
 @router.post("/recommend", response_model=TrainingAIRecommendResponse)
 async def recommend_training_plan(
     payload: TrainingAIRecommendRequest,
@@ -106,9 +126,9 @@ async def recommend_training_plan(
             # =====================================================
             from datetime import datetime
             
-            past_workouts = db.query(models.CameraSession).filter(
-                models.CameraSession.user_id == payload.user_id,
-                models.CameraSession.status == "finished"
+            past_workouts = db.query(models.WorkoutCameraSession).filter(
+                models.WorkoutCameraSession.user_id == payload.user_id,
+                models.WorkoutCameraSession.status == "finished"
             ).count()
 
             requested_intensity = payload_data.get("intensity", "normal")
