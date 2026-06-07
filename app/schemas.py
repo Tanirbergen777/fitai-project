@@ -5,10 +5,10 @@ from typing import List
 
 class UserRegister(BaseModel):
     username: str
-    last_name: str  # Новое
+    last_name: str
     email: str
     password: str
-    birth_date: date  # Новое
+    birth_date: date
     gender: str
 
 class UserLogin(BaseModel):

@@ -12,7 +12,6 @@ from datetime import date
 router = APIRouter(tags=["Profile & AI"])
 
 def calculate_age(birth_date: date):
-    """Функция для точного расчета возраста на текущую дату"""
     today = date.today()
     return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
 
@@ -72,22 +71,19 @@ def update_profile(user_id: int, data: schemas.ProfileUpdate, db: Session = Depe
     }
 @router.post("/onboarding/{user_id}")
 def create_profile(user_id: int, profile_data: schemas.ProfileCreate, db: Session = Depends(get_db)):
-    # 1. Ищем пользователя, чтобы достать его дату рождения
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
-    # 2. Если у пользователя нет даты рождения (старая запись), используем ту, что пришла (если есть)
-    # Но в идеале берем из профиля юзера
+
     user_age = calculate_age(user.birth_date) if user.birth_date else profile_data.age
 
-    # 3. Расчет ИМТ (BMI)
+
     height_m = profile_data.height / 100
     bmi_val = round(profile_data.weight / (height_m ** 2), 2)
 
-    # 4. Работа с ИИ
+
     try:
-        # Передаем автоматически вычисленный возраст в твой классификатор
         ai_verdict = ai_logic.predict_difficulty(
             user_age,
             profile_data.height,
@@ -98,10 +94,9 @@ def create_profile(user_id: int, profile_data: schemas.ProfileCreate, db: Sessio
         print(f"AI Error: {e}")
         ai_verdict = "Определяется..."
 
-    # 5. Создаем или обновляем профиль
     new_profile = models.UserProfile(
         user_id=user_id,
-        age=user_age, # Сохраняем вычисленный возраст
+        age=user_age,
         weight=profile_data.weight,
         height=profile_data.height,
         activity_level=profile_data.activity_level,
@@ -109,7 +104,6 @@ def create_profile(user_id: int, profile_data: schemas.ProfileCreate, db: Sessio
         bmi=bmi_val
     )
 
-    # Очищаем старый профиль, если он был
     db.query(models.UserProfile).filter(models.UserProfile.user_id == user_id).delete()
     db.add(new_profile)
     db.commit()

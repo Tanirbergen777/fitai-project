@@ -10,9 +10,7 @@ class ChatSession(Base):
     title = Column(String(255), default="Новый чат")
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Связи: один чат содержит много сообщений
     messages = relationship("ChatMessage", back_populates="session", cascade="all, delete")
-    # Связь с пользователем (опционально, если нужно)
     user = relationship("User")
 
 class ChatMessage(Base):
@@ -20,7 +18,7 @@ class ChatMessage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("chat_sessions.id", ondelete="CASCADE"), nullable=False)
-    role = Column(String(50), nullable=False)  # 'user' или 'model'
+    role = Column(String(50), nullable=False)
     content = Column(Text, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
@@ -55,8 +53,8 @@ class UserProfile(Base):
     activity_level = Column(Integer)
     goal = Column(String)
     bmi = Column(Float)
-    waist = Column(Float, nullable=True)  # Добавили
-    hip = Column(Float, nullable=True)  # Добавь это
+    waist = Column(Float, nullable=True)
+    hip = Column(Float, nullable=True)
     arm = Column(Float)
     custom_goal_text = Column(String, nullable=True)
 

@@ -118,11 +118,12 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
     setAiIntensitySuggestion(null);
     try {
       const res = await fetch(`${API_BASE_URL}/training-ai/recommend-intensity/${userId}`);
-      if (!res.ok) throw new Error('AI error');
+      if (!res.ok) throw new Error('AI серверінен қате келді');
       const data = await res.json();
       setAiIntensitySuggestion(data);
     } catch (e) {
       console.error(e);
+      alert('AI серверіне қосылу мүмкін болмады. Орташа қарқын таңдалды.');
       setSurvey((prev) => ({ ...prev, intensity: 'normal' }));
     } finally {
       setIsAiAnalyzingIntensity(false);
@@ -593,12 +594,14 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
                     </p>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button 
+                        type="button"
                         onClick={acceptAiIntensity}
                         style={{ padding: '8px 16px', background: '#64ffda', color: '#0a192f', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
                       >
                         Келісемін
                       </button>
                       <button 
+                        type="button"
                         onClick={declineAiIntensity}
                         style={{ padding: '8px 16px', background: 'transparent', color: '#64ffda', border: '1px solid rgba(100, 255, 218, 0.5)', borderRadius: '4px', cursor: 'pointer' }}
                       >
