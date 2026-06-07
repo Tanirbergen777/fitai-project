@@ -7,11 +7,7 @@ import { API_BASE_URL } from '../../config/api';
 const getVideoUrl = (path) =>
   supabase.storage.from('exercise-videos').getPublicUrl(path).data.publicUrl;
 
-const levelRank = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
-};
+
 
 const exerciseSeconds = (exercise) => {
   return (exercise.prepSeconds ?? 3) + (exercise.workSeconds ?? 30) + (exercise.restSeconds ?? 10);
@@ -327,26 +323,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
     ];
   }, [t]);
 
-  const getTemplateBoost = (exercise, templateId) => {
-    if (!templateId) return 0;
 
-    let boost = 0;
-
-    if (templateId.includes('fat_loss') && exercise.goals.includes('lose_weight')) boost += 2;
-    if (templateId.includes('cardio') && exercise.focus.includes('cardio')) boost += 4;
-    if (templateId.includes('low') && exercise.impact === 'low') boost += 4;
-
-    if (templateId.includes('muscle') && exercise.goals.includes('gain_mass')) boost += 2;
-    if (templateId.includes('home') && exercise.level === 'beginner') boost += 2;
-    if (templateId.includes('general') && exercise.goals.includes('gain_mass')) boost += 1;
-    if (templateId.includes('progressive') && ['intermediate', 'advanced'].includes(exercise.level)) boost += 2;
-
-    if (templateId.includes('endurance') && exercise.focus.includes('cardio')) boost += 3;
-    if (templateId.includes('balanced') && exercise.goals.includes('keep_fit')) boost += 2;
-    if (templateId.includes('keep_fit') && exercise.goals.includes('keep_fit')) boost += 2;
-
-    return boost;
-  };
 
   const buildReason = (seconds, backendMlResult) => {
     const minutes = formatMinutes(seconds);
