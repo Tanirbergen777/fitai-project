@@ -87,15 +87,29 @@ def generate_dynamic_workout(plan_template_id: str, row: Dict[str, Any]) -> list
     duration = row["duration"]
     weight = row["weight"]
     age = row["age"]
+    focus = row["focus"]
+    intensity = row["intensity"]
     
     valid_exercises = []
     for ex in AI_EXERCISES:
         # Match goal
         if goal in ex.get("goal_tags", []):
+            # Match focus (if focus is not 'full')
+            if focus != "full" and focus != "cardio":
+                ex_body_part = ex.get("body_part", "")
+                if ex_body_part != focus and "full" not in ex_body_part:
+                    continue
+                    
             # Safe logic for joints limitation
             if limitations == "joints" and ("прыжки" in ex["name"].lower() or "jump" in ex["name"].lower()):
                 continue
             valid_exercises.append(ex)
+            
+    # Fallback if too few exercises after focus filtering
+    if len(valid_exercises) < 3:
+        for ex in AI_EXERCISES:
+            if goal in ex.get("goal_tags", []) and ex not in valid_exercises:
+                valid_exercises.append(ex)
             
     # Calculate how many exercises fit in the duration (assume ~2-3 mins per exercise)
     num_exercises = max(3, duration // 3)
@@ -107,12 +121,15 @@ def generate_dynamic_workout(plan_template_id: str, row: Dict[str, Any]) -> list
         
     generated = []
     for ex in selected:
-        # Dynamic calculation based on Age and Weight
-        if age > 50:
-            reps = "3 подхода по 8 рет (жеңілдетілген)"
+        # Dynamic calculation based on Age, Weight and Intensity
+        if intensity == "high":
+            reps = "4 подхода по 20 рет"
+            rest = 20
+        elif intensity == "low" or age > 50:
+            reps = "2 подхода по 10 рет (жеңілдетілген)"
             rest = 45
         elif age < 18:
-            reps = "2 подхода по 10 рет"
+            reps = "2 подхода по 12 рет"
             rest = 30
         else:
             reps = "3 подхода по 15 рет"
