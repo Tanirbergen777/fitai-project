@@ -83,6 +83,7 @@ const getUserProfilePayload = () => {
     height: Number.isFinite(height) ? height : 170,
     weight: Number.isFinite(weight) ? weight : 70,
     bmi: Number.isFinite(bmi) ? bmi : 24,
+    goal: userData.goal || 'keep_fit',
     waist: Number(userData.waist || 0),
     hip: Number(userData.hip || 0),
     arm: Number(userData.arm || 0),
@@ -94,7 +95,6 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 
   const [step, setStep] = useState('survey');
   const [survey, setSurvey] = useState({
-    goal: 'keep_fit',
     duration: 15,
     focus: 'full',
     limitation: 'none',
@@ -399,7 +399,6 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
       ...profilePayload,
       user_id: Number(localStorage.getItem('userId')) || null,
       workout_duration_minutes: Number(survey.duration),
-      primary_goal: survey.goal,
       limitations: survey.limitation,
     };
 
@@ -440,10 +439,11 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
       );
     }
 
+    const userGoal = getUserProfilePayload()?.goal || 'keep_fit';
     const planTitle =
-      survey.goal === 'gain_mass'
+      userGoal === 'gain_mass'
         ? t('training.aiPlan.titles.gain', 'AI жоспар: бұлшықет массасын арттыру')
-        : survey.goal === 'lose_weight'
+        : userGoal === 'lose_weight'
         ? t('training.aiPlan.titles.lose', 'AI жоспар: май жағу')
         : t('training.aiPlan.titles.keep', 'AI жоспар: форманы сақтау');
 
@@ -528,14 +528,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
         {step === 'survey' && (
           <>
             <div className="ai-training-form-grid">
-              <div className="ai-training-field">
-                <label>{t('training.aiSurvey.goal', 'Мақсат')}</label>
-                <select value={survey.goal} onChange={(e) => updateSurvey('goal', e.target.value)}>
-                  <option value="gain_mass">{t('training.selection.gain.title', 'Бұлшықет массасын арттыру')}</option>
-                  <option value="lose_weight">{t('training.selection.lose.title', 'Май жағу')}</option>
-                  <option value="keep_fit">{t('training.selection.general.title', 'Жалпы форма')}</option>
-                </select>
-              </div>
+
 
               <div className="ai-training-field">
                 <label>{t('training.aiSurvey.duration', 'Қанша минут жаттыға аласыз?')}</label>
