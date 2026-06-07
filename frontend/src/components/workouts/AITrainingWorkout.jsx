@@ -99,12 +99,8 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   const [step, setStep] = useState('survey');
   const [survey, setSurvey] = useState({
     goal: 'keep_fit',
-    level: 'beginner',
     duration: 15,
     focus: 'full',
-    location: 'home',
-    equipment: 'none',
-    cardio: 'some',
     limitation: 'none',
     intensity: 'normal',
   });
@@ -386,9 +382,6 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
       user_id: Number(localStorage.getItem('userId')) || null,
       workout_duration_minutes: Number(survey.duration),
       primary_goal: survey.goal,
-      training_level: survey.level,
-      training_location: survey.location,
-      cardio_preference: survey.cardio,
       limitations: survey.limitation,
     };
 
@@ -429,94 +422,6 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
       );
     }
 
-    const maxSeconds = Number(survey.duration) * 60;
-    const userLevel = levelRank[survey.level] || 1;
-
-    const avoidNormalImpact =
-      survey.limitation !== 'none' ||
-      survey.intensity === 'low' ||
-      backendMlResult?.features?.impact_level === 'low';
-
-    const filtered = exercisePool
-      .filter((exercise) => {
-        const exerciseLevel = levelRank[exercise.level] || 1;
-
-        if (exerciseLevel > userLevel + 1) return false;
-        if (avoidNormalImpact && exercise.impact === 'normal') return false;
-
-        if (survey.limitation === 'knee') {
-          if (['squat_leg_raise', 'lunge_twist', 'jumping_jacks', 'high_knees'].includes(exercise.key)) {
-            return false;
-          }
-        }
-
-        if (survey.limitation === 'back') {
-          if (['reverse_crunch', 'bicycle'].includes(exercise.key)) {
-            return false;
-          }
-        }
-
-        return true;
-      })
-      .map((exercise) => {
-        let score = 0;
-
-        if (exercise.goals.includes(survey.goal)) score += 5;
-        if (exercise.focus.includes(survey.focus)) score += 4;
-        if (exercise.level === survey.level) score += 2;
-        if (survey.cardio === 'yes' && exercise.focus.includes('cardio')) score += 3;
-        if (survey.cardio === 'no' && exercise.focus.includes('cardio')) score -= 3;
-        if (avoidNormalImpact && exercise.impact === 'low') score += 2;
-
-        if (exercise.key.includes('warmup')) score += 1;
-        if (['cobra_stretch', 'child_pose'].includes(exercise.key)) score -= 1;
-
-        score += getTemplateBoost(exercise, backendMlResult?.plan_template_id);
-
-        return { ...exercise, aiScore: score };
-      })
-      .sort((a, b) => b.aiScore - a.aiScore);
-
-    const lowImpactFallback = exercisePool.filter((exercise) => exercise.impact === 'low');
-
-    const warmup = exercisePool.filter((exercise) =>
-      ['warmup_arm_circles', 'torso_rotation'].includes(exercise.key)
-    );
-
-    const cooldown = exercisePool.filter((exercise) =>
-      ['cobra_stretch', 'child_pose'].includes(exercise.key)
-    );
-
-    const selected = [];
-    let currentSeconds = 0;
-
-    [...warmup, ...filtered, ...cooldown].forEach((exercise) => {
-      if (selected.some((item) => item.key === exercise.key)) return;
-
-      const nextTotal = currentSeconds + exerciseSeconds(exercise);
-
-      if (nextTotal <= maxSeconds) {
-        selected.push(exercise);
-        currentSeconds = nextTotal;
-      }
-    });
-
-    if (selected.length === 0) {
-      lowImpactFallback.forEach((exercise) => {
-        if (selected.some((item) => item.key === exercise.key)) return;
-
-        const nextTotal = currentSeconds + exerciseSeconds(exercise);
-
-        if (nextTotal <= maxSeconds) {
-          selected.push(exercise);
-          currentSeconds = nextTotal;
-        }
-      });
-    }
-
-    const minimumPlan = selected.length ? selected : filtered.slice(0, 3);
-    const correctDuration = totalPlanSeconds(minimumPlan);
-
     const planTitle =
       survey.goal === 'gain_mass'
         ? t('training.aiPlan.titles.gain', 'AI жоспар: бұлшықет массасын арттыру')
@@ -524,9 +429,41 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
         ? t('training.aiPlan.titles.lose', 'AI жоспар: май жағу')
         : t('training.aiPlan.titles.keep', 'AI жоспар: форманы сақтау');
 
+    if (backendMlResult?.generated_exercises?.length > 0) {
+      const genEx = backendMlResult.generated_exercises.map((ex, i) => ({
+        key: `ai_gen_${i}`,
+        name: ex.name,
+        description: ex.description,
+        reps: ex.dynamic_reps,
+        workSeconds: 30,
+        restSeconds: ex.rest_seconds || 30,
+        mediaUrl: ex.video_path ? getVideoUrl(ex.video_path) : null,
+        cameraMode: null
+      }));
+
+      const correctDuration = genEx.reduce((acc, curr) => acc + (curr.workSeconds + curr.restSeconds), 0);
+
+      setPlan({
+        title: planTitle,
+        exercises: genEx,
+        totalSeconds: correctDuration,
+        targetMinutes: Number(survey.duration),
+        reason: buildReason(correctDuration, backendMlResult),
+        ml: backendMlResult,
+      });
+
+      setStep('result');
+      setIsBuilding(false);
+      return;
+    }
+
+    // Fallback if backend failed to generate
+    const selected = exercisePool.slice(0, 5);
+    const correctDuration = totalPlanSeconds(selected);
+
     setPlan({
       title: planTitle,
-      exercises: minimumPlan,
+      exercises: selected,
       totalSeconds: correctDuration,
       targetMinutes: Number(survey.duration),
       reason: buildReason(correctDuration, backendMlResult),
@@ -583,15 +520,6 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
               </div>
 
               <div className="ai-training-field">
-                <label>{t('training.aiSurvey.level', 'Дайындық деңгейі')}</label>
-                <select value={survey.level} onChange={(e) => updateSurvey('level', e.target.value)}>
-                  <option value="beginner">{t('training.level.beginner', 'Бастапқы')}</option>
-                  <option value="intermediate">{t('training.level.intermediate', 'Орташа')}</option>
-                  <option value="advanced">{t('training.level.advanced', 'Жоғары')}</option>
-                </select>
-              </div>
-
-              <div className="ai-training-field">
                 <label>{t('training.aiSurvey.duration', 'Қанша минут жаттыға аласыз?')}</label>
                 <select
                   value={survey.duration}
@@ -618,20 +546,12 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
               </div>
 
               <div className="ai-training-field">
-                <label>{t('training.aiSurvey.cardio', 'Кардио керек пе?')}</label>
-                <select value={survey.cardio} onChange={(e) => updateSurvey('cardio', e.target.value)}>
-                  <option value="yes">{t('common.yes', 'Иә')}</option>
-                  <option value="some">{t('training.aiSurvey.some', 'Аздап')}</option>
-                  <option value="no">{t('common.no', 'Жоқ')}</option>
-                </select>
-              </div>
-
-              <div className="ai-training-field">
                 <label>{t('training.aiSurvey.limitation', 'Шектеулер бар ма?')}</label>
                 <select value={survey.limitation} onChange={(e) => updateSurvey('limitation', e.target.value)}>
                   <option value="none">{t('training.limitations.none', 'Жоқ')}</option>
                   <option value="knee">{t('training.limitations.knee', 'Тізе')}</option>
                   <option value="back">{t('training.limitations.back', 'Арқа/бел')}</option>
+                  <option value="joints">Буын ауруы</option>
                   <option value="low_impact">{t('training.limitations.lowImpact', 'Төмен жүктеме керек')}</option>
                 </select>
               </div>
@@ -642,15 +562,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
                   <option value="low">{t('training.intensity.low', 'Жеңіл')}</option>
                   <option value="normal">{t('training.intensity.normal', 'Орташа')}</option>
                   <option value="high">{t('training.intensity.high', 'Қарқынды')}</option>
-                </select>
-              </div>
-
-              <div className="ai-training-field">
-                <label>{t('training.aiSurvey.equipment', 'Құрал-жабдық')}</label>
-                <select value={survey.equipment} onChange={(e) => updateSurvey('equipment', e.target.value)}>
-                  <option value="none">{t('training.labels.noEquipment', 'Құралсыз')}</option>
-                  <option value="mat">{t('training.labels.mat', 'Кілемше')}</option>
-                  <option value="dumbbells">Dumbbells</option>
+                  <option value="ai_auto">AI арқылы таңдау</option>
                 </select>
               </div>
             </div>
@@ -688,6 +600,13 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
             <div className="ai-training-result-card">
               <h3>{plan.title}</h3>
               <p>{plan.reason}</p>
+
+              {displayedMlResult?.ai_safety_warning && (
+                <div className="ai-training-warning-box">
+                  <span style={{ fontSize: '20px', marginRight: '10px' }}>⚠️</span>
+                  <p style={{ margin: 0 }}>{displayedMlResult.ai_safety_warning}</p>
+                </div>
+              )}
 
               {displayedMlResult && (
                 <div className="ai-training-ml-box">
@@ -950,6 +869,20 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   margin: 0;
   color: #c8d1df;
   font-size: 13px;
+}
+
+.ai-training-warning-box {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(243, 156, 18, 0.15);
+  border: 1px solid rgba(243, 156, 18, 0.4);
+  color: #f39c12;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
 .ai-training-error-box {
