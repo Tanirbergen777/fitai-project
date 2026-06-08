@@ -1,0 +1,15 @@
+{
+  "video_name": "lunge_wrong_depth_102.mp4",
+  "video_path": "ai_engine\\datasets\\test_videos\\lunge\\lunge_wrong_depth_102.mp4",
+  "frames_with_pose": 115,
+  "sampled_frames": 115,
+  "detected_frames": 115,
+  "video_fps": 29.826338639652676,
+  "sample_every_n_frames": 6,
+  "final_prediction": "incorrect",
+  "confidence": 0.8655,
+  "mean_correct_probability": 0.1345,
+  "mean_incorrect_probability": 0.8655,
+  "correct_frames": 2,
+  "incorrect_frames": 113
+}

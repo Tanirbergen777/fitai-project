@@ -1,0 +1,101 @@
+video_path,video_name,folder,detected_frames,frame_correct_count,frame_wrong_count,correct_probability,prediction,prediction_label,true_label
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 1.mp4,Copy of push up 1.mp4,Correct sequence,31,31,0,0.7892,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 100.mp4,Copy of push up 100.mp4,Correct sequence,62,60,2,0.6312,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 101.mp4,Copy of push up 101.mp4,Correct sequence,39,39,0,0.6602,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 102.mp4,Copy of push up 102.mp4,Correct sequence,42,42,0,0.6606,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 113.mp4,Copy of push up 113.mp4,Correct sequence,39,39,0,0.6622,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 114.mp4,Copy of push up 114.mp4,Correct sequence,44,44,0,0.6343,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 115.mp4,Copy of push up 115.mp4,Correct sequence,69,69,0,0.661,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 116.mp4,Copy of push up 116.mp4,Correct sequence,38,38,0,0.7175,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 127.mp4,Copy of push up 127.mp4,Correct sequence,45,45,0,0.6616,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 129.mp4,Copy of push up 129.mp4,Correct sequence,42,42,0,0.669,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 131.mp4,Copy of push up 131.mp4,Correct sequence,39,39,0,0.7899,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 132.mp4,Copy of push up 132.mp4,Correct sequence,40,40,0,0.7932,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 133.mp4,Copy of push up 133.mp4,Correct sequence,38,38,0,0.7921,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 134.mp4,Copy of push up 134.mp4,Correct sequence,38,38,0,0.7923,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 135.mp4,Copy of push up 135.mp4,Correct sequence,36,36,0,0.7926,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 136.mp4,Copy of push up 136.mp4,Correct sequence,38,38,0,0.7929,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 137.mp4,Copy of push up 137.mp4,Correct sequence,36,36,0,0.7938,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 138.mp4,Copy of push up 138.mp4,Correct sequence,37,37,0,0.7917,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 140.mp4,Copy of push up 140.mp4,Correct sequence,44,44,0,0.7927,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 141.mp4,Copy of push up 141.mp4,Correct sequence,46,46,0,0.7923,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 142.mp4,Copy of push up 142.mp4,Correct sequence,46,46,0,0.7859,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 144.mp4,Copy of push up 144.mp4,Correct sequence,45,45,0,0.7924,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 146.mp4,Copy of push up 146.mp4,Correct sequence,54,54,0,0.7486,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 147.mp4,Copy of push up 147.mp4,Correct sequence,62,62,0,0.7483,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 148.mp4,Copy of push up 148.mp4,Correct sequence,67,67,0,0.7482,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 162.mp4,Copy of push up 162.mp4,Correct sequence,54,54,0,0.726,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 163.mp4,Copy of push up 163.mp4,Correct sequence,49,49,0,0.7265,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 164.mp4,Copy of push up 164.mp4,Correct sequence,58,58,0,0.7317,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 165.mp4,Copy of push up 165.mp4,Correct sequence,50,50,0,0.7364,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 173.mp4,Copy of push up 173.mp4,Correct sequence,77,77,0,0.6639,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 174.mp4,Copy of push up 174.mp4,Correct sequence,66,66,0,0.6786,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 175.mp4,Copy of push up 175.mp4,Correct sequence,55,41,14,0.5639,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 177.mp4,Copy of push up 177.mp4,Correct sequence,73,73,0,0.7854,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 178.mp4,Copy of push up 178.mp4,Correct sequence,74,74,0,0.7823,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 186.mp4,Copy of push up 186.mp4,Correct sequence,34,32,2,0.6353,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 187.mp4,Copy of push up 187.mp4,Correct sequence,35,35,0,0.6771,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 188.mp4,Copy of push up 188.mp4,Correct sequence,35,35,0,0.6754,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 197.mp4,Copy of push up 197.mp4,Correct sequence,78,78,0,0.5835,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 2.mp4,Copy of push up 2.mp4,Correct sequence,27,27,0,0.7759,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 3.mp4,Copy of push up 3.mp4,Correct sequence,26,26,0,0.778,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 4.mp4,Copy of push up 4.mp4,Correct sequence,29,29,0,0.777,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 47.mp4,Copy of push up 47.mp4,Correct sequence,48,48,0,0.6569,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 5.mp4,Copy of push up 5.mp4,Correct sequence,27,27,0,0.7776,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 6.mp4,Copy of push up 6.mp4,Correct sequence,30,30,0,0.7751,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 7.mp4,Copy of push up 7.mp4,Correct sequence,29,29,0,0.7768,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 78.mp4,Copy of push up 78.mp4,Correct sequence,29,29,0,0.7547,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 79.mp4,Copy of push up 79.mp4,Correct sequence,23,23,0,0.7406,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 80.mp4,Copy of push up 80.mp4,Correct sequence,79,79,0,0.6842,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 83.mp4,Copy of push up 83.mp4,Correct sequence,32,32,0,0.6916,1,correct,1
+ai_engine\datasets\pushup_raw\Correct sequence\Copy of push up 85.mp4,Copy of push up 85.mp4,Correct sequence,31,31,0,0.6852,1,correct,1
+ai_engine\datasets\pushup_raw\Wrong sequence\1.mp4,1.mp4,Wrong sequence,145,0,145,0.0127,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\10.mp4,10.mp4,Wrong sequence,63,0,63,0.0013,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\11.mp4,11.mp4,Wrong sequence,42,0,42,0.0038,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\12.mp4,12.mp4,Wrong sequence,61,0,61,0.0016,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\13.mp4,13.mp4,Wrong sequence,61,0,61,0.0289,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\14.mp4,14.mp4,Wrong sequence,63,0,63,0.0056,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\15.mp4,15.mp4,Wrong sequence,50,0,50,0.0079,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\16.mp4,16.mp4,Wrong sequence,50,0,50,0.0045,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\17.mp4,17.mp4,Wrong sequence,54,0,54,0.0038,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\18.mp4,18.mp4,Wrong sequence,77,0,77,0.0078,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\19.mp4,19.mp4,Wrong sequence,63,0,63,0.0121,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\2.mp4,2.mp4,Wrong sequence,79,0,79,0.0055,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\20.mp4,20.mp4,Wrong sequence,47,0,47,0.0079,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\21.mp4,21.mp4,Wrong sequence,53,0,53,0.0039,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\22.mp4,22.mp4,Wrong sequence,125,0,125,0.0038,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\23.mp4,23.mp4,Wrong sequence,64,0,64,0.0066,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\3.mp4,3.mp4,Wrong sequence,52,0,52,0.006,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\4.mp4,4.mp4,Wrong sequence,36,0,36,0.0054,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\5.mp4,5.mp4,Wrong sequence,60,0,60,0.0089,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\6.mp4,6.mp4,Wrong sequence,60,0,60,0.0076,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\7.mp4,7.mp4,Wrong sequence,55,0,55,0.0064,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\8.mp4,8.mp4,Wrong sequence,44,0,44,0.0133,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\9.mp4,9.mp4,Wrong sequence,33,0,33,0.0063,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 104.mp4,Copy of push up 104.mp4,Wrong sequence,116,0,116,0.1394,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 105.mp4,Copy of push up 105.mp4,Wrong sequence,115,0,115,0.1327,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 107.mp4,Copy of push up 107.mp4,Wrong sequence,41,0,41,0.1332,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 108.mp4,Copy of push up 108.mp4,Wrong sequence,115,0,115,0.1836,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 110.mp4,Copy of push up 110.mp4,Wrong sequence,106,0,106,0.3511,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 149.mp4,Copy of push up 149.mp4,Wrong sequence,162,5,157,0.2598,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 150.mp4,Copy of push up 150.mp4,Wrong sequence,32,0,32,0.1133,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 151.mp4,Copy of push up 151.mp4,Wrong sequence,31,0,31,0.1022,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 152.mp4,Copy of push up 152.mp4,Wrong sequence,33,0,33,0.1047,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 153.mp4,Copy of push up 153.mp4,Wrong sequence,32,0,32,0.1023,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 155.mp4,Copy of push up 155.mp4,Wrong sequence,30,0,30,0.1054,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 156.mp4,Copy of push up 156.mp4,Wrong sequence,24,0,24,0.0906,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 166.mp4,Copy of push up 166.mp4,Wrong sequence,86,0,86,0.0221,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 167.mp4,Copy of push up 167.mp4,Wrong sequence,43,0,43,0.0251,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 168.mp4,Copy of push up 168.mp4,Wrong sequence,45,0,45,0.0252,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 171.mp4,Copy of push up 171.mp4,Wrong sequence,199,0,199,0.0499,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 198.mp4,Copy of push up 198.mp4,Wrong sequence,106,106,0,0.6399,1,correct,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 36.mp4,Copy of push up 36.mp4,Wrong sequence,42,0,42,0.3677,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 37.mp4,Copy of push up 37.mp4,Wrong sequence,33,0,33,0.1684,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 42.mp4,Copy of push up 42.mp4,Wrong sequence,58,0,58,0.3247,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 44.mp4,Copy of push up 44.mp4,Wrong sequence,50,0,50,0.0975,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 46.mp4,Copy of push up 46.mp4,Wrong sequence,50,0,50,0.1285,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 55.mp4,Copy of push up 55.mp4,Wrong sequence,57,0,57,0.0977,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 56.mp4,Copy of push up 56.mp4,Wrong sequence,54,0,54,0.0888,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 57.mp4,Copy of push up 57.mp4,Wrong sequence,38,0,38,0.29,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 58.mp4,Copy of push up 58.mp4,Wrong sequence,42,0,42,0.1275,0,wrong,0
+ai_engine\datasets\pushup_raw\Wrong sequence\Copy of push up 81.mp4,Copy of push up 81.mp4,Wrong sequence,47,0,47,0.1397,0,wrong,0

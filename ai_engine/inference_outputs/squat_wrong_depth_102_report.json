@@ -1,0 +1,15 @@
+{
+  "video_name": "squat_wrong_depth_102.mp4",
+  "video_path": "ai_engine\\datasets\\test_videos\\squat\\squat_wrong_depth_102.mp4",
+  "frames_with_pose": 118,
+  "sampled_frames": 121,
+  "detected_frames": 118,
+  "video_fps": 30.0,
+  "sample_every_n_frames": 6,
+  "final_prediction": "incorrect",
+  "confidence": 0.9767,
+  "mean_correct_probability": 0.0233,
+  "mean_incorrect_probability": 0.9767,
+  "correct_frames": 0,
+  "incorrect_frames": 118
+}

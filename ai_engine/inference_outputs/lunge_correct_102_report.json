@@ -1,0 +1,15 @@
+{
+  "video_name": "lunge_correct_102.mp4",
+  "video_path": "ai_engine\\datasets\\test_videos\\lunge\\lunge_correct_102.mp4",
+  "frames_with_pose": 111,
+  "sampled_frames": 111,
+  "detected_frames": 111,
+  "video_fps": 29.90990990990991,
+  "sample_every_n_frames": 6,
+  "final_prediction": "correct",
+  "confidence": 0.6898,
+  "mean_correct_probability": 0.6898,
+  "mean_incorrect_probability": 0.3102,
+  "correct_frames": 79,
+  "incorrect_frames": 32
+}

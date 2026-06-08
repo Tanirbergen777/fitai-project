@@ -1,0 +1,15 @@
+{
+  "video_name": "squat_correct_101.mp4",
+  "video_path": "ai_engine\\datasets\\test_videos\\squat\\squat_correct_101.mp4",
+  "frames_with_pose": 39,
+  "sampled_frames": 43,
+  "detected_frames": 39,
+  "video_fps": 30.0,
+  "sample_every_n_frames": 6,
+  "final_prediction": "correct",
+  "confidence": 0.6918,
+  "mean_correct_probability": 0.6918,
+  "mean_incorrect_probability": 0.3082,
+  "correct_frames": 24,
+  "incorrect_frames": 15
+}
