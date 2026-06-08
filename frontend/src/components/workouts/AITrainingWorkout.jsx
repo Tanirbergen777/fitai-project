@@ -94,11 +94,19 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   const { t } = useTranslation();
 
   const [step, setStep] = useState('survey');
-  const [survey, setSurvey] = useState({
-    duration: 15,
-    focus: 'full',
-    limitation: 'none',
-    intensity: 'normal',
+  const [survey, setSurvey] = useState(() => {
+    const p = getUserProfilePayload();
+    return {
+      duration: 15,
+      focus: 'full',
+      limitation: 'none',
+      intensity: 'normal',
+      age: p.age,
+      gender: p.gender,
+      height: p.height,
+      weight: p.weight,
+      goal: p.goal
+    };
   });
 
   const [plan, setPlan] = useState(null);
@@ -392,11 +400,8 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   };
 
   const requestMlRecommendation = async () => {
-    const profilePayload = getUserProfilePayload();
-
     const payload = {
       ...survey,
-      ...profilePayload,
       user_id: Number(localStorage.getItem('userId')) || null,
       workout_duration_minutes: Number(survey.duration),
       limitations: survey.limitation,
@@ -453,8 +458,8 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
         name: ex.name,
         description: ex.description,
         reps: ex.dynamic_reps,
-        workSeconds: 30,
-        restSeconds: ex.rest_seconds || 30,
+        workSeconds: ex.workSeconds || 30,
+        restSeconds: ex.restSeconds || ex.rest_seconds || 30,
         mediaUrl: ex.video_path ? getVideoUrl(ex.video_path) : null,
         cameraMode: null
       }));
@@ -598,11 +603,60 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
                         onClick={declineAiIntensity}
                         style={{ padding: '8px 16px', background: 'transparent', color: '#64ffda', border: '1px solid rgba(100, 255, 218, 0.5)', borderRadius: '4px', cursor: 'pointer' }}
                       >
-                        Келіспеймін
+                        Бас тарту
                       </button>
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* NEW BIOMETRIC FIELDS FOR ML */}
+              <div className="ai-training-field">
+                <label>Жасыңыз</label>
+                <input
+                  type="number"
+                  value={survey.age}
+                  onChange={(e) => updateSurvey('age', Number(e.target.value))}
+                  min="10" max="100"
+                />
+              </div>
+
+              <div className="ai-training-field">
+                <label>Бойыңыз (см)</label>
+                <input
+                  type="number"
+                  value={survey.height}
+                  onChange={(e) => updateSurvey('height', Number(e.target.value))}
+                  min="100" max="250"
+                />
+              </div>
+
+              <div className="ai-training-field">
+                <label>Салмағыңыз (кг)</label>
+                <input
+                  type="number"
+                  value={survey.weight}
+                  onChange={(e) => updateSurvey('weight', Number(e.target.value))}
+                  min="30" max="300"
+                />
+              </div>
+
+              <div className="ai-training-field">
+                <label>Жынысыңыз</label>
+                <select value={survey.gender} onChange={(e) => updateSurvey('gender', e.target.value)}>
+                  <option value="Male">Ер</option>
+                  <option value="Female">Әйел</option>
+                </select>
+              </div>
+
+              <div className="ai-training-field" style={{ gridColumn: '1 / -1' }}>
+                <label>Негізгі Мақсатыңыз</label>
+                <select value={survey.goal} onChange={(e) => updateSurvey('goal', e.target.value)}>
+                  <option value="keep_fit">Форманы сақтау</option>
+                  <option value="lose_weight">Май жағу / Салмақ тастау</option>
+                  <option value="gain_mass">Бұлшықет өсіру</option>
+                </select>
+              </div>
               </div>
             </div>
 

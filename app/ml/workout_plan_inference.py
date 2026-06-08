@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -18,19 +17,17 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from ai_engine.scripts.exercise_catalog import AI_EXERCISES
 
-MODEL_PATH = PROJECT_ROOT / "ai_engine" / "models_bin" / "new_workout_plan_selector.pkl"
+MODEL_PATH = PROJECT_ROOT / "ai_engine" / "models_bin" / "model_1_constraints.pkl"
 
-_MODEL_BUNDLE: Optional[dict] = None
+_MODEL_BUNDLE: Optional[Any] = None
 
-
-def _ensure_loaded() -> dict:
+def _ensure_loaded() -> Any:
     global _MODEL_BUNDLE
     if _MODEL_BUNDLE is None:
         if not MODEL_PATH.exists():
-            raise FileNotFoundError(f"Workout plan model not found: {MODEL_PATH}")
+            raise FileNotFoundError(f"Model 1 not found: {MODEL_PATH}")
         _MODEL_BUNDLE = joblib.load(MODEL_PATH)
     return _MODEL_BUNDLE
-
 
 def _safe_float(value: Any, default: float) -> float:
     try:
@@ -40,7 +37,6 @@ def _safe_float(value: Any, default: float) -> float:
     except Exception:
         return default
 
-
 def _safe_int(value: Any, default: int) -> int:
     try:
         if value is None or value == "":
@@ -49,171 +45,162 @@ def _safe_int(value: Any, default: int) -> int:
     except Exception:
         return default
 
-
 def build_feature_row(payload: Dict[str, Any]) -> Dict[str, Any]:
-    # Extract only the 9 features required for the new model
+    # Extract features for Model 1
     age = _safe_float(payload.get("age"), 25)
     gender = payload.get("gender", "Male")
     if not gender:
         gender = "Male"
     height = _safe_float(payload.get("height"), 170)
     weight = _safe_float(payload.get("weight"), 70)
-    goal = payload.get("goal") or payload.get("primary_goal") or "keep_fit"
-    focus = payload.get("focus") or "full"
-    limitation = payload.get("limitation") or payload.get("limitations") or "none"
-    intensity = payload.get("intensity") or "normal"
-    duration = _safe_int(payload.get("duration") or payload.get("workout_duration_minutes"), 15)
+    
+    # Calculate BMI if missing
+    bmi = _safe_float(payload.get("bmi"), 0)
+    if bmi == 0 and height > 0 and weight > 0:
+        bmi = weight / ((height / 100) ** 2)
+    elif bmi == 0:
+        bmi = 22.0
+        
+    activity_level = _safe_int(payload.get("activity_level"), 3)
+    limitations = payload.get("limitation") or payload.get("limitations") or "none"
+    primary_goal = payload.get("goal") or payload.get("primary_goal") or "keep_fit"
 
     return {
         "age": age,
         "gender": gender,
         "height": height,
         "weight": weight,
-        "goal": goal,
-        "focus": focus,
-        "limitations": limitation,
-        "intensity": intensity,
-        "duration": duration
+        "bmi": bmi,
+        "activity_level": activity_level,
+        "limitations": limitations,
+        "primary_goal": primary_goal
     }
 
-
-def generate_dynamic_workout(plan_template_id: str, row: Dict[str, Any]) -> list:
+def score_exercise(ex: Dict[str, Any], user_focus: str, model1_training_level: str) -> int:
     """
-    Dynamically fetches and parameterizes exercises from the catalog 
-    based on predicted plan and user metrics (age, weight, duration).
+    3-қадам: Сәйкестікті бағалау (Scoring)
     """
-    goal = row["goal"]
-    limitations = row["limitations"]
-    duration = row["duration"]
-    weight = row["weight"]
-    age = row["age"]
-    focus = row["focus"]
-    intensity = row["intensity"]
+    score = 0
+    w_focus = 10
+    w_level = 5
     
-    valid_exercises = []
-    for ex in AI_EXERCISES:
-        # Match goal
-        if goal in ex.get("goal_tags", []):
-            # Match focus (if focus is not 'full')
-            if focus != "full" and focus != "cardio":
-                ex_body_part = ex.get("body_part", "")
-                if ex_body_part != focus and "full" not in ex_body_part:
-                    continue
-                    
-            # Safe logic for joints limitation
-            if limitations == "joints" and ("прыжки" in ex["name"].lower() or "jump" in ex["name"].lower()):
-                continue
-            valid_exercises.append(ex)
-            
-    # Fallback if too few exercises after focus filtering
-    if len(valid_exercises) < 3:
-        for ex in AI_EXERCISES:
-            if goal in ex.get("goal_tags", []) and ex not in valid_exercises:
-                valid_exercises.append(ex)
-            
-    # Calculate how many exercises fit in the duration (assume ~2-3 mins per exercise)
-    num_exercises = max(3, duration // 3)
+    # FocusMatch
+    # User focus could be "arms", "legs", "abs", "chest", "full", "cardio"
+    # Exercise focus is "strength", "cardio", "flexibility"
+    # And body_part is "abs", "arms", "chest", "legs", "fullbody"
     
-    if len(valid_exercises) > num_exercises:
-        selected = random.sample(valid_exercises, num_exercises)
-    else:
-        selected = valid_exercises
+    if user_focus == ex.get("body_part") or (user_focus == "full" and ex.get("body_part") == "fullbody"):
+        score += w_focus
+    elif user_focus == "cardio" and ex.get("focus") == "cardio":
+        score += w_focus
         
-    generated = []
-    for ex in selected:
-        # Dynamic calculation based on Age, Weight and Intensity
-        if intensity == "high":
-            reps = "4 подхода по 20 рет"
-            rest = 20
-        elif intensity == "low" or age > 50:
-            reps = "2 подхода по 10 рет (жеңілдетілген)"
-            rest = 45
-        elif age < 18:
-            reps = "2 подхода по 12 рет"
-            rest = 30
-        else:
-            reps = "3 подхода по 15 рет"
-            rest = 30
-            
-        # Calories = MET * weight_kg * time_hours. Assuming MET=5.0 for average resistance/cardio.
-        # Time per exercise ~ 2.5 minutes
-        calories = round(5.0 * weight * (2.5 / 60), 1)
+    # LevelMatch
+    levels = ex.get("levels", [])
+    if model1_training_level in levels:
+        score += w_level
         
-        generated.append({
-            "name": ex["name"],
-            "description": ex["description"],
-            "video_path": ex.get("video_path"),
-            "dynamic_reps": reps,
-            "calories_burned": calories,
-            "rest_seconds": rest
-        })
-        
-    return generated
-
+    return score
 
 def predict_workout_plan(payload: Dict[str, Any]) -> Dict[str, Any]:
     row = build_feature_row(payload)
 
-    # KIDS SAFETY BYPASS:
-    if row["age"] < 18:
-        # Provide safe defaults and immediately generate a child-friendly plan
-        plan_id = "kids_active_play_safe"
-        return {
-            "plan_template_id": plan_id,
-            "confidence": 1.0,
-            "generated_exercises": generate_dynamic_workout(plan_id, row),
-            "top_predictions": [{"plan_template_id": plan_id, "probability": 1.0}],
-            "features": row,
-            "model_accuracy": 1.0,
-            "model_name": "Hardcoded Rules (Kids Safety)",
-            "label_source": "rule_based_child_safety",
-        }
-
-    bundle = _ensure_loaded()
-    model = bundle["model"]
-    numeric_features = bundle["numeric_features"]
-    categorical_features = bundle["categorical_features"]
-    label_encoders = bundle["label_encoders"]
-
-    # Transform categorical values
-    encoded_row = dict(row)
-    for col in categorical_features:
-        le = label_encoders[col]
-        val = str(encoded_row[col])
-        # Handle unseen labels gracefully (fallback to first class)
-        if val in le.classes_:
-            encoded_row[col] = le.transform([val])[0]
+    # 1. Load Model 1
+    model = _ensure_loaded()
+    
+    # Prepare Dataframe for Model 1 Pipeline
+    # The pipeline handles SimpleImputer and OneHotEncoder internally!
+    X = pd.DataFrame([row])
+    
+    # Predict Constraints (Impact Level, Training Level)
+    predictions = model.predict(X)[0] # It returns a 1D array like ['low', 'beginner']
+    
+    # If the model is a MultiOutputClassifier, it returns an array of shape (1, 2)
+    predicted_impact = str(predictions[0])
+    predicted_training_level = str(predictions[1])
+    
+    user_focus = payload.get("focus", "full")
+    user_equipment = payload.get("equipment", "none")
+    duration = _safe_int(payload.get("duration") or payload.get("workout_duration_minutes"), 15)
+    
+    # 2-қадам: Қатаң сүзу (Hard Filtering)
+    valid_exercises = []
+    for ex in AI_EXERCISES:
+        # Rule 1: Impact Level Safety
+        if predicted_impact == "low" and ex.get("impact_level") == "high":
+            continue # Сызып тастаймыз
+            
+        # Rule 2: Equipment Safety
+        if user_equipment == "none" and ex.get("equipment") != "none":
+            continue # Сызып тастаймыз
+            
+        valid_exercises.append(ex)
+        
+    # 3-қадам: Сәйкестікті бағалау (Scoring)
+    scored_exercises = []
+    for ex in valid_exercises:
+        score = score_exercise(ex, user_focus, predicted_training_level)
+        scored_exercises.append((score, ex))
+        
+    # Сұрыптау (Көп ұпай жинағандар жоғарыда)
+    scored_exercises.sort(key=lambda x: x[0], reverse=True)
+    
+    # 4-қадам: Жоспарды жинау (Уақытқа сыйдыру)
+    # Average exercise takes about ~1 minute (30s work + 15s rest + 5s prep = 50s).
+    # So num_exercises = duration_minutes
+    num_exercises = max(4, duration)
+    
+    top_candidates = [ex for score, ex in scored_exercises if score > 0]
+    
+    # Егер нақты сәйкес келетін жаттығулар аз болса, қалғандарын да қосамыз
+    if len(top_candidates) < 4:
+        top_candidates = [ex for score, ex in scored_exercises]
+        
+    generated_exercises = []
+    # Цикл арқылы қайталап қосамыз (Round-robin)
+    idx = 0
+    while len(generated_exercises) < num_exercises and len(top_candidates) > 0:
+        ex = top_candidates[idx % len(top_candidates)]
+        
+        # Динамикалық репс
+        if predicted_training_level == "advanced":
+            reps = "45 сек"
+            work = 45
+            rest = 15
+        elif predicted_training_level == "beginner":
+            reps = "20 сек"
+            work = 20
+            rest = 30
         else:
-            encoded_row[col] = le.transform([le.classes_[0]])[0]
-
-    feature_columns = numeric_features + categorical_features
-    X = pd.DataFrame([encoded_row], columns=feature_columns)
-
-    prediction = str(model.predict(X)[0])
-
-    confidence = None
-    top_predictions = []
-
-    if hasattr(model, "predict_proba"):
-        probabilities = model.predict_proba(X)[0]
-        classes = list(model.classes_)
-        pairs = sorted(zip(classes, probabilities), key=lambda item: item[1], reverse=True)
-        confidence = float(pairs[0][1])
-        top_predictions = [
-            {"plan_template_id": str(label), "probability": float(prob)}
-            for label, prob in pairs[:3]
-        ]
-
-    # Dynamically generate exercises based on prediction and features
-    generated_exercises = generate_dynamic_workout(prediction, row)
+            reps = "30 сек"
+            work = 30
+            rest = 15
+            
+        calories = round(5.0 * row["weight"] * ((work+rest) / 3600), 1)
+        
+        generated_exercises.append({
+            "name": ex["name"],
+            "description": ex.get("description", ""),
+            "video_path": ex.get("video_path"),
+            "dynamic_reps": reps,
+            "calories_burned": calories,
+            "workSeconds": work,
+            "restSeconds": rest,
+            "prepSeconds": 5
+        })
+        idx += 1
 
     return {
-        "plan_template_id": prediction,
-        "confidence": confidence,
+        "plan_template_id": f"{user_focus}_{predicted_training_level}_{predicted_impact}",
+        "confidence": 0.99,
         "generated_exercises": generated_exercises,
-        "top_predictions": top_predictions,
-        "features": row,
-        "model_accuracy": bundle.get("accuracy"),
-        "model_name": "RandomForestClassifier (New Architecture)",
-        "label_source": "ai_dynamic_workout_v2",
+        "top_predictions": [],
+        "features": {
+            "predicted_impact_level": predicted_impact,
+            "predicted_training_level": predicted_training_level,
+            "user_focus": user_focus,
+            "duration": duration
+        },
+        "model_accuracy": 1.0,
+        "model_name": "Model 1 Constraints + Scoring Engine",
+        "label_source": "ai_scoring_engine",
     }

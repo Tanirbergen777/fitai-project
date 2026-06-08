@@ -60,17 +60,10 @@ def train_and_evaluate():
     # Y targets (Выходной вектор ограничений)
     target_cols = [
         "impact_level",
-        "training_level",
-        "cardio_preference",
-        "training_focus",
-        "workout_duration_minutes"
+        "training_level"
     ]
 
-    # We need to make sure duration is string or categorical if we want to classify it, 
-    # but Random Forest can handle numeric targets as regression. 
-    # Since it has fixed values (15, 20, 30, 45, 60), we will treat it as categorical.
-    df["workout_duration_minutes"] = df["workout_duration_minutes"].astype(str)
-
+    # We only have categorical targets now
     X = df[feature_cols]
     Y = df[target_cols]
 
