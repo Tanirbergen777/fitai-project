@@ -657,9 +657,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
                   <option value="gain_mass">Бұлшықет өсіру</option>
                 </select>
               </div>
-              </div>
             </div>
-
             <div className="ai-training-source-box">
               <h3>{t('training.aiSurvey.sourceTitle', 'Анкета неге осылай құрылған?')}</h3>
               <p>
