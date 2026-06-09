@@ -538,12 +538,10 @@ box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.2);
   --text-secondary: #636e72;
   --border-color: #e1e4e8;
   --card-bg: #ffffff;
+  --hero-bg: linear-gradient(180deg, #ffffff, #f0f4f8);
+  --hero-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
-.dashboard-card:hover {
-  transform: translateY(-5px);
-  border-color: #61dafb;
-  box-shadow: 0 10px 30px rgba(97, 218, 251, 0.15);
-}
+
 [data-theme='dark'] {
   /* Темная тема */
   --bg-main: #1c1e22;
@@ -553,21 +551,14 @@ box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.2);
   --text-secondary: #abb2bf;
   --border-color: #333333;
   --card-bg: #282c34;
-}
-:root {
-  --bg-sidebar: #ffffff;
-  --bg-main: #f8f9fa;
-  --text-primary: #1a1a1b;
-  --text-secondary: #586069;
-  --border-color: #eaecef;
+  --hero-bg: linear-gradient(180deg, rgba(35,40,51,0.96), rgba(25,29,38,0.96));
+  --hero-shadow: 0 18px 42px rgba(0,0,0,0.22);
 }
 
-[data-theme='dark'] {
-  --bg-sidebar: rgba(28, 30, 34, 0.95);
-  --bg-main: #1c1e22;
-  --text-primary: #ffffff;
-  --text-secondary: #abb2bf;
-  --border-color: #333333;
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  border-color: #61dafb;
+  box-shadow: 0 10px 30px rgba(97, 218, 251, 0.15);
 }
 /* Отключаем лишние выделения текста, которые могут мешать кликам */
 * {

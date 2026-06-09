@@ -257,9 +257,9 @@ const MainDashboard = ({ user, aiResult, setActiveTab }) => {
     margin-bottom: 22px !important;
     padding: 18px 16px !important;
     border-radius: 24px !important;
-    background: linear-gradient(180deg, rgba(35,40,51,0.96), rgba(25,29,38,0.96)) !important;
-    border: 1px solid rgba(255,255,255,0.06) !important;
-    box-shadow: 0 18px 42px rgba(0,0,0,0.22);
+    background: var(--hero-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--hero-shadow);
   }
 
   .main-dashboard-hero-badge {

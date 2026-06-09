@@ -468,7 +468,6 @@ const MassGainWorkout = ({ onAllStepsComplete, onBack }) => {
             { key: 'floor2', video: 'arms/skruchivaniya-lezha-pravo.MP4' },
 
             { key: 'box', video: 'arms/bokovye-udary.mp4' },
-
             { key: 'biceps1', video: 'arms/podem-nogi-biceps-levo.mp4' },
             { key: 'biceps2', video: 'arms/podem-nogi-biceps-pravo.mp4' },
 
