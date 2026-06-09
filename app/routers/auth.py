@@ -31,10 +31,10 @@ def env_bool(name: str, default: bool = False) -> bool:
 MAIL_USERNAME = os.getenv("MAIL_USERNAME")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_FROM = os.getenv("MAIL_FROM")
-MAIL_PORT = int(os.getenv("MAIL_PORT", "465"))
+MAIL_PORT = int(os.getenv("MAIL_PORT", "587"))
 MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.mail.ru")
-MAIL_STARTTLS = env_bool("MAIL_STARTTLS", False)
-MAIL_SSL_TLS = env_bool("MAIL_SSL_TLS", True)
+MAIL_STARTTLS = env_bool("MAIL_STARTTLS", True)
+MAIL_SSL_TLS = env_bool("MAIL_SSL_TLS", False)
 USE_CREDENTIALS = env_bool("USE_CREDENTIALS", True)
 
 if not MAIL_USERNAME or not MAIL_PASSWORD or not MAIL_FROM:
@@ -219,7 +219,7 @@ async def register_user(user_data: schemas.UserRegister, db: Session = Depends(g
         password_hash=user_data.password,
         birth_date=user_data.birth_date,
         gender=user_data.gender,
-        is_verified=True, # УАҚЫТША: Почта қатесіне бола бұғатталмау үшін бірден True жасадық
+        is_verified=False,
         verification_code=otp_code,
         streak_count=0,
         rating=0
