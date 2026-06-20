@@ -441,12 +441,12 @@ const NutritionProfileSurvey = ({
 }
 
 .nutrition-survey-card {
-  background: linear-gradient(180deg, #232833 0%, #1b2029 100%);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 28px;
   padding: 28px;
-  color: #fff;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+  color: var(--text-primary);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.1);
   box-sizing: border-box;
 }
 
@@ -454,7 +454,7 @@ const NutritionProfileSurvey = ({
   margin: 0 0 18px;
   font-size: 24px;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .nutrition-survey-options-grid {
@@ -467,9 +467,9 @@ const NutritionProfileSurvey = ({
 }
 
 .nutrition-survey-option {
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.035);
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-sidebar);
+  color: var(--text-primary);
   border-radius: 22px;
   padding: 22px;
   text-align: left;
@@ -509,7 +509,7 @@ const NutritionProfileSurvey = ({
 
 .nutrition-survey-option p {
   margin: 0;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.55;
 }
@@ -521,7 +521,7 @@ const NutritionProfileSurvey = ({
 .nutrition-survey-label,
 .nutrition-survey-field label {
   display: block;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 800;
   margin-bottom: 10px;
@@ -534,9 +534,9 @@ const NutritionProfileSurvey = ({
 }
 
 .nutrition-survey-chip {
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.04);
-  color: #dce4f2;
+  border: 1px solid var(--border-color);
+  background: var(--bg-sidebar);
+  color: var(--text-primary);
   border-radius: 999px;
   padding: 10px 14px;
   cursor: pointer;
@@ -566,9 +566,9 @@ const NutritionProfileSurvey = ({
   width: 100%;
   min-height: 50px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: #1c1f24;
-  color: #ffffff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-main);
+  color: var(--text-primary);
   padding: 0 14px;
   font-size: 15px;
   outline: none;
@@ -619,9 +619,9 @@ const NutritionProfileSurvey = ({
 }
 
 .nutrition-survey-secondary-btn {
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid var(--border-color);
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .nutrition-survey-primary-btn:disabled,

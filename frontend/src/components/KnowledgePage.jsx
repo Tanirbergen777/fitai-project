@@ -208,11 +208,11 @@ const styles = {
   hero: {
     background:
       'linear-gradient(135deg, rgba(97,218,251,0.12) 0%, rgba(139,123,255,0.10) 100%)',
-    border: '1px solid rgba(255,255,255,0.08)',
+    border: '1px solid var(--border-color)',
     borderRadius: '28px',
     padding: '28px',
     marginBottom: '20px',
-    boxShadow: '0 12px 40px rgba(0,0,0,0.10)',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.1)',
   },
   badge: {
     display: 'inline-flex',
@@ -242,8 +242,8 @@ const styles = {
     marginTop: '18px',
     padding: '11px 16px',
     borderRadius: '14px',
-    border: '1px solid rgba(255,255,255,0.10)',
-    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid var(--border-color)',
+    background: 'var(--card-bg)',
     color: 'var(--text-primary)',
     cursor: 'pointer',
     fontWeight: '700',

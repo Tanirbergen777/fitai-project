@@ -956,24 +956,7 @@ const FocusPage = ({ onBack }) => {
                 </div>
               </div>
 
-              <div style={styles.futureAiBlock}>
-                <h3 style={styles.cardTitle}>
-                  {tr('knowledgeModule.focus.ui.futureAiTitle', 'Что будет в будущем')}
-                </h3>
-                <p style={styles.text}>
-                  {tr(
-                    'knowledgeModule.focus.ui.futureAiText',
-                    'Позже этот интерфейс будет работать через нашу собственную модель: она будет определять уровень концентрации, риск отвлечения, ментальную перегрузку и давать более персональные советы по еде, режиму и действиям.'
-                  )}
-                </p>
 
-                <div style={styles.futureAiList}>
-                  <div style={styles.futureAiItem}>• focus score</div>
-                  <div style={styles.futureAiItem}>• distraction risk</div>
-                  <div style={styles.futureAiItem}>• overload level</div>
-                  <div style={styles.futureAiItem}>• food suggestions</div>
-                </div>
-              </div>
 
               <div style={styles.buttonRow}>
                 <button style={styles.primaryButton} onClick={() => setMode('survey')}>
@@ -1607,27 +1590,7 @@ const styles = {
     fontSize: '14px',
     lineHeight: 1.6,
   },
-  futureAiBlock: {
-    marginTop: '18px',
-    padding: '18px',
-    borderRadius: '20px',
-    background: 'rgba(97,218,251,0.06)',
-    border: '1px dashed rgba(97,218,251,0.25)',
-  },
-  futureAiList: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: '8px',
-    marginTop: '14px',
-  },
-  futureAiItem: {
-    padding: '10px 12px',
-    borderRadius: '12px',
-    background: 'rgba(255,255,255,0.04)',
-    color: 'var(--text-primary)',
-    fontSize: '13px',
-    fontWeight: '600',
-  },
+
 
   exerciseHero: {
     display: 'grid',

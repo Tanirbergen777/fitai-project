@@ -57,7 +57,7 @@ def train_and_evaluate():
         "primary_goal"
     ]
 
-    # Y targets (Выходной вектор ограничений)
+
     target_cols = [
         "impact_level",
         "training_level"
@@ -90,8 +90,7 @@ def train_and_evaluate():
 
     preprocessor = build_preprocessor(numeric_features, categorical_features)
 
-    # RandomForest natively supports multi-output classification, but using MultiOutputClassifier 
-    # ensures explicit handling for classification metrics per target.
+
     model = RandomForestClassifier(n_estimators=150, max_depth=15, random_state=42)
 
     pipeline = Pipeline(steps=[
@@ -105,9 +104,7 @@ def train_and_evaluate():
     print("Training complete. Accuracy evaluation:")
     y_pred = pipeline.predict(X_test)
     
-    # y_pred is a 2D array: shape (n_samples, n_targets)
-    # y_test is a DataFrame
-    
+
     for i, target_name in enumerate(target_cols):
         y_test_col = y_test.iloc[:, i]
         y_pred_col = y_pred[:, i]
@@ -118,7 +115,7 @@ def train_and_evaluate():
         print(f"Accuracy: {acc:.4f}")
         print(classification_report(y_test_col, y_pred_col, zero_division=0))
 
-    # Save model
+
     model_path = os.path.join(MODELS_DIR, "model_1_constraints.pkl")
     joblib.dump(pipeline, model_path)
     

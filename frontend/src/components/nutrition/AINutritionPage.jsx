@@ -28,6 +28,22 @@ const AINutritionPage = ({ onBack, userId, onFoodSelected }) => {
     keep_fit: t('nutrition.ai.goalLabels.keep_fit'),
   };
 
+  
+  const translateReason = (reasonStr) => {
+    if (!reasonStr) return '';
+    return reasonStr.split(',').map(r => {
+      const trimmed = r.trim();
+      switch(trimmed) {
+        case 'подходит под цель': return t('nutrition.ai.reasons.goalOk', 'Мақсатқа сай');
+        case 'подходит по времени': return t('nutrition.ai.reasons.timeOk', 'Уақытқа сай');
+        case 'учтены предпочтения': return t('nutrition.ai.reasons.prefOk', 'Қалаулар ескерілді');
+        case 'уже выбиралось сегодня': return t('nutrition.ai.reasons.alreadySelected', 'Бүгін таңдалған');
+        case 'ml-рекомендация': return t('nutrition.ai.reasons.mlRec', 'ML ұсынысы');
+        default: return trimmed;
+      }
+    }).join(', ');
+  };
+
   const slotLabelMap = {
     breakfast: t('nutrition.ai.slotLabels.breakfast'),
     lunch: t('nutrition.ai.slotLabels.lunch'),
@@ -312,7 +328,7 @@ useEffect(() => {
                   {slotLabelMap[currentSlot] || t('nutrition.ai.fitsNow')}
                 </div>
 
-                <h3>{food.name}</h3>
+                <h3>{t(`nutrition.catalog.${food.id}.name`, { defaultValue: food.name })}</h3>
 
                 <div className="nutrition-food-stats">
                   <div className="nutrition-stat-box">
@@ -344,11 +360,11 @@ useEffect(() => {
                   </div>
                 </div>
 
-                <p className="nutrition-recipe">{food.recipe}</p>
+                <p className="nutrition-recipe">{t(`nutrition.catalog.${food.id}.recipe`, { defaultValue: food.recipe })}</p>
 
                 {food.reason && (
                   <p className="nutrition-section-subtitle" style={{ marginBottom: '14px' }}>
-                    {t('nutrition.ai.reasonLabel')}: {food.reason}
+                    {t('nutrition.ai.reasonLabel')}: {translateReason(food.reason)}
                   </p>
                 )}
 

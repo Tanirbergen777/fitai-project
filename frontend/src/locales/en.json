@@ -16,7 +16,17 @@
     "knowledge_desc": "Articles and video lessons",
     "ai_desc": "Ask a question to the coach",
     "current_status": "Your current status",
-    "analyzing": "Analyzing..."
+    "analyzing": "Analyzing...",
+    "ml_progress": {
+      "title": "Your Progress",
+      "subtitle": "Based on AI recommendations",
+      "weeks_label": "Duration (weeks)",
+      "workouts_label": "Workouts (week)",
+      "calories_label": "Calories (today)",
+      "duration_label": "Time (today)",
+      "calories_suffix": "kcal",
+      "duration_suffix": "min"
+    }
   },
   "nutritionPage": {
     "badge": "Nutrition Hub",
@@ -62,7 +72,56 @@
     "add_friends_title": "Add Friends",
     "add_friends_desc": "Add friends to compete together!",
     "find_friends": "Find friends",
-    "invite_friends": "Invite friends"
+    "invite_friends": "Invite friends",
+    "editModal": {
+      "title": "Edit Profile",
+      "username": "Username",
+      "usernamePlaceholder": "Enter your name",
+      "birthDate": "Date of Birth",
+      "weight": "Weight (kg)",
+      "height": "Height (cm)",
+      "bmiLabel": "BMI:",
+      "targetBmiLabel": "Target BMI:",
+      "goal": "Goal",
+      "goalOptions": {
+        "weightLoss": "Weight Loss",
+        "muscleGain": "Muscle Gain",
+        "maintain": "Improve Shape"
+      },
+      "targetWeight": "Target Weight (kg)",
+      "targetWeightPlaceholder": "E.g., 75",
+      "targetWeeks": "Target Timeframe (weeks)",
+      "targetWeeksPlaceholder": "E.g., 12",
+      "mlLoading": "⏳ ML is analyzing timeframe...",
+      "mlGoodVerdict": "✅ ML Verdict: Great! This is a healthy and achievable goal.",
+      "mlOptimalPlan": "Optimal plan:",
+      "timesPerWeek": "times a week",
+      "perWorkout": "Per workout:",
+      "min": "min.",
+      "burnAbout": "(burn around",
+      "kcal": "kcal)",
+      "mlBadVerdict": "⚠️ ML Verdict: Too fast! For safety, we recommend at least {{weeks}} weeks.",
+      "mlHeavyPlan": "If you keep this timeframe, you'll need:",
+      "heavyWorkouts": "heavy workouts per week",
+      "save": "SAVE CHANGES",
+      "errors": {
+        "weightLossRule": "For 'Weight Loss', target weight must be less than current weight.",
+        "muscleGainRule": "For 'Muscle Gain', target weight must be greater than current weight.",
+        "bmiWarning": "Your target weight will lead to a BMI of {{bmi}} ({{category}}). This might be harmful to your health. Are you sure you want to continue?",
+        "attention": "Warning:",
+        "gotIt": "Got it",
+        "yesSave": "Yes, save",
+        "cancel": "Cancel"
+      },
+      "bmiCategories": {
+        "underweight": "Underweight",
+        "normal": "Normal",
+        "overweight": "Overweight",
+        "obese1": "Obesity Class I",
+        "obese2": "Obesity Class II",
+        "obese3": "Obesity Class III"
+      }
+    }
   },
   "auth": {
     "back_to_main": "Back to Home",
@@ -337,7 +396,14 @@
         "historyCleared": "Today's nutrition history has been cleared.",
         "historyClearError": "Could not clear today's nutrition history."
       },
-      "emptyRecommendations": "No meals could be selected for the current conditions yet."
+      "emptyRecommendations": "No meals could be selected for the current conditions yet.",
+      "reasons": {
+        "goalOk": "Fits your goal",
+        "timeOk": "Fits meal time",
+        "prefOk": "Preferences applied",
+        "alreadySelected": "Already selected today",
+        "mlRec": "ML recommendation"
+      }
     },
     "survey": {
       "badge": "AI Nutrition Survey",
@@ -416,6 +482,275 @@
         "save": "Save survey",
         "saving": "Saving..."
       }
+    },
+    "foodAction": {
+      "chooseTitle": "What would you like to do with this dish?",
+      "goCafe": "Go to a nearby cafe",
+      "goCafeText": "We will open a search for this dish on Yandex Maps.",
+      "cookMyself": "Cook it myself",
+      "cookMyselfText": "We will show you the recipe, ingredients, and a YouTube video.",
+      "cookSubtitle": "Recipe, ingredients, and preparation steps",
+      "ingredients": "Ingredients",
+      "steps": "How to cook",
+      "openYoutube": "Open YouTube",
+      "buySubtitle": "We will open Yandex Maps to search for nearby places with this dish",
+      "buyText": "A search on Yandex Maps will open now. You can choose a convenient place, check options, and see the route.",
+      "openYandex": "Open Yandex Maps",
+      "fallback": {
+        "ingredients": {
+          "main": "Main ingredient of the dish",
+          "extra1": "Additional ingredients to taste",
+          "extra2": "Spices and add-ins"
+        },
+        "recipe": "Use the dish description as a basis for cooking.",
+        "step2": "Prepare the ingredients and assemble the dish step by step."
+      }
+    },
+    "catalog": {
+      "1": {
+        "name": "Oatmeal with banana and nuts",
+        "recipe": "Boil oatmeal, add banana and some nuts."
+      },
+      "2": {
+        "name": "Omelet with vegetables",
+        "recipe": "Cook an omelet with vegetables in a pan."
+      },
+      "3": {
+        "name": "Cottage cheese with berries",
+        "recipe": "Mix cottage cheese with berries without sugar."
+      },
+      "4": {
+        "name": "Greek yogurt with granola",
+        "recipe": "Mix Greek yogurt with granola."
+      },
+      "5": {
+        "name": "Oatmeal with apple and cinnamon",
+        "recipe": "Boil oatmeal and add apple and cinnamon."
+      },
+      "6": {
+        "name": "Fried eggs with whole grain bread",
+        "recipe": "Fry eggs and serve with whole grain bread."
+      },
+      "7": {
+        "name": "Sugar-free syrniki",
+        "recipe": "Make cottage cheese pancakes (syrniki) and serve without sugar."
+      },
+      "8": {
+        "name": "Avocado and egg toast",
+        "recipe": "Toast the bread, add avocado and a boiled egg."
+      },
+      "9": {
+        "name": "Millet porridge with pumpkin",
+        "recipe": "Boil millet with pumpkin pieces."
+      },
+      "10": {
+        "name": "Omelet with cheese",
+        "recipe": "Cook an omelet and add grated cheese."
+      },
+      "11": {
+        "name": "Rice porridge with milk",
+        "recipe": "Boil rice porridge with milk."
+      },
+      "12": {
+        "name": "Yogurt with banana and seeds",
+        "recipe": "Mix yogurt, banana, and seeds."
+      },
+      "13": {
+        "name": "Cottage cheese with honey and nuts",
+        "recipe": "Add some honey and nuts to cottage cheese."
+      },
+      "14": {
+        "name": "Buckwheat porridge with egg",
+        "recipe": "Boil buckwheat and serve with a boiled egg."
+      },
+      "15": {
+        "name": "Rice with chicken",
+        "recipe": "Boil rice and add cooked chicken."
+      },
+      "16": {
+        "name": "Buckwheat with turkey",
+        "recipe": "Boil buckwheat and serve with turkey."
+      },
+      "17": {
+        "name": "Pasta with beef",
+        "recipe": "Boil pasta and mix with beef."
+      },
+      "18": {
+        "name": "Tuna salad",
+        "recipe": "Mix lettuce, vegetables, and tuna."
+      },
+      "19": {
+        "name": "Salmon with vegetables",
+        "recipe": "Bake salmon and serve with vegetables."
+      },
+      "20": {
+        "name": "Potato with turkey",
+        "recipe": "Bake potato and turkey in the oven."
+      },
+      "21": {
+        "name": "Chicken breast with broccoli",
+        "recipe": "Fry or bake chicken breast and serve with broccoli."
+      },
+      "22": {
+        "name": "Bulgur with chicken",
+        "recipe": "Boil bulgur and serve with chicken."
+      },
+      "23": {
+        "name": "Beef pilaf",
+        "recipe": "Cook pilaf with rice and beef."
+      },
+      "24": {
+        "name": "Brown rice with vegetables and chicken",
+        "recipe": "Mix brown rice, vegetables, and chicken."
+      },
+      "25": {
+        "name": "Turkey fillet with quinoa",
+        "recipe": "Bake turkey and serve with quinoa."
+      },
+      "26": {
+        "name": "Lentils with chicken",
+        "recipe": "Boil lentils and serve with chicken."
+      },
+      "27": {
+        "name": "Stewed beef with potato",
+        "recipe": "Stew beef and potato together."
+      },
+      "28": {
+        "name": "Fish with buckwheat",
+        "recipe": "Bake fish and serve with buckwheat."
+      },
+      "29": {
+        "name": "Pasta with chicken and tomato sauce",
+        "recipe": "Mix pasta, chicken, and tomato sauce."
+      },
+      "30": {
+        "name": "Chicken with salad",
+        "recipe": "Bake chicken and serve with vegetable salad."
+      },
+      "31": {
+        "name": "Baked cod with vegetables",
+        "recipe": "Bake cod and vegetables in the oven."
+      },
+      "32": {
+        "name": "Turkey cutlets with rice",
+        "recipe": "Cook turkey cutlets and serve with rice."
+      },
+      "33": {
+        "name": "Teriyaki chicken with rice",
+        "recipe": "Cook teriyaki chicken and serve with rice."
+      },
+      "34": {
+        "name": "Turkey and vegetable stew",
+        "recipe": "Stew turkey and vegetables."
+      },
+      "35": {
+        "name": "Lentil soup with chicken",
+        "recipe": "Cook lentil soup and add chicken."
+      },
+      "36": {
+        "name": "Vegetable soup with beef",
+        "recipe": "Boil vegetable soup and add beef pieces."
+      },
+      "37": {
+        "name": "Beef with bulgur",
+        "recipe": "Fry beef and serve with bulgur."
+      },
+      "38": {
+        "name": "Curry chicken with rice",
+        "recipe": "Cook curry chicken and serve with rice."
+      },
+      "39": {
+        "name": "Baked mackerel with vegetables",
+        "recipe": "Bake mackerel with vegetables."
+      },
+      "40": {
+        "name": "Beans with turkey",
+        "recipe": "Stew beans with turkey."
+      },
+      "41": {
+        "name": "Chicken breast with quinoa and vegetables",
+        "recipe": "Bake chicken and serve with quinoa and vegetables."
+      },
+      "42": {
+        "name": "Rice with omelet and vegetables",
+        "recipe": "Make rice, omelet, and add vegetables."
+      },
+      "43": {
+        "name": "Yogurt and apple",
+        "recipe": "Take natural yogurt and an apple."
+      },
+      "44": {
+        "name": "Peanut butter and banana sandwich",
+        "recipe": "Spread peanut butter on bread and add banana."
+      },
+      "45": {
+        "name": "Kefir and crispbreads",
+        "recipe": "Add 2-3 crispbreads to kefir."
+      },
+      "46": {
+        "name": "Protein shake",
+        "recipe": "Mix protein with milk or water."
+      },
+      "47": {
+        "name": "Nuts and dried fruits",
+        "recipe": "Mix nuts and some dried fruits."
+      },
+      "48": {
+        "name": "Cottage cheese mousse",
+        "recipe": "Whip cottage cheese to a soft texture."
+      },
+      "49": {
+        "name": "Smoothie with banana and yogurt",
+        "recipe": "Blend banana and yogurt in a blender."
+      },
+      "50": {
+        "name": "Hummus with vegetable sticks",
+        "recipe": "Serve hummus with carrot and cucumber."
+      },
+      "51": {
+        "name": "Turkey sandwich",
+        "recipe": "Make a sandwich with turkey and vegetables."
+      },
+      "52": {
+        "name": "Apple and peanut butter",
+        "recipe": "Slice an apple and add some peanut butter."
+      },
+      "53": {
+        "name": "Banana and cottage cheese",
+        "recipe": "Mix cottage cheese and banana pieces."
+      },
+      "54": {
+        "name": "Protein bar",
+        "recipe": "Take a ready-made protein bar."
+      },
+      "55": {
+        "name": "Pear and Greek yogurt",
+        "recipe": "Serve pear with Greek yogurt."
+      },
+      "56": {
+        "name": "Crispbreads with cream cheese",
+        "recipe": "Spread cream cheese on crispbreads."
+      },
+      "57": {
+        "name": "Kefir before bed",
+        "recipe": "Drink a glass of kefir."
+      },
+      "58": {
+        "name": "Cottage cheese before bed",
+        "recipe": "Eat a portion of cottage cheese without sugar."
+      },
+      "59": {
+        "name": "Egg white omelet",
+        "recipe": "Make a light omelet from egg whites."
+      },
+      "60": {
+        "name": "Sugar-free yogurt",
+        "recipe": "Take natural yogurt without sugar."
+      },
+      "61": {
+        "name": "Light chicken salad",
+        "recipe": "Make a light salad with greens and chicken."
+      }
     }
   },
   "level": {
@@ -481,8 +816,8 @@
       "hamstrings": "Hamstrings",
       "calves": "Calves",
       "arms": "Arms",
-    "back": "Back",
-    "support": "Support"
+      "back": "Back",
+      "support": "Support"
     },
     "lose": {
       "full": {
@@ -767,33 +1102,33 @@
           "desc": "Basic load for arms and chest."
         },
         "armCirclesClockwise": {
-  "title": "Arm circles clockwise",
-  "desc": "Make controlled forward circles to warm up the shoulders and arms."
-},
-"armCirclesCounterclockwise": {
-  "title": "Arm circles counterclockwise",
-  "desc": "Rotate the arms backward with control to activate the shoulders."
-},
-"kneePushUps": {
-  "title": "Knee push-ups",
-  "desc": "Do light push-ups from the knees to activate chest and triceps."
-},
-"elbowSqueeze": {
-  "title": "Elbow squeeze pulses",
-  "desc": "Keep the elbows bent and squeeze the arms back with control."
-},
-"bicepsLeft": {
-  "title": "Left arm biceps hold",
-  "desc": "Focus on the left arm and keep the movement controlled under tension."
-},
-"bicepsRight": {
-  "title": "Right arm biceps hold",
-  "desc": "Focus on the right arm and keep the movement controlled under tension."
-},
-"tricepsStretch": {
-  "title": "Triceps stretch",
-  "desc": "Stretch the triceps and shoulder area after the working set."
-},
+          "title": "Arm circles clockwise",
+          "desc": "Make controlled forward circles to warm up the shoulders and arms."
+        },
+        "armCirclesCounterclockwise": {
+          "title": "Arm circles counterclockwise",
+          "desc": "Rotate the arms backward with control to activate the shoulders."
+        },
+        "kneePushUps": {
+          "title": "Knee push-ups",
+          "desc": "Do light push-ups from the knees to activate chest and triceps."
+        },
+        "elbowSqueeze": {
+          "title": "Elbow squeeze pulses",
+          "desc": "Keep the elbows bent and squeeze the arms back with control."
+        },
+        "bicepsLeft": {
+          "title": "Left arm biceps hold",
+          "desc": "Focus on the left arm and keep the movement controlled under tension."
+        },
+        "bicepsRight": {
+          "title": "Right arm biceps hold",
+          "desc": "Focus on the right arm and keep the movement controlled under tension."
+        },
+        "tricepsStretch": {
+          "title": "Triceps stretch",
+          "desc": "Stretch the triceps and shoulder area after the working set."
+        },
         "arms1": {
           "title": "Elbow Squeeze",
           "desc": "Calm work for arms and shoulders."
@@ -813,33 +1148,33 @@
       },
       "legs": {
         "highKnees": {
-  "title": "High knees",
-  "desc": "Run in place while lifting the knees high to activate the legs and cardio."
-},
-"shortSquats": {
-  "title": "Short squats",
-  "desc": "Perform short and controlled squats with a comfortable range of motion."
-},
-"bridgeMarch": {
-  "title": "Glute bridge march",
-  "desc": "Hold the bridge and alternate lifting the legs while keeping the hips stable."
-},
-"reverseLunge": {
-  "title": "Reverse lunges",
-  "desc": "Step one leg back and lower with control to work the legs and glutes."
-},
-"sideLunges": {
-  "title": "Side lunges",
-  "desc": "Step to the side and shift the weight with control to activate the inner thighs and glutes."
-},
-"calfRaise": {
-  "title": "Calf raises",
-  "desc": "Rise onto the toes and lower slowly to work the calves."
-},
-"quadricepsStretch": {
-  "title": "Quadriceps stretch",
-  "desc": "Stretch the front of the thigh after the working exercises."
-},
+          "title": "High knees",
+          "desc": "Run in place while lifting the knees high to activate the legs and cardio."
+        },
+        "shortSquats": {
+          "title": "Short squats",
+          "desc": "Perform short and controlled squats with a comfortable range of motion."
+        },
+        "bridgeMarch": {
+          "title": "Glute bridge march",
+          "desc": "Hold the bridge and alternate lifting the legs while keeping the hips stable."
+        },
+        "reverseLunge": {
+          "title": "Reverse lunges",
+          "desc": "Step one leg back and lower with control to work the legs and glutes."
+        },
+        "sideLunges": {
+          "title": "Side lunges",
+          "desc": "Step to the side and shift the weight with control to activate the inner thighs and glutes."
+        },
+        "calfRaise": {
+          "title": "Calf raises",
+          "desc": "Rise onto the toes and lower slowly to work the calves."
+        },
+        "quadricepsStretch": {
+          "title": "Quadriceps stretch",
+          "desc": "Stretch the front of the thigh after the working exercises."
+        },
         "run": {
           "title": "High Knees",
           "desc": "Warm-up and light cardio."
@@ -932,49 +1267,54 @@
         "desc": "Legs and core activation."
       }
     },
-"selection": {
-  "gain": {
-    "title": "Muscle Mass Gain",
-    "desc": "Strength workouts for muscle growth"
-  },
-  "lose": {
-    "title": "Fat Burn",
-    "desc": "Intense cardio for weight loss"
-  },
-  "general": {
-    "title": "General Fitness",
-    "desc": "Maintain tone and overall health"
-  },
-  "ai": {
-    "title": "Pick training through AI",
-    "desc": "Personalized workout plan selection by goal, level, and limitations"
-  }
-},
-"ai": {
-  "badge": "AI Training",
-  "title": "Workout selection through AI",
-  "subtitle": "This interface will later choose workouts based on your goal, training level, workout duration, and limitations.",
-  "cards": {
-    "goal": {
-      "title": "Goal-based planning",
-      "text": "AI will determine whether you need mass gain, fat burn, or general fitness."
+    "selection": {
+      "gain": {
+        "title": "Muscle Mass Gain",
+        "desc": "Strength workouts for muscle growth"
+      },
+      "lose": {
+        "title": "Fat Burn",
+        "desc": "Intense cardio for weight loss"
+      },
+      "general": {
+        "title": "General Fitness",
+        "desc": "Maintain tone and overall health"
+      },
+      "ai": {
+        "title": "Pick training through AI",
+        "desc": "Personalized workout plan selection by goal, level, and limitations"
+      }
     },
-    "level": {
-      "title": "Training level",
-      "text": "The plan will adapt to beginner, intermediate, or advanced level."
+    "ai": {
+      "badge": "AI Training",
+      "title": "Workout selection through AI",
+      "subtitle": "This interface will later choose workouts based on your goal, training level, workout duration, and limitations.",
+      "cards": {
+        "goal": {
+          "title": "Goal-based planning",
+          "text": "AI will determine whether you need mass gain, fat burn, or general fitness."
+        },
+        "level": {
+          "title": "Training level",
+          "text": "The plan will adapt to beginner, intermediate, or advanced level."
+        },
+        "duration": {
+          "title": "Workout duration",
+          "text": "AI will be able to build a workout for 15, 20, 30, 45, or 60 minutes."
+        },
+        "limitations": {
+          "title": "Limitations",
+          "text": "The system will consider injuries, no-jumping restrictions, knee pain, or back pain."
+        }
+      },
+      "futureTitle": "What comes next",
+      "futureText": "Later this screen will be connected to the survey and backend logic so AI can automatically build a personalized training plan for you.",
+      "surveyTitle": "Choose a workout plan with AI",
+      "surveySubtitle": "Fill out the survey: the system will create a personalized workout plan based on your goals, time, level, and limitations.",
+      "confidence": "Confidence",
+      "source": "Source",
+      "modelAccuracy": "Model accuracy"
     },
-    "duration": {
-      "title": "Workout duration",
-      "text": "AI will be able to build a workout for 15, 20, 30, 45, or 60 minutes."
-    },
-    "limitations": {
-      "title": "Limitations",
-      "text": "The system will consider injuries, no-jumping restrictions, knee pain, or back pain."
-    }
-  },
-  "futureTitle": "What comes next",
-  "futureText": "Later this screen will be connected to the survey and backend logic so AI can automatically build a personalized training plan for you."
-},
     "finishModal": {
       "title": "You're on fire!",
       "received": "Received:",
@@ -1242,6 +1582,49 @@
         "title": "Calf Stretch (Left)",
         "desc": "Stretch calves"
       }
+    },
+    "massGainPage": {
+      "badge": "Mass Gain Training",
+      "subtitle": "Choose a zone for focused strength training, and the system will prepare a plan with videos and timers.",
+      "startButton": "Start workout"
+    },
+    "loseWeightPage": {
+      "badge": "Fat Loss Training",
+      "subtitle": "Select a direction, and the system will open an energetic plan with videos, timers, and execution control.",
+      "startButton": "Start fat burn"
+    },
+    "generalPage": {
+      "badge": "General Training",
+      "subtitle": "Select a direction to maintain tone and health with moderate exercises.",
+      "startButton": "Start workout"
+    },
+    "aiPlan": {
+      "mlFallback": "ML model is temporarily unavailable. Plan generated using fallback planner.",
+      "targetTime": "Selected Time",
+      "realTime": "Plan Duration",
+      "exercises": "Exercises",
+      "start": "Start Workout"
+    },
+    "aiSurvey": {
+      "duration": "How many minutes can you work out?",
+      "focus": "Which area to focus on?",
+      "limitation": "Any limitations?",
+      "intensity": "Intensity",
+      "sourceTitle": "Why is the survey structured this way?",
+      "sourceText": "The questions are based on factors like age, activity level, goal, time, and limitations. These factors align with the NHANES/PAQ data structure and physical activity recommendations.",
+      "building": "Building AI plan...",
+      "buildPlan": "Generate AI Plan",
+      "editAnswers": "Edit Answers",
+      "focusFull": "Full body",
+      "limitationNone": "None",
+      "limitationKnee": "Knee",
+      "limitationBack": "Back/Lower Back",
+      "limitationLowImpact": "Low impact needed",
+      "intensityLow": "Low",
+      "intensityNormal": "Normal",
+      "intensityHigh": "High",
+      "intensityAuto": "Select with AI",
+      "limitationJoints": "Joint issues"
     }
   },
   "aiProfile": {
@@ -1470,9 +1853,80 @@
     }
   },
   "knowledgeModule": {
-      "habits": {
-      "reminderScheduled": "A reminder will be sent to your email at {{time}}"
-      },
+    "habits": {
+      "title": "Healthy habits",
+      "subtitle": "Big change usually starts not with a huge push, but with small repeated actions.",
+      "ideaTitle": "Main idea",
+      "ideaText": "The point of habits is not doing something perfectly once. The real goal is doing one useful action consistently. That is how a strong lifestyle is built.",
+      "whyTitle": "Why it matters",
+      "whyText": "If a person wants to look better, feel better, and become more disciplined, motivation alone is not enough. A stable habit system is needed.",
+      "stepsTitle": "How to build habits better",
+      "steps": [
+        "Start with one habit, not ten at once",
+        "Make the habit very simple at the beginning",
+        "Attach the new habit to an action you already do",
+        "Do not expect a perfect result every day",
+        "Focus on consistency, not one-time maximum effort"
+      ],
+      "tipsTitle": "Practical tips",
+      "tips": [
+        "Start small: 5 minutes, 1 set, 1 action",
+        "Do not build a habit through overload and guilt",
+        "It is better to do a little, but regularly",
+        "Try to track completed habits every day",
+        "If you miss a day, do not quit — just return the next day"
+      ],
+      "ui": {
+        "badge": "Habit Builder",
+        "heroText": "Here the user chooses a habit or challenge, understands why it matters, and enables reminders for daily life.",
+        "habitsTab": "Habits",
+        "challengeTab": "Challenges",
+        "currentHabit": "Selected habit",
+        "whyItMatters": "Why it matters",
+        "chainTitle": "How it affects the day",
+        "chainSleep1": "Went to bed earlier",
+        "chainSleep2": "Woke up easier",
+        "chainSleep3": "Started the morning calmer",
+        "chainSleep4": "Less rushing and being late",
+        "chainSleep5": "The day went better",
+        "chainWater1": "Drank water",
+        "chainWater2": "Less sluggishness",
+        "chainWater3": "Better well-being",
+        "chainWater4": "More energy",
+        "chainWater5": "A more stable day",
+        "chainPhone1": "Did not take the phone in the morning",
+        "chainPhone2": "Less noise in the mind",
+        "chainPhone3": "Calmer start of the day",
+        "chainPhone4": "Better focus",
+        "chainPhone5": "Less chaos",
+        "chainGeneric1": "Small action",
+        "chainGeneric2": "Better condition",
+        "chainGeneric3": "Better day",
+        "chainGeneric4": "More stability",
+        "chainGeneric5": "Healthier lifestyle",
+        "reminderTitle": "Habit reminder",
+        "enableEmail": "Enable email reminder",
+        "timeLabel": "Time",
+        "previewLabel": "Email preview",
+        "previewWater": "Hi! Don’t forget to drink water today.",
+        "previewSleep": "Hi! Reminder for your habit: try to go to bed earlier today.",
+        "previewPhone": "Hi! Don’t forget: a calm morning without the phone helps your focus.",
+        "previewWalk": "Hi! A short walk today will help both your body and mind.",
+        "saveReminder": "Save reminder",
+        "savedHabit": "Habit settings saved. Later this will be connected to real email reminders.",
+        "currentChallenge": "Selected challenge",
+        "challengeBenefitTitle": "Why it is useful",
+        "challengeReminderTitle": "Challenge reminder",
+        "enableChallengeEmail": "Enable challenge reminder by email",
+        "challengePreviewWalk": "Hi! Reminder about your challenge: a 15-minute walk today can refresh your mind and reduce fatigue.",
+        "challengePreviewWater": "Hi! Don’t forget your challenge: drink water today and keep the rhythm.",
+        "challengePreviewSleep": "Hi! Reminder about your challenge: try to go to bed on time today.",
+        "challengePreviewPhone": "Hi! Reminder about your challenge: try to start the morning without your phone.",
+        "saveChallengeReminder": "Save reminder",
+        "savedChallenge": "Challenge settings saved. Later this will be connected to real email reminders.",
+        "days": "days"
+      }
+    },
     "home": {
       "mainTitle": "Knowledge section for real life",
       "mainText": "This section is not only for reading. It helps the user understand habits, energy, focus, and core health knowledge that directly affect quality of life.",
@@ -1487,7 +1941,7 @@
     },
     "videos": {
       "title": "Recommended videos",
-      "subtitle": "For now these are basic recommendations. Later this block will show videos selected by our AI according to the user's request.",
+      "subtitle": "List of interesting and useful videos",
       "watch": "Watch"
     },
     "healthFeed": {
@@ -1668,80 +2122,6 @@
           "videoUrl": "https://www.youtube.com/results?search_query=recovery+sleep+stress+health"
         }
       ]
-    },
-    "habits": {
-      "title": "Healthy habits",
-      "subtitle": "Big change usually starts not with a huge push, but with small repeated actions.",
-      "ideaTitle": "Main idea",
-      "ideaText": "The point of habits is not doing something perfectly once. The real goal is doing one useful action consistently. That is how a strong lifestyle is built.",
-      "whyTitle": "Why it matters",
-      "whyText": "If a person wants to look better, feel better, and become more disciplined, motivation alone is not enough. A stable habit system is needed.",
-      "stepsTitle": "How to build habits better",
-      "steps": [
-        "Start with one habit, not ten at once",
-        "Make the habit very simple at the beginning",
-        "Attach the new habit to an action you already do",
-        "Do not expect a perfect result every day",
-        "Focus on consistency, not one-time maximum effort"
-      ],
-      "tipsTitle": "Practical tips",
-      "tips": [
-        "Start small: 5 minutes, 1 set, 1 action",
-        "Do not build a habit through overload and guilt",
-        "It is better to do a little, but regularly",
-        "Try to track completed habits every day",
-        "If you miss a day, do not quit — just return the next day"
-      ],
-      "ui": {
-        "badge": "Habit Builder",
-        "heroText": "Here the user chooses a habit or challenge, understands why it matters, and enables reminders for daily life.",
-        "habitsTab": "Habits",
-        "challengeTab": "Challenges",
-        "currentHabit": "Selected habit",
-        "whyItMatters": "Why it matters",
-        "chainTitle": "How it affects the day",
-        "chainSleep1": "Went to bed earlier",
-        "chainSleep2": "Woke up easier",
-        "chainSleep3": "Started the morning calmer",
-        "chainSleep4": "Less rushing and being late",
-        "chainSleep5": "The day went better",
-        "chainWater1": "Drank water",
-        "chainWater2": "Less sluggishness",
-        "chainWater3": "Better well-being",
-        "chainWater4": "More energy",
-        "chainWater5": "A more stable day",
-        "chainPhone1": "Did not take the phone in the morning",
-        "chainPhone2": "Less noise in the mind",
-        "chainPhone3": "Calmer start of the day",
-        "chainPhone4": "Better focus",
-        "chainPhone5": "Less chaos",
-        "chainGeneric1": "Small action",
-        "chainGeneric2": "Better condition",
-        "chainGeneric3": "Better day",
-        "chainGeneric4": "More stability",
-        "chainGeneric5": "Healthier lifestyle",
-        "reminderTitle": "Habit reminder",
-        "enableEmail": "Enable email reminder",
-        "timeLabel": "Time",
-        "previewLabel": "Email preview",
-        "previewWater": "Hi! Don’t forget to drink water today.",
-        "previewSleep": "Hi! Reminder for your habit: try to go to bed earlier today.",
-        "previewPhone": "Hi! Don’t forget: a calm morning without the phone helps your focus.",
-        "previewWalk": "Hi! A short walk today will help both your body and mind.",
-        "saveReminder": "Save reminder",
-        "savedHabit": "Habit settings saved. Later this will be connected to real email reminders.",
-        "currentChallenge": "Selected challenge",
-        "challengeBenefitTitle": "Why it is useful",
-        "challengeReminderTitle": "Challenge reminder",
-        "enableChallengeEmail": "Enable challenge reminder by email",
-        "challengePreviewWalk": "Hi! Reminder about your challenge: a 15-minute walk today can refresh your mind and reduce fatigue.",
-        "challengePreviewWater": "Hi! Don’t forget your challenge: drink water today and keep the rhythm.",
-        "challengePreviewSleep": "Hi! Reminder about your challenge: try to go to bed on time today.",
-        "challengePreviewPhone": "Hi! Reminder about your challenge: try to start the morning without your phone.",
-        "saveChallengeReminder": "Save reminder",
-        "savedChallenge": "Challenge settings saved. Later this will be connected to real email reminders.",
-        "days": "days"
-      }
     },
     "energy": {
       "title": "Energy and condition",
@@ -1982,5 +2362,43 @@
       "recoveryTitle": "Recovery",
       "recoveryText": "Progress is built not only on effort, but also on the ability to recover at the right time."
     }
+  },
+  "ai": {
+    "new_chat": "New chat",
+    "history_title": "Chat history",
+    "session_not_found": "This chat was deleted. Start a new chat.",
+    "welcome_message": "Hello! I am your AI assistant. How can I help?",
+    "history_load_error": "⚠️ Chat history failed to load. Try again.",
+    "empty_reply_error": "⚠️ Server returned no response. Try again.",
+    "server_error": "Unknown server error",
+    "connection_error": "⚠️ Connection error. Check if the server is running.",
+    "input_placeholder": "Ask about diet or exercises...",
+    "sending": "Sending...",
+    "send_btn": "Send",
+    "no_history": "History is empty",
+    "mobile_history": "History"
+  },
+  "camera": {
+    "reps": "Reps",
+    "phase": "Phase",
+    "goal": "Goal",
+    "sec": "sec",
+    "no_goal": "No goal",
+    "completed": "completed",
+    "exercise_completed": "Exercise completed",
+    "not_completed": "Not completed yet",
+    "current_exercise": "Current exercise:",
+    "not_selected": "not selected",
+    "legWidth": "Leg width",
+    "kneeAngle": "Knee angle",
+    "elbowAngle": "Elbow angle",
+    "hipShift": "Hip shift",
+    "kneeHeight": "Knee height",
+    "torsoAngle": "Torso angle",
+    "angle": "Angle",
+    "feedback_normal": "Starting position is normal.",
+    "ready": "Ready",
+    "loading": "Loading",
+    "error": "Error"
   }
 }

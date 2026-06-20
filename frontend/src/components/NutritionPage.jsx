@@ -136,8 +136,8 @@ const NutritionPage = ({ userId }) => {
     width: 100%;
     min-width: 0;
     min-height: 100%;
-    color: white;
-    background-color: #1c1f24;
+    color: var(--text-primary);
+    background-color: transparent;
     padding: 20px;
     box-sizing: border-box;
     align-items: center;
@@ -154,12 +154,12 @@ const NutritionPage = ({ userId }) => {
     font-size: clamp(32px, 5vw, 48px);
     font-weight: 900;
     margin: 0 0 10px;
-    color: #ffffff;
+    color: var(--text-primary);
     letter-spacing: -0.03em;
   }
 
   .nutrition-subtitle {
-    color: #aab3c2;
+    color: var(--text-secondary);
     font-size: 16px;
     max-width: 760px;
     margin: 0 auto;
@@ -181,8 +181,8 @@ const NutritionPage = ({ userId }) => {
     flex: 1;
     min-width: 220px;
     max-width: 320px;
-    background: #21252b;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 24px;
     padding: 30px 24px;
     cursor: pointer;
@@ -197,9 +197,8 @@ const NutritionPage = ({ userId }) => {
 
   .nutrition-selection-card:hover {
     transform: translateY(-8px);
-    background: #2c313a;
     border-color: rgba(97, 218, 251, 0.4);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
   }
 
   .nutrition-selection-card:active {
@@ -213,7 +212,7 @@ const NutritionPage = ({ userId }) => {
 
   .nutrition-selection-card.ai:hover {
     border-color: #c678dd;
-    box-shadow: 0 15px 35px rgba(198, 120, 221, 0.2);
+    box-shadow: 0 15px 35px rgba(198, 120, 221, 0.1);
   }
 
   .nutrition-selection-icon {
@@ -226,12 +225,12 @@ const NutritionPage = ({ userId }) => {
     font-size: 22px;
     font-weight: 800;
     line-height: 1.2;
-    color: #ffffff;
+    color: var(--text-primary);
   }
 
   .nutrition-selection-card p {
     margin: 0;
-    color: #9da5b4;
+    color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.5;
   }
@@ -280,7 +279,7 @@ const NutritionPage = ({ userId }) => {
     font-size: clamp(28px, 4vw, 40px);
     font-weight: 900;
     margin: 0 0 8px 0;
-    color: #ffffff;
+    color: var(--text-primary);
   }
 
   .nutrition-section-subtitle {
@@ -297,11 +296,11 @@ const NutritionPage = ({ userId }) => {
   }
 
   .nutrition-food-card {
-    background: linear-gradient(180deg, #232833 0%, #1b2029 100%);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 22px;
     padding: 22px;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.1);
     box-sizing: border-box;
     min-width: 0;
   }
@@ -310,7 +309,7 @@ const NutritionPage = ({ userId }) => {
     margin: 0 0 12px 0;
     font-size: 20px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-primary);
   }
 
   .nutrition-food-time {
@@ -333,8 +332,8 @@ const NutritionPage = ({ userId }) => {
   }
 
   .nutrition-stat-box {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(128,128,128,0.04);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 10px 12px;
     min-width: 0;
@@ -342,18 +341,18 @@ const NutritionPage = ({ userId }) => {
 
   .nutrition-stat-label {
     font-size: 12px;
-    color: #8f99aa;
+    color: var(--text-secondary);
     margin-bottom: 4px;
   }
 
   .nutrition-stat-value {
     font-size: 15px;
     font-weight: 800;
-    color: #fff;
+    color: var(--text-primary);
   }
 
   .nutrition-recipe {
-    color: #c8d1df;
+    color: var(--text-secondary);
     font-size: 14px;
     line-height: 1.6;
     margin-bottom: 18px;
@@ -384,9 +383,9 @@ const NutritionPage = ({ userId }) => {
     margin-top: 22px;
     padding: 16px 18px;
     border-radius: 18px;
-    background: rgba(97, 218, 251, 0.10);
-    border: 1px solid rgba(97, 218, 251, 0.25);
-    color: #bdefff;
+    background: rgba(97, 218, 251, 0.15);
+    border: 1px solid rgba(97, 218, 251, 0.4);
+    color: var(--text-primary);
     font-weight: 700;
   }
 
@@ -397,11 +396,11 @@ const NutritionPage = ({ userId }) => {
   }
 
   .nutrition-rule-card {
-    background: linear-gradient(180deg, #232833 0%, #1b2029 100%);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 22px;
     padding: 22px;
-    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.1);
     min-width: 0;
   }
 
@@ -414,22 +413,22 @@ const NutritionPage = ({ userId }) => {
     margin: 0 0 10px 0;
     font-size: 20px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-primary);
   }
 
   .nutrition-rule-card p {
     margin: 0;
-    color: #c8d1df;
+    color: var(--text-secondary);
     line-height: 1.6;
     font-size: 14px;
   }
 
   .nutrition-ai-shell {
-    background: linear-gradient(180deg, #232833 0%, #1b2029 100%);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 28px;
     padding: 28px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.1);
     box-sizing: border-box;
   }
 
@@ -451,11 +450,11 @@ const NutritionPage = ({ userId }) => {
     font-size: clamp(28px, 4vw, 40px);
     font-weight: 900;
     margin: 0 0 10px 0;
-    color: #ffffff;
+    color: var(--text-primary);
   }
 
   .nutrition-ai-text {
-    color: #aab3c2;
+    color: var(--text-secondary);
     line-height: 1.7;
     font-size: 15px;
     margin-bottom: 24px;
@@ -490,9 +489,9 @@ const NutritionPage = ({ userId }) => {
   }
 
   .nutrition-secondary-btn {
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid var(--border-color);
     background: transparent;
-    color: #fff;
+    color: var(--text-primary);
   }
 
   .nutrition-primary-btn:hover,
@@ -510,9 +509,9 @@ const NutritionPage = ({ userId }) => {
   .nutrition-summary-chip {
     padding: 8px 14px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #dce4f2;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     font-size: 13px;
     font-weight: 700;
   }
@@ -521,9 +520,9 @@ const NutritionPage = ({ userId }) => {
     margin-top: 22px;
     padding: 18px;
     border-radius: 18px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    color: #c8d1df;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
   }
 
   @media (max-width: 1100px) {
@@ -547,7 +546,7 @@ const NutritionPage = ({ userId }) => {
       min-height: auto;
       padding: 18px 8px 104px;
       align-items: stretch;
-      background-color: #1c1f24;
+      background-color: transparent;
       overflow: visible;
     }
 
@@ -586,7 +585,7 @@ const NutritionPage = ({ userId }) => {
       min-height: 156px;
       border-radius: 22px;
       padding: 18px;
-      box-shadow: 0 14px 32px rgba(0,0,0,0.18);
+      box-shadow: 0 14px 32px rgba(0,0,0,0.1);
     }
 
     .nutrition-selection-icon {

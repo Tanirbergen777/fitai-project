@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>Аутентификация және Тіркелу Архитектурасы (Толық)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #64748b;
+            margin-bottom: 25px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+        }
+
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        #loading {
+            display: none;
+            margin-top: 10px;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Аутентификация және Тіркелу Архитектурасы</h1>
+
+    <p>
+        Бұл сызбада платформаға кіру (Login), тіркелу (Registration), <strong>Электрондық поштаны растау (Email Verification OTP)</strong> барысындағы барлық тексерістер, қателерді қайтару логикасы және дерекқормен жұмыс толық көрсетілген.
+    </p>
+
+    <div class="mermaid">
+
+flowchart TB
+
+%% =====================================================
+%% CLASS DEFINITIONS
+%% =====================================================
+
+classDef frontend fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e40af,rx:10px,ry:10px;
+classDef database fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#334155,rx:10px,ry:10px;
+classDef backend fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#6b21a8,rx:10px,ry:10px;
+classDef output fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#065f46,rx:10px,ry:10px;
+classDef error fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#991b1b,rx:10px,ry:10px;
+classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,rx:10px,ry:10px;
+
+%% =====================================================
+%% ENTRY POINT
+%% =====================================================
+
+ENTRY{"Платформаға<br>Кіру"}:::frontend
+
+LOGIN_PAGE["Кіру беті (Login)<br>Email, Password енгізу"]:::frontend
+REG_PAGE["Тіркелу беті (Register)<br>Username, Email, Password енгізу"]:::frontend
+
+ENTRY -->|"Аккаунты бар"| LOGIN_PAGE
+ENTRY -->|"Жаңа қолданушы"| REG_PAGE
+
+%% =====================================================
+%% LOGIN FLOW
+%% =====================================================
+
+subgraph LOGIN_FLOW ["Кіру Логикасы (Login Flow)"]
+    direction TB
+    LOGIN_REQ["POST /login"]:::backend
+    CHECK_USER{"Пайдаланушы<br>базада бар ма?"}:::decision
+    ERR_NO_USER["Қате: Мұндай қолданушы<br>тіркелмеген"]:::error
+    CHECK_PASS{"Құпия сөз<br>дұрыс па?"}:::decision
+    ERR_WRONG_PASS["Қате: Құпия сөз<br>қате енгізілді"]:::error
+    LOGIN_SUCCESS["JWT Token жасау<br>және қайтару"]:::backend
+end
+
+LOGIN_PAGE -->|"Мәліметтерді жіберу"| LOGIN_REQ
+LOGIN_REQ --> CHECK_USER
+CHECK_USER -->|"Жоқ"| ERR_NO_USER
+CHECK_USER -->|"Иә"| CHECK_PASS
+CHECK_PASS -->|"Қате"| ERR_WRONG_PASS
+CHECK_PASS -->|"Дұрыс"| LOGIN_SUCCESS
+
+ERR_NO_USER --> LOGIN_PAGE
+ERR_WRONG_PASS --> LOGIN_PAGE
+
+%% =====================================================
+%% REGISTRATION & VERIFICATION FLOW
+%% =====================================================
+
+subgraph REG_FLOW ["Тіркелу және Растау (Registration & OTP)"]
+    direction TB
+    REG_REQ["POST /register"]:::backend
+    CHECK_EXIST{"Бұл Email не Username<br>базада бар ма?"}:::decision
+    ERR_EXIST["Қате: Бұл аккаунт<br>алдын ала тіркелген"]:::error
+    HASH_PASS["Құпия сөзді хэштеу<br>(Bcrypt алгоритмі)"]:::backend
+    SAVE_USER_TEMP[("Қолданушыны тіркеу<br>және код жіберу (Email)")]:::database
+    
+    VERIFY_PAGE["Кодты растау беті<br>(OTP Code)"]:::frontend
+    VERIFY_REQ["POST /verify-email"]:::backend
+    CHECK_CODE{"Код дұрыс па?"}:::decision
+    ERR_CODE["Қате: Код қате<br>немесе ескірген"]:::error
+    SAVE_USER_FINAL[("Қолданушыны<br>Verified ету")]:::database
+end
+
+REG_PAGE -->|"Мәліметтерді жіберу"| REG_REQ
+REG_REQ --> CHECK_EXIST
+CHECK_EXIST -->|"Иә (Бар)"| ERR_EXIST
+CHECK_EXIST -->|"Жоқ (Бос)"| HASH_PASS
+HASH_PASS --> SAVE_USER_TEMP
+
+ERR_EXIST --> REG_PAGE
+SAVE_USER_TEMP -->|"Поштаға 6-таңбалы код жіберіледі"| VERIFY_PAGE
+VERIFY_PAGE -->|"Кодты енгізу"| VERIFY_REQ
+VERIFY_REQ --> CHECK_CODE
+CHECK_CODE -->|"Қате"| ERR_CODE
+ERR_CODE --> VERIFY_PAGE
+CHECK_CODE -->|"Дұрыс"| SAVE_USER_FINAL
+
+SAVE_USER_FINAL -->|"Автоматты түрде кіру"| LOGIN_REQ
+
+%% =====================================================
+%% POST-AUTH (PROFILE CHECK)
+%% =====================================================
+
+subgraph POST_AUTH ["Авторизациядан кейінгі тексеріс"]
+    direction TB
+    GET_ME["GET /user-stats/{userId}<br>немесе /users/me"]:::backend
+    CHECK_PROFILE{"Профиль<br>толтырылған ба?"}:::decision
+    ONBOARDING["Сауалнама беті<br>(Жас, салмақ, мақсат енгізу)"]:::frontend
+    SAVE_PROF["POST /profiles/<br>Деректерді сақтау"]:::backend
+    DASHBOARD["Басты Бетке кіру<br>(Main Dashboard)"]:::output
+end
+
+LOGIN_SUCCESS -->|"Token браузерде сақталады"| GET_ME
+GET_ME --> CHECK_PROFILE
+CHECK_PROFILE -->|"Жоқ"| ONBOARDING
+CHECK_PROFILE -->|"Иә"| DASHBOARD
+
+ONBOARDING -->|"Дене параметрлерін жіберу"| SAVE_PROF
+SAVE_PROF --> DASHBOARD
+
+    </div>
+
+    <button id="downloadBtn" onclick="downloadSVG()">
+        Графиканы жүктеп алу
+    </button>
+
+    <div id="loading">
+        Жүктелуде...
+    </div>
+
+</div>
+
+<script>
+
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+    });
+
+    function downloadSVG() {
+
+        const btn = document.getElementById('downloadBtn');
+        const loading = document.getElementById('loading');
+
+        btn.style.display = 'none';
+        loading.style.display = 'block';
+
+        setTimeout(() => {
+
+            const svgElement = document.querySelector('.mermaid svg');
+
+            if (!svgElement) {
+                alert("Диаграмма әлі жүктелмеді.");
+                btn.style.display = 'inline-block';
+                loading.style.display = 'none';
+                return;
+            }
+
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svgElement);
+
+            if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                source = source.replace(
+                    /^<svg/,
+                    '<svg xmlns="http://www.w3.org/2000/svg"'
+                );
+            }
+
+            const blob = new Blob(
+                [source],
+                { type: "image/svg+xml;charset=utf-8" }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Auth_Architecture_Detailed.svg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            btn.style.display = 'inline-block';
+            loading.style.display = 'none';
+
+        }, 500);
+    }
+
+</script>
+
+</body>
+</html>

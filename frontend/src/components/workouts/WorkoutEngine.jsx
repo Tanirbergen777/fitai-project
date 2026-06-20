@@ -119,16 +119,35 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
   const [exercisePhase, setExercisePhase] = useState('prepare'); // prepare | work
   const [prepTimeLeft, setPrepTimeLeft] = useState(5);
 
+  const prevExercisesRef = useRef([]);
+
   useEffect(() => {
-    setWorkoutQueue(normalizedExercises);
-    setExerciseResults([]);
-    savedResultIdsRef.current = new Set();
-    setCurrentIndex(0);
-    setCameraRepCount(0);
-    setCameraSummaryByExercise({});
-    cameraSummaryByExerciseRef.current = {};
-    setSkipModalOpen(false);
-    setStep('preview');
+    const prev = prevExercisesRef.current;
+    
+    const isTranslationUpdate = prev.length > 0 && 
+                                prev.length === normalizedExercises.length && 
+                                prev[0]?.mediaUrl === normalizedExercises[0]?.mediaUrl;
+
+    if (isTranslationUpdate) {
+      setWorkoutQueue(prevQueue => {
+        return normalizedExercises.map((newEx, i) => ({
+          ...newEx,
+          _postponedCount: prevQueue[i]?._postponedCount || 0
+        }));
+      });
+    } else {
+      setWorkoutQueue(normalizedExercises);
+      setExerciseResults([]);
+      savedResultIdsRef.current = new Set();
+      setCurrentIndex(0);
+      setCameraRepCount(0);
+      setCameraSummaryByExercise({});
+      cameraSummaryByExerciseRef.current = {};
+      setSkipModalOpen(false);
+      setStep('preview');
+    }
+    
+    prevExercisesRef.current = normalizedExercises;
   }, [normalizedExercises]);
 
   const queue = workoutQueue.length ? workoutQueue : normalizedExercises;
@@ -149,8 +168,6 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
     step === 'active' && exercisePhase === 'work'
       ? Math.max(0, currentWorkSeconds - timeLeft)
       : 0;
-
-  const currentExerciseId = currentEx?._workoutId || `${currentIndex}-${currentEx?.name || 'exercise'}`;
 
   const getCameraDrivenPerformance = useCallback(
     (cameraSummary, fallbackPerformance) => {
@@ -275,6 +292,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
         reason,
         reasonLabel: getSkipReasonLabel(reason),
         benefit: getExerciseGoalBenefit(currentEx, reason),
+        calories: Math.round(((currentEx.calories || 12) * performancePercent) / 100),
         createdAt: new Date().toISOString(),
       };
     },
@@ -318,12 +336,9 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
       const completed = resultsList.filter((item) => item.status === 'completed');
       const skipped = resultsList.filter((item) => item.status === 'skipped');
 
-      const averagePerformance = completed.length
-        ? Math.round(
-            completed.reduce((sum, item) => sum + (item.performancePercent || 0), 0) /
-              completed.length
-          )
-        : 0;
+      const averagePerformance = Math.round(
+        resultsList.reduce((sum, item) => sum + (item.performancePercent || 0), 0) / total
+      );
 
       const techniqueItems = completed.filter(
         (item) => typeof item.techniqueScore === 'number'
@@ -339,11 +354,8 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
       const completionScore = clampPercent((completed.length / total) * 100);
       const consistencyScore = clampPercent(((total - skipped.length) / total) * 100);
 
-      const score = clampPercent(
-        completionScore * 0.35 +
-          averagePerformance * 0.45 +
-          consistencyScore * 0.2
-      );
+      // Score is directly proportional to average performance across all exercises
+      const score = averagePerformance;
 
       let summary = 'Жақсы жұмыс! Жаттығу қорытындысы дайын.';
 
@@ -357,6 +369,11 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
         summary = 'Бүгін толық орындау қиын болды. Келесі жолы жеңілдетілген жоспардан бастаймыз.';
       }
 
+      const totalBurnedCalories = resultsList.reduce(
+        (sum, item) => sum + (item.calories || 0),
+        0
+      );
+
       return {
         title,
         score,
@@ -367,6 +384,7 @@ const WorkoutEngine = ({ exercises = [], title, onComplete, onBack }) => {
         performanceScore: averagePerformance,
         techniqueScore: averageTechnique,
         consistencyScore,
+        totalBurnedCalories,
         results: resultsList,
         skipped,
         summary,
@@ -948,10 +966,10 @@ const styles = `
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
-  color: #fff;
+  color: var(--text-primary);
   text-align: start;
   align-items: stretch;
-  background: #1c1f24;
+  background: var(--bg-main);
 }
 
 .we-topbar {
@@ -970,7 +988,7 @@ const styles = `
   gap: 8px;
   background: rgba(97, 218, 251, 0.08);
   border: 1px solid rgba(97, 218, 251, 0.35);
-  color: #61dafb;
+  color: var(--accent-text);
   padding: 12px 18px;
   border-radius: 999px;
   cursor: pointer;
@@ -1018,10 +1036,10 @@ const styles = `
   box-sizing: border-box;
   background:
     radial-gradient(circle at top right, rgba(97,218,251,0.10), transparent 28%),
-    linear-gradient(180deg, #232833 0%, #1b2029 100%);
-  border: 1px solid rgba(255,255,255,0.07);
+    var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 28px;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.32);
+  box-shadow: var(--shadow-md, 0 10px 30px rgba(0,0,0,0.1));
 }
 
 .we-program-card {
@@ -1059,7 +1077,7 @@ const styles = `
   border-radius: 999px;
   background: rgba(97, 218, 251, 0.1);
   border: 1px solid rgba(97, 218, 251, 0.22);
-  color: #7ce3ff;
+  color: var(--accent-text);
   font-size: 12px;
   font-weight: 800;
   margin-bottom: 16px;
@@ -1077,7 +1095,7 @@ const styles = `
 
 .we-subtitle {
   margin: 0 0 20px;
-  color: #a7b0bf;
+  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.6;
   max-width: 760px;
@@ -1092,7 +1110,7 @@ const styles = `
 }
 
 .we-stat {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-bg);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 18px;
   padding: 12px 16px;
@@ -1125,19 +1143,19 @@ const styles = `
   display: block;
   font-size: 15px;
   margin-bottom: 3px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .we-stat-content p,
 .we-stat p {
   margin: 0;
-  color: #8f99aa;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
 .we-plan-side-card h3 {
   margin: 0 0 16px;
-  color: #61dafb;
+  color: var(--accent-text);
   font-size: 20px;
   font-weight: 900;
   line-height: 1.2;
@@ -1154,7 +1172,7 @@ const styles = `
   gap: 14px;
   align-items: center;
   padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .we-plan-item:last-child {
@@ -1166,7 +1184,7 @@ const styles = `
   height: 38px;
   border-radius: 12px;
   background: rgba(97,218,251,0.12);
-  color: #61dafb;
+  color: var(--accent-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1190,7 +1208,7 @@ const styles = `
 }
 
 .we-plan-reps {
-  color: #96a0b1;
+  color: var(--text-secondary);
   margin-top: 6px;
   font-size: 15px;
   text-align: left;
@@ -1228,12 +1246,12 @@ const styles = `
 
 .we-secondary-btn {
   background: transparent;
-  color: #ffffff;
+  color: var(--text-primary);
   border: 1px solid rgba(255,255,255,0.12);
 }
 
 .we-secondary-btn:hover {
-  background: rgba(255,255,255,0.04);
+  background: var(--card-bg);
 }
 
 .we-wide-btn {
@@ -1263,7 +1281,7 @@ const styles = `
 }
 
 .we-progress-text {
-  color: #aab3c2;
+  color: var(--text-secondary);
   min-width: 48px;
   text-align: right;
   font-weight: 800;
@@ -1294,7 +1312,7 @@ const styles = `
   padding: 10px 16px;
   border-radius: 999px;
   background: rgba(97,218,251,0.12);
-  color: #7ce3ff;
+  color: var(--accent-text);
   border: 1px solid rgba(97,218,251,0.18);
   font-weight: 850;
 }
@@ -1308,19 +1326,19 @@ const styles = `
   border-radius: 14px;
   background: rgba(97, 218, 251, 0.08);
   border: 1px solid rgba(97, 218, 251, 0.18);
-  color: #dbefff;
+  color: var(--accent-text);
   font-size: 15px;
   font-weight: 800;
   margin-bottom: 14px;
 }
 
 .we-description {
-  background: rgba(255,255,255,0.04);
+  background: var(--card-bg);
   border: 1px solid rgba(255,255,255,0.05);
   border-left: 4px solid #61dafb;
   border-radius: 18px;
   padding: 14px 16px;
-  color: #b4bcc9;
+  color: var(--text-secondary);
   line-height: 1.65;
   margin-bottom: 22px;
   max-width: 760px;
@@ -1351,7 +1369,7 @@ const styles = `
   font-size: 16px;
   font-weight: 800;
   background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--border-color);
   width: fit-content;
   max-width: 100%;
   line-height: 1.45;
@@ -1362,7 +1380,7 @@ const styles = `
 }
 
 .we-equipment {
-  color: #61dafb;
+  color: var(--accent-text);
 }
 
 .we-actions {
@@ -1444,7 +1462,7 @@ const styles = `
   max-height: 760px;
   object-fit: contain;
   border-radius: 24px;
-  background: #10151d;
+  background: var(--bg-main);
 }
 
 .we-prep-card,
@@ -1469,12 +1487,12 @@ const styles = `
   font-size: 22px;
   font-weight: 950;
   line-height: 1;
-  color: #61dafb;
+  color: var(--accent-text);
 }
 
 .we-prep-seconds {
   margin-top: 8px;
-  color: #9ea8b8;
+  color: var(--text-secondary);
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1482,7 +1500,7 @@ const styles = `
 
 .we-prep-hint {
   margin: 0 0 24px;
-  color: #aab3c2;
+  color: var(--text-secondary);
   line-height: 1.5;
   max-width: 520px;
   font-size: 17px;
@@ -1515,7 +1533,7 @@ const styles = `
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #1a1f28;
+  background: var(--card-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1530,7 +1548,7 @@ const styles = `
 
 .we-timer-unit {
   margin-top: 8px;
-  color: #9ea8b8;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -1539,13 +1557,13 @@ const styles = `
   max-width: 420px;
   padding: 18px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.04);
+  background: var(--card-bg);
   border: 1px solid rgba(255,255,255,0.05);
 }
 
 .we-next-card p {
   margin: 0 0 8px;
-  color: #90a0b5;
+  color: var(--text-secondary);
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1644,7 +1662,7 @@ const styles = `
     padding: 8px 10px 110px;
     background:
       radial-gradient(circle at top, rgba(97,218,251,0.08), transparent 28%),
-      #1c1f24;
+      var(--bg-main);
   }
 
   .we-topbar {
@@ -1760,9 +1778,9 @@ const styles = `
     z-index: 20;
     padding: 8px 0 12px;
     margin-bottom: 12px;
-    background: linear-gradient(180deg, rgba(28,31,36,0.98), rgba(28,31,36,0.86));
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border-color);
   }
 
   .we-active-stack {
@@ -1962,7 +1980,7 @@ const styles = `
   position: fixed;
   inset: 0;
   z-index: 9998;
-  background: rgba(7, 10, 16, 0.72);
+  background: var(--bg-main);
   backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
@@ -1977,8 +1995,8 @@ const styles = `
   padding: 24px;
   background:
     radial-gradient(circle at top, rgba(97,218,251,0.12), transparent 34%),
-    linear-gradient(180deg, #252a35 0%, #1b2029 100%);
-  border: 1px solid rgba(255,255,255,0.08);
+    var(--card-bg);
+  border: 1px solid var(--border-color);
   box-shadow: 0 28px 80px rgba(0,0,0,0.48);
 }
 
@@ -2003,7 +2021,7 @@ const styles = `
 
 .we-skip-modal p {
   margin: 0 0 18px;
-  color: #aab3c2;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -2018,9 +2036,9 @@ const styles = `
   width: 100%;
   min-height: 50px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.04);
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 15px;
   font-weight: 850;
   cursor: pointer;
@@ -2037,7 +2055,7 @@ const styles = `
 .we-skip-cancel {
   margin-top: 12px;
   text-align: center;
-  color: #aab3c2;
+  color: var(--text-secondary);
   background: transparent;
 }
 
@@ -2056,9 +2074,9 @@ const styles = `
   padding: 30px;
   background:
     radial-gradient(circle at top right, rgba(97,218,251,0.12), transparent 34%),
-    linear-gradient(180deg, #232833 0%, #1b2029 100%);
-  border: 1px solid rgba(255,255,255,0.07);
-  box-shadow: 0 24px 60px rgba(0,0,0,0.32);
+    var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md, 0 10px 30px rgba(0,0,0,0.1));
   box-sizing: border-box;
 }
 
@@ -2073,7 +2091,7 @@ const styles = `
   align-items: baseline;
   justify-content: center;
   gap: 4px;
-  color: #61dafb;
+  color: var(--accent-text);
 }
 
 .we-score-circle strong {
@@ -2083,7 +2101,7 @@ const styles = `
 
 .we-score-circle span {
   font-size: 18px;
-  color: #aab3c2;
+  color: var(--text-secondary);
 }
 
 .we-summary-stats {
@@ -2096,19 +2114,19 @@ const styles = `
 .we-summary-stats div {
   padding: 16px;
   border-radius: 18px;
-  background: rgba(255,255,255,0.04);
+  background: var(--card-bg);
   border: 1px solid rgba(255,255,255,0.05);
 }
 
 .we-summary-stats span {
   display: block;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 13px;
   margin-bottom: 6px;
 }
 
 .we-summary-stats strong {
-  color: #fff;
+  color: var(--text-primary);
   font-size: 22px;
 }
 
@@ -2141,19 +2159,19 @@ const styles = `
 
 .we-check-main strong {
   display: block;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .we-check-main p {
   margin: 0;
-  color: #aab3c2;
+  color: var(--text-secondary);
 }
 
 .we-check-main small {
   display: block;
   margin-top: 8px;
-  color: #c8d1df;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -2172,7 +2190,7 @@ const styles = `
 
 .we-learning-box p {
   margin: 0;
-  color: #c8d1df;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 

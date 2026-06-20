@@ -25,8 +25,8 @@ def main():
 
     drop_cols = [
         "label",
-        "food_name",   # для первой версии убираем имя блюда
-        "rule_score",  # это служебная колонка от rule-based генерации
+        "food_name",
+        "rule_score",
     ]
 
     X = df.drop(columns=drop_cols, errors="ignore")

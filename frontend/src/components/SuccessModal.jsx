@@ -95,7 +95,13 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
         </div>
 
         <h2 id="success-modal-title">
-          {t('training.finishModal.title', 'Жаттығу аяқталды!')}
+          {finalScore >= 90
+            ? t('training.finishModal.titleExcellent', 'Керемет нәтиже!')
+            : finalScore >= 70
+            ? t('training.finishModal.titleGood', 'Жақсы нәтиже!')
+            : finalScore >= 40
+            ? t('training.finishModal.titleAverage', 'Орташа нәтиже!')
+            : t('training.finishModal.titleLow', 'Төмен нәтиже!')}
         </h2>
 
         <p className="success-modal-subtitle">
@@ -121,6 +127,11 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
             <div>
               <span>{t('training.report.performance', 'Орындау сапасы')}</span>
               <strong>{performanceScore !== null ? `${performanceScore}%` : '—'}</strong>
+            </div>
+
+            <div>
+              <span>{t('training.report.calories', 'Калория (ккал)')}</span>
+              <strong>{report.totalBurnedCalories ?? 0} 🔥</strong>
             </div>
 
             <div>
@@ -298,7 +309,7 @@ const SuccessModal = ({ isOpen, points = 0, report = null, onClose }) => {
 
 .success-modal-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin: 0 0 18px;
 }

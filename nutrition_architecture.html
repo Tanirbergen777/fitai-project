@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Тамақтануды Ұсыну Архитектурасы</title>
+
+    <!-- Mermaid.js кітапханасы -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #64748b;
+            margin-bottom: 25px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+        }
+
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        #loading {
+            display: none;
+            margin-top: 10px;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>AI Тамақтануды Ұсыну Архитектурасы (Nutrition Recommender)</h1>
+
+    <p>
+        Бұл диаграммада қолданушының сұранысы мен тамақтар базасының қалай сүзгіден өтетіні және <b>Random Forest</b> моделі арқылы (Soft Voting) үздік 3 тамақтың қалай таңдалатыны (Ranking) толық көрсетілген.
+    </p>
+
+    <div class="mermaid">
+
+flowchart TB
+
+%% =====================================================
+%% CLASS DEFINITIONS
+%% =====================================================
+
+classDef frontend fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e40af,rx:10px,ry:10px;
+classDef database fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#334155,rx:10px,ry:10px;
+classDef backend fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#6b21a8,rx:10px,ry:10px;
+classDef output fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#065f46,rx:10px,ry:10px;
+classDef error fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#991b1b,rx:10px,ry:10px;
+classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,rx:10px,ry:10px;
+classDef ml fill:#ffedd5,stroke:#ea580c,stroke-width:2px,color:#9a3412,rx:10px,ry:10px;
+
+%% =====================================================
+%% INPUTS
+%% =====================================================
+
+USER_PROFILE["Қолданушы Профилі<br>(Мақсаты, Бюджеті, Аллергиясы, Талғамы)"]:::frontend
+FOOD_CATALOG[("Тағамдар Каталогы<br>(NUTRITION_CATALOG)")]:::database
+CURRENT_TIME["Ағымдағы уақыт<br>(Таңғы/Түскі/Кешкі ас)"]:::backend
+
+%% =====================================================
+%% STAGE 1: HARD FILTERING
+%% =====================================================
+
+subgraph FILTERING ["1-Қадам: Қатаң сүзу (Rule-based Hard Filtering)"]
+    direction TB
+    START_FILTER{"Сүзгіден өткізу"}:::decision
+    
+    CHECK_SLOT{"Уақытқа сай ма?<br>(Meal Slot)"}:::decision
+    CHECK_GOAL{"Мақсатқа сай ма?<br>(Goal)"}:::decision
+    CHECK_ALLERGY{"Аллергиясы жоқ па?<br>(Allergy/Dislike)"}:::decision
+    
+    REJECTED["Қабылданбады<br>(Тізімнен сызылады)"]:::error
+    PASSED["Қауіпсіз Тағамдар<br>(Модельге жіберіледі)"]:::backend
+end
+
+USER_PROFILE --> START_FILTER
+FOOD_CATALOG --> START_FILTER
+CURRENT_TIME --> START_FILTER
+
+START_FILTER --> CHECK_SLOT
+CHECK_SLOT -->|"Жоқ"| REJECTED
+CHECK_SLOT -->|"Иә"| CHECK_GOAL
+
+CHECK_GOAL -->|"Жоқ"| REJECTED
+CHECK_GOAL -->|"Иә"| CHECK_ALLERGY
+
+CHECK_ALLERGY -->|"Иә (Аллергия бар)"| REJECTED
+CHECK_ALLERGY -->|"Жоқ (Қауіпсіз)"| PASSED
+
+%% =====================================================
+%% STAGE 2: ML SCORING (SOFT VOTING)
+%% =====================================================
+
+subgraph ML_SCORING ["2-Қадам: Ықтималдықты есептеу (Random Forest)"]
+    direction TB
+    FEATURE_ENG["Кіріс деректерін біріктіру<br>(build_feature_row)"]:::backend
+    ML_MODEL["Random Forest Моделі<br>(n_estimators=200)"]:::ml
+    PROBABILITY["Ықтималдықты табу<br>predict_proba(X)"]:::ml
+    SCORE_CALC["Пайызды (Score) шығару<br>probability * 100"]:::backend
+end
+
+PASSED -->|"Әрбір тамақ үшін"| FEATURE_ENG
+FEATURE_ENG --> ML_MODEL
+ML_MODEL -->|"Soft Voting"| PROBABILITY
+PROBABILITY --> SCORE_CALC
+
+%% =====================================================
+%% STAGE 3: RANKING & OUTPUT
+%% =====================================================
+
+subgraph RANKING ["3-Қадам: Сұрыптау және Ұсыну (Ranking)"]
+    direction TB
+    SORTING["Барлық тамақтарды Ұпайы (Score)<br>бойынша жоғарыдан төмен сұрыптау"]:::backend
+    TOP_3["Ең үздік 3 тамақты (Top 3) таңдау"]:::backend
+    REASONS["Таңдалу себептерін қосу<br>(Мақсатына сай, талғамы ескерілген)"]:::backend
+end
+
+SCORE_CALC -->|"Барлық тамақтардың ұпайы"| SORTING
+SORTING --> TOP_3
+TOP_3 --> REASONS
+
+FINAL_OUTPUT["Қолданушының экранына<br>Дайын Ас Мәзірі ретінде шығару"]:::output
+
+REASONS -->|"JSON Response"| FINAL_OUTPUT
+
+    </div>
+
+    <button id="downloadBtn" onclick="downloadSVG()">
+        Графиканы жүктеп алу (SVG)
+    </button>
+
+    <div id="loading">
+        Жүктелуде...
+    </div>
+
+</div>
+
+<script>
+    // Initialize Mermaid
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+    });
+
+    function downloadSVG() {
+        const btn = document.getElementById('downloadBtn');
+        const loading = document.getElementById('loading');
+
+        btn.style.display = 'none';
+        loading.style.display = 'block';
+
+        setTimeout(() => {
+            const svgElement = document.querySelector('.mermaid svg');
+
+            if (!svgElement) {
+                alert("Диаграмма әлі жүктелмеді.");
+                btn.style.display = 'inline-block';
+                loading.style.display = 'none';
+                return;
+            }
+
+            // Serialize SVG
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svgElement);
+
+            // Add namespaces if missing
+            if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                source = source.replace(
+                    /^<svg/,
+                    '<svg xmlns="http://www.w3.org/2000/svg"'
+                );
+            }
+
+            // Create blob and download link
+            const blob = new Blob(
+                [source],
+                { type: "image/svg+xml;charset=utf-8" }
+            );
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Nutrition_Architecture.svg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            // Reset buttons
+            btn.style.display = 'inline-block';
+            loading.style.display = 'none';
+        }, 500);
+    }
+</script>
+
+</body>
+</html>

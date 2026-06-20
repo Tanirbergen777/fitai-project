@@ -117,7 +117,7 @@ const ChatHistoryItem = ({ session, isActive, onClick, onRename, onDelete }) => 
   border-radius: 14px;
   border: 1px solid transparent;
   background: transparent;
-  color: #abb2bf;
+  color: var(--text-secondary);
   box-sizing: border-box;
 }
 
@@ -162,7 +162,7 @@ const ChatHistoryItem = ({ session, isActive, onClick, onRename, onDelete }) => 
   border: none;
   border-radius: 12px;
   background: transparent;
-  color: #abb2bf;
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 20px;
   line-height: 1;
@@ -192,8 +192,8 @@ const ChatHistoryItem = ({ session, isActive, onClick, onRename, onDelete }) => 
   z-index: 40;
   min-width: 190px;
   border-radius: 14px;
-  background: #21252b;
-  border: 1px solid #3e4451;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   box-shadow: 0 18px 50px rgba(0,0,0,0.55);
   overflow: hidden;
 }
@@ -203,7 +203,7 @@ const ChatHistoryItem = ({ session, isActive, onClick, onRename, onDelete }) => 
   min-height: 46px;
   border: none;
   background: transparent;
-  color: #abb2bf;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 12px;

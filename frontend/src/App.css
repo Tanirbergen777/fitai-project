@@ -540,6 +540,7 @@ box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.2);
   --card-bg: #ffffff;
   --hero-bg: linear-gradient(180deg, #ffffff, #f0f4f8);
   --hero-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  --accent-text: #007bb5;
 }
 
 [data-theme='dark'] {
@@ -553,6 +554,7 @@ box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.2);
   --card-bg: #282c34;
   --hero-bg: linear-gradient(180deg, rgba(35,40,51,0.96), rgba(25,29,38,0.96));
   --hero-shadow: 0 18px 42px rgba(0,0,0,0.22);
+  --accent-text: #61dafb;
 }
 
 .dashboard-card:hover {

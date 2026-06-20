@@ -45,13 +45,24 @@ const CAMERA_EXERCISE_META = {
 const applyCameraAnalysisMeta = (exercise) => {
   const meta = CAMERA_EXERCISE_META[exercise.key];
 
+  let baseCalories = 10;
+  const mode = meta?.cameraMode || exercise.cameraMode;
+  if (['jumping_jacks', 'high_knees', 'squat', 'lunge'].includes(mode)) {
+    baseCalories = 18;
+  } else if (mode === 'pushup') {
+    baseCalories = 15;
+  } else {
+    baseCalories = 12;
+  }
+
   if (!meta) {
-    return exercise;
+    return { ...exercise, calories: baseCalories };
   }
 
   return {
     ...exercise,
     ...meta,
+    calories: baseCalories,
     analysisEnabled: true,
   };
 };
@@ -71,7 +82,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
     if (!selectedBodyPart) return;
 
     const fetchLoseWeightExercises = async () => {
-      setLoading(true);
+      if (exercises.length === 0) setLoading(true);
 
       try {
         let prepared = [];
@@ -617,11 +628,10 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
 
         <div className="bodypart-container">
           <div className="lw-hero">
-            <span className="lw-badge">Fat loss training</span>
+            <span className="lw-badge">{t('training.loseWeightPage.badge')}</span>
             <h2>{t('training.loseSelectTitle')}</h2>
             <p>
-              Выберите направление, а система откроет энергичный план с видео,
-              таймером и контролем выполнения.
+              {t('training.loseWeightPage.subtitle')}
             </p>
           </div>
 
@@ -638,7 +648,7 @@ const LoseWeightWorkout = ({ onAllStepsComplete, onBack }) => {
                 <span className="bodypart-content">
                   <span className="bodypart-icon">{card.icon}</span>
                   <span className="bodypart-title">{card.title}</span>
-                  <span className="bodypart-hint">Start fat burn ›</span>
+                  <span className="bodypart-hint">{t('training.loseWeightPage.startButton')} ›</span>
                 </span>
               </button>
             ))}
@@ -693,11 +703,11 @@ const styles = `
   overflow-x: hidden;
   overflow-y: auto;
   box-sizing: border-box;
-  color: #fff;
+  color: var(--text-primary);
   background:
     radial-gradient(circle at top left, rgba(255, 128, 80, 0.09), transparent 28%),
     radial-gradient(circle at top right, rgba(97, 218, 251, 0.07), transparent 26%),
-    #1c1f24;
+    var(--bg-main);
   padding: 16px;
 }
 
@@ -776,7 +786,7 @@ const styles = `
 
 .lw-hero p {
   margin: 0 auto;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.65;
   max-width: 680px;
@@ -800,11 +810,11 @@ const styles = `
   align-items: flex-end;
   justify-content: flex-start;
   padding: 0;
-  color: #fff;
+  color: var(--text-primary);
   background-size: cover;
   background-position: center;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 22px 50px rgba(0,0,0,0.32);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
   transition:
     transform 0.32s ease,
     box-shadow 0.32s ease,
@@ -928,13 +938,13 @@ const styles = `
 .lw-loading-card h3 {
   margin: 10px 0 8px;
   font-size: 24px;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 900;
 }
 
 .lw-loading-card p {
   margin: 0;
-  color: #aab3c2;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -972,7 +982,7 @@ const styles = `
     padding: 10px 10px 100px;
     background:
       radial-gradient(circle at top, rgba(255,128,80,0.11), transparent 28%),
-      #1c1f24;
+      var(--bg-main);
   }
 
   .lw-page--engine {

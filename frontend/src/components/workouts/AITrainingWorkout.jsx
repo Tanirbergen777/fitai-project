@@ -90,6 +90,95 @@ const getUserProfilePayload = () => {
   };
 };
 
+const videoPathMap = {
+  'fullbody/krug-rukami.mp4': 'armCircles',
+  'fullbody/pryzhki-jumping-jacks.mp4': 'jumpingJacks',
+  'fullbody/vrashchenie-korpusom.mp4': 'torsoRotation',
+  'fullbody/pryzhki-na-korotchkah.mp4': 'squatJumps',
+  'fullbody/vypad-so-skruchivaniem.mp4': 'lungeTwist',
+  'fullbody/prisedanie-podem-nog.mp4': 'squatLegRaise',
+  'fullbody/beg-koleni-vverh.mp4': 'highKnees',
+  'fullbody/otzhimanie-povorot-gusenica.mp4': 'pushupRotation',
+  'fullbody/otzhimanie-gusenica.mp4': 'inchwormDiamond',
+  'fullbody/bokovoy-mostik-levo.mp4': 'sideBridgeLeft',
+  'fullbody/bokovoy-mostik-pravo.mp4': 'sideBridgeRight',
+  'fullbody/velosiped.mp4': 'bicycle',
+  'fullbody/obratnye-skruchivaniya.mp4': 'reverseCrunch',
+  'fullbody/mostik-babochka.mp4': 'butterflyBridge',
+  'fullbody/kasanie-pyatok.mp4': 'heelTouches',
+  'fullbody/pryzhki-v-planke.mp4': 'plankJacks',
+  'fullbody/supermen-plovec.mp4': 'supermanSwimmer',
+  'fullbody/izmenennye-berpi.mp4': 'modifiedBurpees',
+  'fullbody/obratnyy-snezhnyy-angel.mp4': 'reverseSnowAngel',
+  'fullbody/rastyazhka-kobra.mp4': 'cobraStretch',
+  'fullbody/poza-rebenka.mp4': 'childPose',
+  'fullbody/skruchivanie-poyasnica-levo.mp4': 'lowerBackLeft',
+  'fullbody/skruchivanie-poyasnica-pravo.mp4': 'lowerBackRight',
+  'chest/otzhimaniya-ot-pola.mp4': 'pushUps',
+  'chest/otzhimanie-shirokiy-upor.mp4': 'widePushUps',
+  'chest/otzhimanie-koleni.mp4': 'kneePushUps',
+  'chest/otzhimanie-opora-vperedi.mp4': 'inclinePushUps',
+  'chest/obratnye-otzhimaniya-stul.mp4': 'chairDips',
+  'chest/rastyazhka-grudi.mp4': 'chestStretch',
+  'abs/podem-korpusa-v-sed.mp4': 'sitUps',
+  'abs/bokovoy-mostik-levo.mp4': 'sideBridgeLeft',
+  'abs/bokovoy-mostik-pravo.mp4': 'sideBridgeRight',
+  'abs/planka-klassicheskaya.mp4': 'plankClassic',
+  'abs/planka-levyy-bok.mp4': 'plankLeft',
+  'abs/planka-pravyy-bok.mp4': 'plankRight',
+  'abs/velosiped.mp4': 'bicycle',
+  'abs/podem-nog-lezha.mp4': 'legRaise',
+  'abs/otjimanie-povorotom.mp4': 'pushupRotation',
+  'abs/obratnye-skruchivaniya.mp4': 'reverseCrunch',
+  'abs/skruchivaniya.mp4': 'crunches',
+  'abs/kasanie-pyatok.mp4': 'heelTouches',
+  'abs/ugolok.mp4': 'hollowHold',
+  'abs/planka-s-podemom-nog.mp4': 'mountainClimbers',
+  'abs/rastyazhka-kobra.mp4': 'cobraStretch',
+  'abs/skruchivanie-poyasnica-pravo.mp4': 'lowerBackRight',
+  'abs/skruchivanie-poyasnica-levo.mp4': 'lowerBackLeft',
+  'legs/prizhki.mp4': 'jump2',
+  'legs/beg-koleni-vverh.mp4': 'run',
+  'legs/zahlyost-goleni.mp4': 'heel',
+  'legs/prizhki-iz-planki.mp4': 'jump1',
+  'legs/tolchki-nogoy-vverh-levo.mp4': 'kick1',
+  'legs/tolchki-nogoy-vverh-pravo.mp4': 'kick2',
+  'legs/burpi.mp4': 'burpee',
+  'legs/vypad-nazad.mp4': 'lunge1',
+  'legs/vypady-v-storonu.mp4': 'lunge2',
+  'legs/korotkie-prisedaniya.mp4': 'squat1',
+  'legs/vprisyadku.mp4': 'squat2',
+  'legs/podem-beder-marsh.mp4': 'bridge',
+  'legs/podem-nog-lezha-na-zhivote.mp4': 'legraise',
+  'legs/podem-ikry-levo.mp4': 'calf1',
+  'legs/podem-ikry-pravo.mp4': 'calf2',
+  'legs/rastyazhka-vypad-levo.mp4': 'stretch1',
+  'legs/rastyazhka-vypad-pravo.mp4': 'stretch2',
+  'legs/rastyazhka-kvadriceps-levo.mp4': 'quad1',
+  'legs/rastyazhka-kvadriceps-pravo.mp4': 'quad2',
+  'legs/rastyazhka-ikry-levo.mp4': 'calfstretch1',
+  'arms/mahi-rukami-po-chasovoy.mp4': 'warmup1',
+  'arms/mahi-rukami-protiv-chasovoy.mp4': 'warmup2',
+  'arms/prizhki-bez-skakalki.mp4': 'warmup3',
+  'arms/otzhimaniya-s-kolenei-s-zaderzhkoy.mp4': 'push1',
+  'arms/voennye-otzhimaniya.mp4': 'push2',
+  'arms/otzhimaniya-s-povorotom.mp4': 'push3',
+  'arms/otzhimaniya-sidya-na-polu.mp4': 'push4',
+  'arms/svedenie-loktey.mp4': 'arms1',
+  'arms/dvizheniya-vverh-vniz-lokti.mp4': 'arms2',
+  'arms/skruchivaniya-v-proeme-levo.mp4': 'twist1',
+  'arms/skruchivaniya-v-proeme-pravo.mp4': 'twist2',
+  'arms/skruchivaniya-lezha-levo.mp4': 'floor1',
+  'arms/skruchivaniya-lezha-pravo.MP4': 'floor2',
+  'arms/bokovye-udary.mp4': 'box',
+  'arms/podem-nogi-biceps-levo.mp4': 'biceps1',
+  'arms/podem-nogi-biceps-pravo.mp4': 'biceps2',
+  'arms/burpi.mp4': 'burpee',
+  'arms/rastyazhka-triceps-levo.mp4': 'stretch1',
+  'arms/rastyazhka-triceps-pravo.mp4': 'stretch2',
+  'arms/rastyazhka-biceps.mp4': 'stretch3',
+};
+
 const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   const { t } = useTranslation();
 
@@ -453,16 +542,36 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
         : t('training.aiPlan.titles.keep', 'AI жоспар: форманы сақтау');
 
     if (backendMlResult?.generated_exercises?.length > 0) {
-      const genEx = backendMlResult.generated_exercises.map((ex, i) => ({
-        key: `ai_gen_${i}`,
-        name: ex.name,
-        description: ex.description,
-        reps: ex.dynamic_reps,
-        workSeconds: ex.workSeconds || 30,
-        restSeconds: ex.restSeconds || ex.rest_seconds || 30,
-        mediaUrl: ex.video_path ? getVideoUrl(ex.video_path) : null,
-        cameraMode: null
-      }));
+      const genEx = backendMlResult.generated_exercises.map((ex, i) => {
+        let name = ex.name;
+        let description = ex.description;
+        
+        if (ex.video_path && videoPathMap[ex.video_path]) {
+          const cat = ex.video_path.split('/')[0];
+          const key = videoPathMap[ex.video_path];
+          const transName = t(`training.${cat}.${key}.title`);
+          const transDesc = t(`training.${cat}.${key}.desc`);
+          
+          if (transName && !transName.includes('training.')) name = transName;
+          if (transDesc && !transDesc.includes('training.')) description = transDesc;
+        }
+
+        let repsText = ex.dynamic_reps || '';
+        if (typeof repsText === 'string') {
+          repsText = repsText.replace('сек', t('training.seconds', 'сек')).replace('sec', t('training.seconds', 'сек'));
+        }
+
+        return {
+          key: `ai_gen_${i}`,
+          name: name,
+          description: description,
+          reps: repsText,
+          workSeconds: ex.workSeconds || 30,
+          restSeconds: ex.restSeconds || ex.rest_seconds || 30,
+          mediaUrl: ex.video_path ? getVideoUrl(ex.video_path) : null,
+          cameraMode: null
+        };
+      });
 
       const correctDuration = genEx.reduce((acc, curr) => acc + (curr.workSeconds + curr.restSeconds), 0);
 
@@ -517,18 +626,20 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
           ← {t('common.back', 'Артқа')}
         </button>
 
-        <div className="ai-training-badge">AI Training</div>
-
         <h2 className="ai-training-title">
-          {t('training.ai.surveyTitle', 'AI арқылы жаттығу жоспарын таңдау')}
+          {step === 'survey'
+            ? t('training.ai.surveyTitle', 'AI арқылы жаттығу жоспарын таңдау')
+            : plan?.title || t('training.ai.surveyTitle', 'AI арқылы жаттығу жоспарын таңдау')}
         </h2>
 
-        <p className="ai-training-subtitle">
-          {t(
-            'training.ai.surveySubtitle',
-            'Анкетаны толтыр: жүйе мақсатыңа, уақытыңа, деңгейіңе және шектеулеріңе қарай жеке жаттығу жоспарын құрады.'
-          )}
-        </p>
+        {step === 'survey' && (
+          <p className="ai-training-subtitle">
+            {t(
+              'training.ai.surveySubtitle',
+              'Анкетаны толтыр: жүйе мақсатыңа, уақытыңа, деңгейіңе және шектеулеріңе қарай жеке жаттығу жоспарын құрады.'
+            )}
+          </p>
+        )}
 
         {step === 'survey' && (
           <>
@@ -552,7 +663,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
               <div className="ai-training-field">
                 <label>{t('training.aiSurvey.focus', 'Қай аймаққа көңіл бөлесіз?')}</label>
                 <select value={survey.focus} onChange={(e) => updateSurvey('focus', e.target.value)}>
-                  <option value="full">{t('training.focus.full', 'Бүкіл дене')}</option>
+                  <option value="full">{t('training.aiSurvey.focusFull', 'Бүкіл дене')}</option>
                   <option value="legs">{t('training.labels.legs', 'Аяқ')}</option>
                   <option value="chest">{t('training.labels.chest', 'Кеуде')}</option>
                   <option value="arms">{t('training.labels.arms', 'Қол')}</option>
@@ -564,44 +675,44 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
               <div className="ai-training-field">
                 <label>{t('training.aiSurvey.limitation', 'Шектеулер бар ма?')}</label>
                 <select value={survey.limitation} onChange={(e) => updateSurvey('limitation', e.target.value)}>
-                  <option value="none">{t('training.limitations.none', 'Жоқ')}</option>
-                  <option value="knee">{t('training.limitations.knee', 'Тізе')}</option>
-                  <option value="back">{t('training.limitations.back', 'Арқа/бел')}</option>
-                  <option value="joints">Буын ауруы</option>
-                  <option value="low_impact">{t('training.limitations.lowImpact', 'Төмен жүктеме керек')}</option>
+                  <option value="none">{t('training.aiSurvey.limitationNone', 'Жоқ')}</option>
+                  <option value="knee">{t('training.aiSurvey.limitationKnee', 'Тізе')}</option>
+                  <option value="back">{t('training.aiSurvey.limitationBack', 'Арқа/бел')}</option>
+                  <option value="joints">{t('training.aiSurvey.limitationJoints', 'Буын ауруы')}</option>
+                  <option value="low_impact">{t('training.aiSurvey.limitationLowImpact', 'Төмен жүктеме керек')}</option>
                 </select>
               </div>
 
               <div className="ai-training-field">
                 <label>{t('training.aiSurvey.intensity', 'Қарқын')}</label>
                 <select value={survey.intensity} onChange={(e) => updateSurvey('intensity', e.target.value)}>
-                  <option value="low">{t('training.intensity.low', 'Жеңіл')}</option>
-                  <option value="normal">{t('training.intensity.normal', 'Орташа')}</option>
-                  <option value="high">{t('training.intensity.high', 'Қарқынды')}</option>
-                  <option value="ai_auto">AI арқылы таңдау</option>
+                  <option value="low">{t('training.aiSurvey.intensityLow', 'Жеңіл')}</option>
+                  <option value="normal">{t('training.aiSurvey.intensityNormal', 'Орташа')}</option>
+                  <option value="high">{t('training.aiSurvey.intensityHigh', 'Қарқынды')}</option>
+                  <option value="ai_auto">{t('training.aiSurvey.intensityAuto', 'AI арқылы таңдау')}</option>
                 </select>
                 {isAiAnalyzingIntensity && (
-                  <p style={{ marginTop: '10px', fontSize: '14px', color: '#64ffda' }}>
+                  <p style={{ marginTop: '10px', fontSize: '14px', color: 'var(--accent-text)' }}>
                     AI ойланып жатыр...
                   </p>
                 )}
                 {aiIntensitySuggestion && !isAiAnalyzingIntensity && (
-                  <div style={{ marginTop: '10px', padding: '15px', backgroundColor: 'rgba(100, 255, 218, 0.1)', borderRadius: '8px', border: '1px solid rgba(100, 255, 218, 0.3)' }}>
-                    <p style={{ margin: '0 0 10px 0', fontSize: '14px', lineHeight: '1.4', color: '#e6f1ff' }}>
+                  <div style={{ marginTop: '10px', padding: '15px', backgroundColor: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--accent-text)' }}>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '14px', lineHeight: '1.4', color: 'var(--text-primary)' }}>
                       <strong>AI ұсынысы:</strong> {aiIntensitySuggestion.reason}
                     </p>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button 
                         type="button"
                         onClick={acceptAiIntensity}
-                        style={{ padding: '8px 16px', background: '#64ffda', color: '#0a192f', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                        style={{ padding: '8px 16px', background: 'var(--accent-text)', color: 'var(--bg-main)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
                       >
                         Келісемін
                       </button>
                       <button 
                         type="button"
                         onClick={declineAiIntensity}
-                        style={{ padding: '8px 16px', background: 'transparent', color: '#64ffda', border: '1px solid rgba(100, 255, 218, 0.5)', borderRadius: '4px', cursor: 'pointer' }}
+                        style={{ padding: '8px 16px', background: 'transparent', color: 'var(--accent-text)', border: '1px solid var(--accent-text)', borderRadius: '4px', cursor: 'pointer' }}
                       >
                         Бас тарту
                       </button>
@@ -689,42 +800,6 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
         {step === 'result' && plan && (
           <div className="ai-training-result">
             <div className="ai-training-result-card">
-              <h3>{plan.title}</h3>
-              <p>{plan.reason}</p>
-
-              {displayedMlResult?.ai_safety_warning && (
-                <div className="ai-training-warning-box">
-                  <span style={{ fontSize: '20px', marginRight: '10px' }}>⚠️</span>
-                  <p style={{ margin: 0 }}>{displayedMlResult.ai_safety_warning}</p>
-                </div>
-              )}
-
-              {displayedMlResult && (
-                <div className="ai-training-ml-box">
-                  <span>ML model</span>
-                  <strong>{displayedMlResult.plan_template_id}</strong>
-                  <p>
-                    Confidence:{' '}
-                    {displayedMlResult.confidence !== null && displayedMlResult.confidence !== undefined
-                      ? `${Math.round(displayedMlResult.confidence * 100)}%`
-                      : 'N/A'}
-                    {' '}· Source: {displayedMlResult.label_source || 'ml_nhanes_workout_plan'}
-                  </p>
-
-                  {displayedMlResult.model_accuracy !== null && displayedMlResult.model_accuracy !== undefined && (
-                    <p>
-                      Model accuracy: {Math.round(displayedMlResult.model_accuracy * 100)}%
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {mlError && (
-                <div className="ai-training-error-box">
-                  {mlError}
-                </div>
-              )}
-
               <div className="ai-training-stats">
                 <div>
                   <span>{t('training.aiPlan.targetTime', 'Таңдалған уақыт')}</span>
@@ -749,7 +824,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
                   <span>{index + 1}</span>
                   <div>
                     <strong>{exercise.name}</strong>
-                    <p>{exercise.reps} · {exercise.cameraMode ? 'Camera AI' : 'Timer'}</p>
+                    <p>{exercise.reps} · {exercise.cameraMode ? 'Camera AI' : t('training.timer', 'Таймер')}</p>
                   </div>
                 </div>
               ))}
@@ -774,7 +849,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   min-height: 100%;
   padding: 24px;
   box-sizing: border-box;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .ai-training-shell {
@@ -782,11 +857,10 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   margin: 0 auto;
   padding: 32px;
   border-radius: 28px;
-  background:
-    radial-gradient(circle at top right, rgba(198, 120, 221, 0.14), transparent 32%),
-    linear-gradient(180deg, #232833 0%, #1b2029 100%);
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+  background-color: var(--card-bg);
+  background-image: radial-gradient(circle at top right, rgba(198, 120, 221, 0.14), transparent 32%);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--hero-shadow);
   box-sizing: border-box;
 }
 
@@ -797,9 +871,9 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   min-height: 42px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid rgba(97,218,251,0.3);
-  background: rgba(97,218,251,0.08);
-  color: #61dafb;
+  border: 1px solid var(--border-color);
+  background: var(--bg-main);
+  color: var(--accent-text);
   font-weight: 800;
   cursor: pointer;
   margin-bottom: 18px;
@@ -809,9 +883,9 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   display: inline-flex;
   padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(198, 120, 221, 0.10);
-  border: 1px solid rgba(198, 120, 221, 0.25);
-  color: #d8a8ea;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 900;
   margin-bottom: 16px;
@@ -827,7 +901,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 .ai-training-subtitle {
   margin: 0 0 28px;
   max-width: 860px;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.7;
 }
@@ -845,18 +919,19 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 .ai-training-field label {
   display: block;
   margin-bottom: 8px;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 900;
 }
 
-.ai-training-field select {
+.ai-training-field select,
+.ai-training-field input {
   width: 100%;
   min-height: 52px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: #1c1f24;
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-main);
+  color: var(--text-primary);
   padding: 0 14px;
   font-size: 15px;
   outline: none;
@@ -878,7 +953,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 
 .ai-training-source-box p {
   margin: 0;
-  color: #c8d1df;
+  color: var(--text-secondary);
   line-height: 1.65;
   font-size: 14px;
 }
@@ -909,15 +984,15 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 }
 
 .ai-training-secondary {
-  border: 1px solid rgba(255,255,255,0.12);
-  background: transparent;
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-main);
+  color: var(--text-primary);
 }
 
 .ai-training-result-card {
   padding: 22px;
   border-radius: 22px;
-  background: rgba(255,255,255,0.04);
+  background: var(--card-bg);
   border: 1px solid rgba(255,255,255,0.07);
 }
 
@@ -928,7 +1003,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 
 .ai-training-result-card p {
   margin: 0;
-  color: #c8d1df;
+  color: var(--text-secondary);
   line-height: 1.65;
 }
 
@@ -950,7 +1025,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 
 .ai-training-ml-box strong {
   display: block;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 18px;
   margin-bottom: 5px;
   overflow-wrap: anywhere;
@@ -958,7 +1033,7 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 
 .ai-training-ml-box p {
   margin: 0;
-  color: #c8d1df;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
@@ -997,18 +1072,18 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
 .ai-training-stats div {
   padding: 14px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.04);
+  background: var(--card-bg);
 }
 
 .ai-training-stats span {
   display: block;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 12px;
   margin-bottom: 5px;
 }
 
 .ai-training-stats strong {
-  color: #61dafb;
+  color: var(--accent-text);
   font-size: 18px;
 }
 
@@ -1025,32 +1100,33 @@ const AITrainingWorkout = ({ onAllStepsComplete, onBack }) => {
   align-items: center;
   padding: 14px;
   border-radius: 18px;
-  background: rgba(255,255,255,0.035);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
 }
 
 .ai-training-exercise-item > span {
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: rgba(97,218,251,0.12);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #61dafb;
+  color: var(--accent-text);
   font-weight: 900;
   flex-shrink: 0;
 }
 
 .ai-training-exercise-item strong {
   display: block;
-  color: #fff;
+  color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .ai-training-exercise-item p {
   margin: 0;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 

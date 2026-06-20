@@ -87,10 +87,10 @@ def _build_feature_row(features_json: Dict[str, Any]) -> pd.DataFrame:
 
     row = {}
     for col in feature_columns:
-        # Негізгі жол: дәл training кезіндегі feature атауы.
+
         value = _to_number(features_json.get(col))
 
-        # Қосымша alias: кейбір frontend feature атаулары prefix-пен келеді.
+
         if value is None and col.startswith("feature_"):
             value = _to_number(features_json.get(col.replace("feature_", "", 1)))
 

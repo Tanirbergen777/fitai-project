@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import EditProfileModal from './EditProfileModal';
 import Notification from './Notification';
 import ImageProfilePage from './ImageProfilePage';
 import { API_BASE_URL } from '../config/api';
+import ActivityHeatmap from './ActivityHeatmap';
+import RatingChart from './RatingChart';
 
 const ProfilePage = ({ user, aiResult, onProfileUpdate }) => {
   const { t } = useTranslation();
@@ -11,6 +13,17 @@ const ProfilePage = ({ user, aiResult, onProfileUpdate }) => {
   const [customGoal, setCustomGoal] = useState(
     aiResult?.goal || user?.goal || 'Улучшение формы'
   );
+  const [activityStats, setActivityStats] = useState(null);
+  
+  useEffect(() => {
+    const uId = localStorage.getItem('userId');
+    if (uId) {
+      fetch(`${API_BASE_URL}/activity-stats/${uId}`)
+        .then(res => res.json())
+        .then(data => setActivityStats(data))
+        .catch(err => console.error("Error fetching activity stats:", err));
+    }
+  }, []);
   const [notification, setNotification] = useState({
     show: false,
     message: '',
@@ -274,6 +287,17 @@ const ProfilePage = ({ user, aiResult, onProfileUpdate }) => {
               </div>
             </div>
           </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+            {activityStats ? (
+              <>
+                <ActivityHeatmap heatmapData={activityStats.heatmap} />
+                <RatingChart ratingData={activityStats.rating} />
+              </>
+            ) : (
+              <div style={{ color: 'var(--text-secondary)' }}>Статистика жүктелуде...</div>
+            )}
+          </div>
         </div>
 
         <div className="profile-right-col" style={rightColStyle}>
@@ -336,7 +360,7 @@ const ProfilePage = ({ user, aiResult, onProfileUpdate }) => {
     width: 100% !important;
     min-height: auto !important;
     padding: 18px 8px 104px !important;
-    background: #1c1e22 !important;
+    background: transparent !important;
     overflow: visible !important;
     box-sizing: border-box !important;
   }
@@ -365,9 +389,9 @@ const ProfilePage = ({ user, aiResult, onProfileUpdate }) => {
     gap: 18px !important;
     margin-bottom: 14px !important;
     padding: 20px 16px !important;
-    border: 1px solid rgba(255,255,255,0.07) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 24px !important;
-    background: #21252b !important;
+    background: var(--card-bg) !important;
     box-sizing: border-box !important;
   }
 
@@ -533,7 +557,7 @@ const duoPageStyle = {
   display: 'flex',
   justifyContent: 'center',
   padding: '60px 20px',
-  background: '#1c1e22',
+  background: 'transparent',
   minHeight: '100vh'
 };
 
@@ -576,7 +600,7 @@ const userNameStyle = {
   fontSize: '38px',
   margin: 0,
   fontWeight: 'bold',
-  color: 'white',
+  color: 'var(--text-primary)',
   letterSpacing: '-0.5px'
 };
 
@@ -603,7 +627,7 @@ const inputGoalWrapper = {
   background: 'rgba(97, 218, 251, 0.03)',
   padding: '12px 18px',
   borderRadius: '16px',
-  border: '1px solid #3e4451',
+  border: '1px solid var(--border-color)',
   maxWidth: '320px',
   transition: 'border-color 0.3s'
 };
@@ -622,7 +646,7 @@ const editProfileButtonStyle = {
   marginTop: '15px',
   padding: '14px 28px',
   borderRadius: '14px',
-  border: '1.5px solid #3e4451',
+  border: '1.5px solid var(--border-color)',
   background: 'transparent',
   color: '#61dafb',
   fontSize: '16px',
@@ -637,8 +661,8 @@ const duoAvatarStyle = {
   width: '160px',
   height: '160px',
   borderRadius: '50%',
-  background: '#282c34',
-  border: '2px solid #3e4451',
+  background: 'var(--card-bg)',
+  border: '2px solid var(--border-color)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -672,7 +696,7 @@ const detailsRowStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '20px',
-  color: '#abb2bf',
+  color: 'var(--text-secondary)',
   fontSize: '16px',
   marginBottom: '5px'
 };
@@ -684,21 +708,21 @@ const duoSocialLinks = {
 };
 
 const socialLink = {
-  color: '#abb2bf',
+  color: 'var(--text-secondary)',
   fontSize: '14px',
   cursor: 'pointer'
 };
 
 const separatorStyle = {
   height: '1px',
-  background: 'linear-gradient(90deg, #3e4451 0%, rgba(62,68,81,0) 100%)',
+  background: 'linear-gradient(90deg, var(--border-color) 0%, transparent 100%)',
   margin: '40px 0'
 };
 
 const sectionTitleStyle = {
   fontSize: '24px',
   marginBottom: '25px',
-  color: 'white',
+  color: 'var(--text-primary)',
   fontWeight: 'bold'
 };
 
@@ -709,13 +733,13 @@ const statsGridStyle = {
 };
 
 const duoStatCardStyle = {
-  border: '1px solid #3e4451',
+  border: '1px solid var(--border-color)',
   borderRadius: '20px',
   padding: '25px',
   display: 'flex',
   alignItems: 'center',
   gap: '20px',
-  background: '#21252b'
+  background: 'var(--card-bg)'
 };
 
 const statIconStyle = {
@@ -725,26 +749,26 @@ const statIconStyle = {
 const statValueStyle = {
   fontSize: '32px',
   fontWeight: 'bold',
-  color: 'white'
+  color: 'var(--text-primary)'
 };
 
 const statLabelStyle = {
-  color: '#abb2bf',
+  color: 'var(--text-secondary)',
   fontSize: '15px',
   textTransform: 'uppercase',
   letterSpacing: '0.5px'
 };
 
 const duoTabsCardStyle = {
-  border: '1px solid #3e4451',
+  border: '1px solid var(--border-color)',
   borderRadius: '20px',
   overflow: 'hidden',
-  background: '#21252b'
+  background: 'var(--card-bg)'
 };
 
 const tabsHeaderStyle = {
   display: 'flex',
-  borderBottom: '1px solid #3e4451'
+  borderBottom: '1px solid var(--border-color)'
 };
 
 const activeTabStyle = {
@@ -761,7 +785,7 @@ const inactiveTabStyle = {
   flex: 1,
   padding: '15px',
   textAlign: 'center',
-  color: '#abb2bf',
+  color: 'var(--text-secondary)',
   fontSize: '13px'
 };
 
@@ -778,21 +802,21 @@ const emptyFriendsStyle = {
 
 const tabsTextStyle = {
   fontSize: '14px',
-  color: '#abb2bf',
+  color: 'var(--text-secondary)',
   lineHeight: '1.5'
 };
 
 const duoFriendsCardStyle = {
-  border: '1px solid #3e4451',
+  border: '1px solid var(--border-color)',
   borderRadius: '20px',
   padding: '25px',
-  background: '#21252b'
+  background: 'var(--card-bg)'
 };
 
 const friendsTitleStyle = {
   margin: '0 0 20px 0',
   fontSize: '18px',
-  color: 'white',
+  color: 'var(--text-primary)',
   fontWeight: 'bold'
 };
 
@@ -800,7 +824,7 @@ const friendOptionStyle = {
   display: 'flex',
   justifyContent: 'space-between',
   padding: '15px 0',
-  borderBottom: '1px solid #3e4451',
+  borderBottom: '1px solid var(--border-color)',
   color: '#61dafb',
   cursor: 'pointer',
   fontSize: '14px',
@@ -812,11 +836,11 @@ const detailItemStyle = {
   alignItems: 'center',
   gap: '10px',
   fontSize: '18px',
-  color: '#abb2bf'
+  color: 'var(--text-secondary)'
 };
 
 const detailDividerStyle = {
-  color: '#3e4451',
+  color: 'var(--border-color)',
   padding: '0 10px',
   fontSize: '18px'
 };

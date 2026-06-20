@@ -24,7 +24,7 @@ DEFAULT_DATASET_ROOT = Path("ai_engine/datasets/pushup_raw")
 
 VIDEO_EXTS = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
 
-# MediaPipe landmark indexes
+
 L_SHOULDER, R_SHOULDER = 11, 12
 L_ELBOW, R_ELBOW = 13, 14
 L_WRIST, R_WRIST = 15, 16

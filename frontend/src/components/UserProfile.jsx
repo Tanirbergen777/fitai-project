@@ -41,16 +41,6 @@ const UserProfile = ({ username, handleLogout }) => {
         <div className="history-dropdown user-profile-dropdown" style={dropdownStyle}>
           <button
             type="button"
-            className="user-profile-menu-item"
-            style={menuItemStyle}
-            onClick={() => alert('Настройки в разработке')}
-          >
-            <span>⚙️</span>
-            <span>Настройки</span>
-          </button>
-
-          <button
-            type="button"
             className="user-profile-menu-item user-profile-menu-item--danger"
             style={{ ...menuItemStyle, color: '#e06c75' }}
             onClick={handleLogout}
@@ -141,9 +131,9 @@ const UserProfile = ({ username, handleLogout }) => {
     border-radius: 18px !important;
     z-index: 2000 !important;
     box-sizing: border-box !important;
-    background: rgba(33, 37, 43, 0.98) !important;
+    background: var(--bg-sidebar) !important;
     backdrop-filter: blur(16px);
-    box-shadow: 0 18px 60px rgba(0,0,0,0.46) !important;
+    box-shadow: 0 18px 60px rgba(0,0,0,0.2) !important;
   }
 
   .user-profile-menu-item {
@@ -186,11 +176,11 @@ const userBadgeStyle = {
   background: 'rgba(97, 218, 251, 0.05)',
   padding: '8px 18px',
   borderRadius: '25px',
-  border: '1px solid rgba(97, 218, 251, 0.3)',
+  border: '1px solid var(--border-color)',
   fontSize: '14px',
   cursor: 'pointer',
   backdropFilter: 'blur(10px)',
-  color: 'white',
+  color: 'var(--text-primary)',
   transition: 'all 0.3s ease',
   fontFamily: 'inherit'
 };
@@ -199,13 +189,13 @@ const dropdownStyle = {
   position: 'absolute',
   top: '50px',
   right: '0',
-  backgroundColor: '#21252b',
-  border: '1px solid #3e4451',
+  backgroundColor: 'var(--card-bg)',
+  border: '1px solid var(--border-color)',
   borderRadius: '12px',
   padding: '8px',
   minWidth: '160px',
   zIndex: 1000,
-  boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
+  boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
 };
 
 const menuItemStyle = {
@@ -217,7 +207,7 @@ const menuItemStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  color: '#abb2bf'
+  color: 'var(--text-primary)'
 };
 
 export default UserProfile;

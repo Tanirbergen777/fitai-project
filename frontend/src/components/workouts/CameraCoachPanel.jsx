@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import {
   LANDMARKS,
@@ -382,6 +383,7 @@ const drawHudOverlay = (ctx, width, height, overlay) => {
 };
 
 export default function CameraCoachPanel({
+
   exerciseName = '',
   exerciseOrderIndex = null,
   targetReps = null,
@@ -395,6 +397,8 @@ export default function CameraCoachPanel({
   onTargetReached = null,
   onCameraSummary = null,
 }) {
+  const { t } = useTranslation();
+
   const videoRef = useRef(null);
   const skeletonCanvasRef = useRef(null);
   const hudCanvasRef = useRef(null);
@@ -447,6 +451,52 @@ export default function CameraCoachPanel({
   const targetReachedNotifiedRef = useRef(false);
 
   const [cameraOn, setCameraOn] = useState(false);
+  const [facingMode, setFacingMode] = useState('user');
+  const facingModeRef = useRef('user');
+
+  const switchCamera = useCallback(async () => {
+    const newMode = facingModeRef.current === 'user' ? 'environment' : 'user';
+    facingModeRef.current = newMode;
+    setFacingMode(newMode);
+
+    // Ағымдағы стримді тоқтатамыз
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    // Жаңа камераны іске қосамыз
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: newMode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+
+      lastVideoTimeRef.current = -1;
+      rafRef.current = requestAnimationFrame(processFrame);
+      console.log('Camera switched to:', newMode === 'user' ? 'Front' : 'Back');
+    } catch (err) {
+      console.error('Camera switch error:', err);
+      setFeedback('Камераны ауыстыру мүмкін болмады. Қайтадан көріңіз.');
+    }
+  }, []);
   const [modelStatus, setModelStatus] = useState('loading');
   const [feedback, setFeedback] = useState('Инициализация camera coach...');
   const [repCount, setRepCount] = useState(0);
@@ -472,7 +522,7 @@ export default function CameraCoachPanel({
   // Маңызды: 90 градус бұрылуды алып тастадық.
   // Ноутбукта да, телефонда да браузер камераны өзі дұрыс orientation-мен береді.
   const CAMERA_ROTATION = 0;
-  const MIRROR_CAMERA = true;
+  const MIRROR_CAMERA = facingMode === 'user'; // Фронтальный камера - айна, артқы камера - айнасыз
   const cameraTransform = `${MIRROR_CAMERA ? 'scaleX(-1)' : 'scaleX(1)'} rotate(${CAMERA_ROTATION}deg)`;
 
   const completionPercent = useMemo(() => {
@@ -1584,12 +1634,13 @@ export default function CameraCoachPanel({
 
       const attempts = [];
 
-      // Артқы камераны қолданбаймыз. Алдымен фронт камераны ашамыз.
+      // Таңдалған камераны (фронтальный немесе задний) ашамыз.
+      const currentFacing = facingModeRef.current || 'user';
       attempts.push({
-        name: 'Default user camera',
+        name: currentFacing === 'user' ? 'Front camera' : 'Back camera',
         constraints: {
           video: {
-            facingMode: { ideal: 'user' },
+            facingMode: { ideal: currentFacing },
             width: { ideal: 1280 },
             height: { ideal: 720 },
           },
@@ -1598,15 +1649,7 @@ export default function CameraCoachPanel({
       });
 
       videoDevices.forEach((device, index) => {
-        const label = String(device.label || '').toLowerCase();
-        const looksLikeBackCamera =
-          label.includes('back') ||
-          label.includes('rear') ||
-          label.includes('environment') ||
-          label.includes('зад') ||
-          label.includes('арт');
-
-        if (device.deviceId && !looksLikeBackCamera) {
+        if (device.deviceId) {
           attempts.push({
             name: device.label || `Camera ${index + 1}`,
             constraints: {
@@ -1687,6 +1730,25 @@ export default function CameraCoachPanel({
     }
   };
 
+
+  const translatedMetricLabel = useMemo(() => {
+    const map = {
+      'Ширина ног': t('camera.legWidth', 'Ширина ног'),
+      'Угол колена': t('camera.kneeAngle', 'Угол колена'),
+      'Угол локтя': t('camera.elbowAngle', 'Угол локтя'),
+      'Смещение таза': t('camera.hipShift', 'Смещение таза'),
+      'Высота колена': t('camera.kneeHeight', 'Высота колена'),
+      'Угол корпуса': t('camera.torsoAngle', 'Угол корпуса'),
+      'Угол': t('camera.angle', 'Угол'),
+    };
+    return map[metricLabel] || metricLabel;
+  }, [metricLabel, t]);
+
+  const translatedFeedback = useMemo(() => {
+    if (feedback === 'Исходная позиция нормальная.') return t('camera.feedback_normal', 'Исходная позиция нормальная.');
+    return feedback;
+  }, [feedback, t]);
+
   const videoWrapStyle = {
     ...styles.videoWrap,
     maxWidth: isMobileCameraLayout ? 'min(100%, 430px)' : '560px',
@@ -1700,31 +1762,6 @@ export default function CameraCoachPanel({
         <div>
           <div style={styles.badge}>{badgeText}</div>
           <h3 style={styles.title}>Камера</h3>
-            <p style={styles.subtitle}>
-              MediaPipe Pose + Computer Vision: дене нүктелерін анықтау, қозғалысты талдау және feedback көрсету.
-            </p>
-
-            <div style={styles.techRow}>
-              <span style={styles.techChip}>🧠 MediaPipe Pose</span>
-              <span style={styles.techChip}>👁️ Computer Vision</span>
-
-              <span
-                style={{
-                  ...styles.techChip,
-                  ...(modelStatus === 'ready'
-                    ? styles.techChipReady
-                    : modelStatus === 'error'
-                    ? styles.techChipError
-                    : styles.techChipLoading),
-                }}
-              >
-                {modelStatus === 'ready'
-                  ? 'Model ready'
-                  : modelStatus === 'loading'
-                  ? 'Loading model'
-                  : 'Model error'}
-              </span>
-            </div>
         </div>
 
         <div style={styles.actions}>
@@ -1733,9 +1770,24 @@ export default function CameraCoachPanel({
               Включить
             </button>
           ) : (
-            <button style={styles.secondaryBtn} onClick={() => void stopCamera()}>
-              Остановить
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                style={{
+                  ...styles.secondaryBtn,
+                  padding: '8px 12px',
+                  minWidth: 'auto',
+                  fontSize: '18px',
+                  lineHeight: '1',
+                }}
+                onClick={switchCamera}
+                title={facingMode === 'user' ? 'Артқы камераға ауысу' : 'Алдыңғы камераға ауысу'}
+              >
+                🔄
+              </button>
+              <button style={styles.secondaryBtn} onClick={() => void stopCamera()}>
+                Остановить
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -1770,39 +1822,39 @@ export default function CameraCoachPanel({
           <span style={styles.statLabel}>MediaPipe Pose</span>
           <strong style={styles.statValue}>
             {modelStatus === 'ready'
-              ? 'Ready'
+              ? t('camera.ready', 'Ready')
               : modelStatus === 'loading'
-              ? 'Loading'
-              : 'Error'}
+              ? t('camera.loading', 'Loading')
+              : t('camera.error', 'Error')}
           </strong>
         </div>
 
         <div style={styles.statCard}>
-          <span style={styles.statLabel}>Повторы</span>
+          <span style={styles.statLabel}>{t('camera.reps', 'Повторы')}</span>
           <strong style={styles.statValue}>{repCount}</strong>
         </div>
 
         <div style={styles.statCard}>
-          <span style={styles.statLabel}>Фаза</span>
+          <span style={styles.statLabel}>{t('camera.phase', 'Фаза')}</span>
           <strong style={styles.statValue}>{stage}</strong>
         </div>
 
         <div style={styles.statCard}>
-          <span style={styles.statLabel}>{metricLabel}</span>
+          <span style={styles.statLabel}>{translatedMetricLabel}</span>
           <strong style={styles.statValue}>{metricValue ?? '—'}</strong>
         </div>
       </div>
 
       <div style={styles.progressCard}>
         <div style={styles.progressTop}>
-          <span style={styles.progressLabel}>Цель</span>
+          <span style={styles.progressLabel}>{t('camera.goal', 'Цель')}</span>
 
           <strong style={styles.progressValue}>
             {targetType === 'reps'
               ? `${repCount} / ${targetReps ?? '—'}`
               : targetType === 'time'
-              ? `${elapsedWorkSeconds} / ${targetDurationSeconds ?? '—'} сек`
-              : targetLabel || 'Без цели'}
+              ? `${elapsedWorkSeconds} / ${targetDurationSeconds ?? '—'} ${t('camera.sec', 'сек')}`
+              : targetLabel || t('camera.no_goal', 'Без цели')}
           </strong>
         </div>
 
@@ -1816,17 +1868,17 @@ export default function CameraCoachPanel({
         </div>
 
         <div style={styles.progressBottom}>
-          <span>{completionPercent ?? 0}% выполнено</span>
+          <span>{completionPercent ?? 0}% {t('camera.completed', 'выполнено')}</span>
           <strong>
-            {isTargetReached ? 'Упражнение завершено' : 'Ещё не завершено'}
+            {isTargetReached ? t('camera.exercise_completed', 'Упражнение завершено') : t('camera.not_completed', 'Ещё не завершено')}
           </strong>
         </div>
       </div>
 
-      <div style={styles.feedbackBox}>{feedback}</div>
+      <div style={styles.feedbackBox}>{translatedFeedback}</div>
 
       <div style={styles.helpText}>
-        Текущее упражнение: <strong>{exerciseName || 'не выбрано'}</strong>
+        {t('camera.current_exercise', 'Текущее упражнение:')} <strong>{exerciseName || t('camera.not_selected', 'не выбрано')}</strong>
       </div>
     </div>
   );
@@ -1839,7 +1891,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '18px',
-    color: '#fff',
+    color: 'var(--text-primary)',
   },
   header: {
     display: 'flex',
@@ -1868,7 +1920,7 @@ const styles = {
   },
   subtitle: {
     margin: '10px 0 0',
-    color: '#aab3c2',
+    color: 'var(--text-secondary)',
     lineHeight: 1.6,
     fontSize: '15px',
     maxWidth: '420px',
@@ -1933,7 +1985,7 @@ techChipError: {
     fontWeight: 800,
     cursor: 'pointer',
     background: 'transparent',
-    color: '#fff',
+    color: 'var(--text-primary)',
     border: '1px solid rgba(255,255,255,0.12)',
   },
   videoWrap: {
@@ -1968,8 +2020,8 @@ techChipError: {
     gap: '12px',
   },
   statCard: {
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: 'var(--card-bg)',
+    border: '1px solid var(--border-color)',
     borderRadius: '18px',
     padding: '14px',
     display: 'flex',
@@ -1978,7 +2030,7 @@ techChipError: {
     minWidth: 0,
   },
   statLabel: {
-    color: '#9ea8b8',
+    color: 'var(--text-secondary)',
     fontSize: '12px',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
@@ -1986,14 +2038,14 @@ techChipError: {
   statValue: {
     fontSize: '20px',
     fontWeight: 900,
-    color: '#fff',
+    color: 'var(--text-primary)',
     wordBreak: 'break-word',
   },
   progressCard: {
     borderRadius: '18px',
     padding: '14px 16px',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    background: 'var(--card-bg)',
+    border: '1px solid var(--border-color)',
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
@@ -2006,7 +2058,7 @@ techChipError: {
     flexWrap: 'wrap',
   },
   progressLabel: {
-    color: '#9ea8b8',
+    color: 'var(--text-secondary)',
     fontSize: '12px',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
@@ -2014,13 +2066,13 @@ techChipError: {
   progressValue: {
     fontSize: '20px',
     fontWeight: 900,
-    color: '#fff',
+    color: 'var(--text-primary)',
   },
   progressTrack: {
     width: '100%',
     height: '12px',
     borderRadius: '999px',
-    background: 'rgba(255,255,255,0.08)',
+    background: 'var(--border-color)',
     overflow: 'hidden',
   },
   progressFill: {
@@ -2034,7 +2086,7 @@ techChipError: {
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: '12px',
-    color: '#c9d4e4',
+    color: 'var(--text-secondary)',
     fontSize: '14px',
     flexWrap: 'wrap',
   },
@@ -2043,12 +2095,12 @@ techChipError: {
     padding: '14px 16px',
     background: 'rgba(99, 224, 255, 0.08)',
     border: '1px solid rgba(99, 224, 255, 0.18)',
-    color: '#dbefff',
+    color: 'var(--text-primary)',
     lineHeight: 1.5,
     fontWeight: 700,
   },
   helpText: {
-    color: '#aab3c2',
+    color: 'var(--text-secondary)',
     fontSize: '14px',
   },
 };

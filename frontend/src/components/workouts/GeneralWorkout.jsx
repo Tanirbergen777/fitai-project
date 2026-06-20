@@ -22,7 +22,7 @@ const GeneralWorkout = ({ onAllStepsComplete, onBack }) => {
     if (!selectedBodyPart) return;
 
     const fetchGeneralExercises = async () => {
-      setLoading(true);
+      if (exercises.length === 0) setLoading(true);
 
       try {
         let prepared = [];
@@ -469,7 +469,17 @@ const GeneralWorkout = ({ onAllStepsComplete, onBack }) => {
           ];
         }
 
-        setExercises(prepared);
+        setExercises(prepared.map(ex => {
+          let baseCalories = 10;
+          if (['jumping_jacks', 'high_knees', 'squat', 'lunge'].includes(ex.cameraMode)) {
+            baseCalories = 18;
+          } else if (ex.cameraMode === 'pushup') {
+            baseCalories = 15;
+          } else {
+            baseCalories = 12;
+          }
+          return { ...ex, calories: baseCalories };
+        }));
       } catch (err) {
         console.error('Ошибка загрузки упражнений общей формы:', err);
       } finally {
@@ -538,7 +548,7 @@ const GeneralWorkout = ({ onAllStepsComplete, onBack }) => {
 
         <div className="bodypart-container">
           <div className="gw-hero">
-            <span className="gw-badge">General training</span>
+            <span className="gw-badge">{t('training.generalPage.badge')}</span>
             <h2>{t('training.generalSelectTitle')}</h2>
             <p>
               Выберите часть тела, а система откроет подходящий план с видео,
@@ -614,11 +624,11 @@ const styles = `
   overflow-x: hidden;
   overflow-y: auto;
   box-sizing: border-box;
-  color: #fff;
+  color: var(--text-primary);
   background:
     radial-gradient(circle at top left, rgba(97, 218, 251, 0.08), transparent 28%),
     radial-gradient(circle at top right, rgba(198, 120, 221, 0.07), transparent 26%),
-    #1c1f24;
+    var(--bg-main);
   padding: 16px;
 }
 
@@ -697,7 +707,7 @@ const styles = `
 
 .gw-hero p {
   margin: 0 auto;
-  color: #aab3c2;
+  color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.65;
   max-width: 680px;
@@ -722,11 +732,11 @@ const styles = `
   align-items: flex-end;
   justify-content: flex-start;
   padding: 0;
-  color: #fff;
+  color: var(--text-primary);
   background-size: cover;
   background-position: center;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 22px 50px rgba(0,0,0,0.32);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
   transition:
     transform 0.32s ease,
     box-shadow 0.32s ease,
@@ -859,13 +869,13 @@ const styles = `
 .gw-loading-card h3 {
   margin: 10px 0 8px;
   font-size: 24px;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 900;
 }
 
 .gw-loading-card p {
   margin: 0;
-  color: #aab3c2;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -906,7 +916,7 @@ const styles = `
     padding: 10px 10px 100px;
     background:
       radial-gradient(circle at top, rgba(97,218,251,0.10), transparent 28%),
-      #1c1f24;
+      var(--bg-main);
   }
 
   .gw-page--engine {

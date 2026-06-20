@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>Тамақтану (Nutrition) EDA Графиктері</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h1 { color: #1e293b; }
+        h2 { color: #3b82f6; margin-top: 50px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;}
+        p { color: #64748b; margin-bottom: 20px; line-height: 1.6; font-size: 16px;}
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            margin-top: 15px;
+        }
+        .note {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            text-align: left;
+            margin-top: 20px;
+            border-radius: 4px;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тамақтану моделінің датасетіне жасалған EDA</h1>
+        <p>Бұл құжатта <b>nutrition_recommendation_sampled.csv</b> датасетіне жасалған Exploratory Data Analysis (EDA) нәтижелері көрсетілген.</p>
+        
+        <h2>1. Ұсынымдар үлестірімі (Label Distribution)</h2>
+        <p>Модельдің үйренуі үшін датасетте қанша "Ұсынамыз" (1) және "Ұсынбаймыз" (0) жауаптары бар екенін көрсететін график.</p>
+        <img src="nutrition_eda/label_dist.png" alt="Label Distribution" />
+        <div class="note">
+            <b>Ескерту:</b> Бұл график модельге қандай баланс (Class Balance) берілгенін түсінуге көмектеседі.
+        </div>
+        
+        <h2>2. Макронутриенттер үлестірімі (Calories & Macros)</h2>
+        <p>Базадағы тамақтардың калориясы, белогы, майы және көмірсулары қаншалықты жиі кездесетінін көрсететін гистограмма (Histogram).</p>
+        <img src="nutrition_eda/macros_dist.png" alt="Macros Distribution" />
+        
+        <h2>3. Мақсат пен Уақыт үлестірімі (Goal & Meal Slots)</h2>
+        <p>Қолданушылар көбінесе қандай мақсатпен тамақ іздейді және қай уақытқа сұраныс көбірек түсетіні көрсетілген.</p>
+        <img src="nutrition_eda/cat_dist.png" alt="Goals and Meal Slots" />
+        
+        <h2>4. Сандық деректер корреляциясы (Correlation Heatmap)</h2>
+        <p>Деректер бір-бірімен қаншалықты байланысты екенін көрсетеді (Pearson Correlation).</p>
+        <img src="nutrition_eda/corr_matrix.png" alt="Correlation Matrix" />
+        <div class="note">
+            <b>Ескерту:</b> 1.0-ге жақын мәндер (қызыл) екі деректің тікелей байланысты екенін білдіреді. 0 мәні ешқандай байланыс жоқ екенін білдіреді.
+        </div>
+    </div>
+</body>
+</html>

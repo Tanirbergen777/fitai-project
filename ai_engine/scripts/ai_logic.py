@@ -25,7 +25,7 @@ def build_training_frame(df: pd.DataFrame) -> pd.DataFrame:
     work_df = df[required].copy()
     work_df = work_df.dropna()
 
-    # Дополнительный признак
+
     work_df["BMI"] = work_df["Weight"] / (work_df["Height"] ** 2)
 
     return work_df
@@ -140,6 +140,70 @@ def predict_status(age, gender, height, weight, activity_level):
 
     prediction_numeric = model.predict(input_df)
     return label_encoder.inverse_transform(prediction_numeric)[0]
+
+def predict_goal_timeframe(age, height_cm, start_weight, target_weight, goal_str, requested_days):
+    clf_path = os.path.join(BASE_DIR, "..", "models_bin", "goal_time_classifier.pkl")
+    reg_path = os.path.join(BASE_DIR, "..", "models_bin", "goal_time_regressor.pkl")
+    
+    if not os.path.exists(clf_path) or not os.path.exists(reg_path):
+        return {"is_realistic": True, "recommended_days": requested_days}
+        
+    clf_model = joblib.load(clf_path)
+    reg_model = joblib.load(reg_path)
+    
+    goal_num = 0 if goal_str == 'Похудение' else 1
+    
+    input_df = pd.DataFrame([{
+        'age': float(age),
+        'height_cm': float(height_cm),
+        'start_weight': float(start_weight),
+        'target_weight': float(target_weight),
+        'goal': goal_num,
+        'requested_days': float(requested_days)
+    }])
+    
+    reg_input_df = input_df.drop(columns=['requested_days'])
+    
+    is_realistic = bool(clf_model.predict(input_df)[0])
+    recommended_days = int(reg_model.predict(reg_input_df)[0])
+    
+    # If they are giving themselves more time than the ML recommends, it's realistic
+    if requested_days >= recommended_days:
+        is_realistic = True
+        
+    weight_diff = abs(start_weight - target_weight)
+    weeks = requested_days / 7.0 if requested_days > 0 else 1.0
+    kg_per_week = weight_diff / weeks
+    
+    if goal_str == 'Набор массы':
+        workouts_per_week = 4 if kg_per_week > 0.3 else 3
+        calories_per_workout = 300
+        duration_per_workout = 60
+    else:
+        if kg_per_week > 0.7:
+            workouts_per_week = 5
+        elif kg_per_week > 0.4:
+            workouts_per_week = 4
+        elif kg_per_week > 0.2:
+            workouts_per_week = 3
+        else:
+            workouts_per_week = 2
+            
+        weekly_deficit = (weight_diff * 7700) / weeks
+        target_weekly_burn = weekly_deficit * 0.4
+        target_weekly_burn = max(target_weekly_burn, workouts_per_week * 250)
+        
+        calories_per_workout = int(target_weekly_burn / workouts_per_week)
+        calories_per_workout = max(200, min(800, calories_per_workout))
+        duration_per_workout = max(30, int(calories_per_workout / 6.5))
+            
+    return {
+        "is_realistic": is_realistic,
+        "recommended_days": recommended_days,
+        "workouts_per_week": workouts_per_week,
+        "calories_per_workout": calories_per_workout,
+        "duration_per_workout": duration_per_workout
+    }
 
 
 if __name__ == "__main__":

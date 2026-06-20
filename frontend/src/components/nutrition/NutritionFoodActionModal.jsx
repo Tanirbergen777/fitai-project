@@ -415,11 +415,11 @@ const NutritionFoodActionModal = ({ open, food, onClose }) => {
             max-height: 90vh;
             overflow-y: auto;
             border-radius: 28px;
-            background: linear-gradient(180deg, #232833 0%, #171c24 100%);
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.25);
             padding: 28px;
-            color: #fff;
+            color: var(--text-primary);
             animation: nutritionModalUp 0.3s ease;
           }
 
@@ -429,7 +429,7 @@ const NutritionFoodActionModal = ({ open, food, onClose }) => {
             right: 16px;
             border: none;
             background: transparent;
-            color: #b8c3d6;
+            color: var(--text-secondary);
             font-size: 28px;
             cursor: pointer;
           }
@@ -447,7 +447,7 @@ const NutritionFoodActionModal = ({ open, food, onClose }) => {
 
           .nutrition-food-modal-subtitle {
             margin: 0 0 18px 0;
-            color: #aab3c2;
+            color: var(--text-secondary);
             line-height: 1.7;
             font-size: 15px;
           }
@@ -462,9 +462,9 @@ const NutritionFoodActionModal = ({ open, food, onClose }) => {
           .nutrition-food-meta-chip {
             padding: 8px 14px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #dce4f2;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             font-size: 13px;
             font-weight: 700;
           }
@@ -478,20 +478,20 @@ const NutritionFoodActionModal = ({ open, food, onClose }) => {
 
           .nutrition-food-choice-card {
             text-align: left;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            background: var(--bg-sidebar);
             border-radius: 22px;
             padding: 22px;
             cursor: pointer;
             transition: all 0.25s ease;
-            color: white;
+            color: var(--text-primary);
           }
 
           .nutrition-food-choice-card:hover {
             transform: translateY(-4px);
-            background: rgba(255,255,255,0.06);
+            background: rgba(128,128,128,0.04);
             border-color: rgba(97,218,251,0.35);
-            box-shadow: 0 18px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.15);
           }
 
           .nutrition-food-choice-card h4 {
@@ -502,7 +502,7 @@ const NutritionFoodActionModal = ({ open, food, onClose }) => {
 
           .nutrition-food-choice-card p {
             margin: 0;
-            color: #b5bfd0;
+            color: var(--text-secondary);
             line-height: 1.6;
             font-size: 14px;
           }
@@ -522,7 +522,7 @@ const NutritionFoodActionModal = ({ open, food, onClose }) => {
           .nutrition-food-step-list {
             margin: 0;
             padding-left: 22px;
-            color: #d8e0ee;
+            color: var(--text-secondary);
             line-height: 1.8;
           }
 

@@ -77,18 +77,12 @@ def build_feature_row(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 def score_exercise(ex: Dict[str, Any], user_focus: str, model1_training_level: str) -> int:
-    """
-    3-қадам: Сәйкестікті бағалау (Scoring)
-    """
+
     score = 0
     w_focus = 10
     w_level = 5
     
-    # FocusMatch
-    # User focus could be "arms", "legs", "abs", "chest", "full", "cardio"
-    # Exercise focus is "strength", "cardio", "flexibility"
-    # And body_part is "abs", "arms", "chest", "legs", "fullbody"
-    
+
     if user_focus == ex.get("body_part") or (user_focus == "full" and ex.get("body_part") == "fullbody"):
         score += w_focus
     elif user_focus == "cardio" and ex.get("focus") == "cardio":
@@ -107,35 +101,31 @@ def predict_workout_plan(payload: Dict[str, Any]) -> Dict[str, Any]:
     # 1. Load Model 1
     model = _ensure_loaded()
     
-    # Prepare Dataframe for Model 1 Pipeline
-    # The pipeline handles SimpleImputer and OneHotEncoder internally!
+
     X = pd.DataFrame([row])
-    
-    # Predict Constraints (Impact Level, Training Level)
+
     predictions = model.predict(X)[0] # It returns a 1D array like ['low', 'beginner']
-    
-    # If the model is a MultiOutputClassifier, it returns an array of shape (1, 2)
+
     predicted_impact = str(predictions[0])
     predicted_training_level = str(predictions[1])
     
     user_focus = payload.get("focus", "full")
     user_equipment = payload.get("equipment", "none")
     duration = _safe_int(payload.get("duration") or payload.get("workout_duration_minutes"), 15)
-    
-    # 2-қадам: Қатаң сүзу (Hard Filtering)
+
     valid_exercises = []
     for ex in AI_EXERCISES:
-        # Rule 1: Impact Level Safety
+
         if predicted_impact == "low" and ex.get("impact_level") == "high":
-            continue # Сызып тастаймыз
+            continue
             
-        # Rule 2: Equipment Safety
+
         if user_equipment == "none" and ex.get("equipment") != "none":
-            continue # Сызып тастаймыз
+            continue
             
         valid_exercises.append(ex)
         
-    # 3-қадам: Сәйкестікті бағалау (Scoring)
+
     scored_exercises = []
     for ex in valid_exercises:
         score = score_exercise(ex, user_focus, predicted_training_level)
@@ -145,8 +135,7 @@ def predict_workout_plan(payload: Dict[str, Any]) -> Dict[str, Any]:
     scored_exercises.sort(key=lambda x: x[0], reverse=True)
     
     # 4-қадам: Жоспарды жинау (Уақытқа сыйдыру)
-    # Average exercise takes about ~1 minute (30s work + 15s rest + 5s prep = 50s).
-    # So num_exercises = duration_minutes
+
     num_exercises = max(4, duration)
     
     top_candidates = [ex for score, ex in scored_exercises if score > 0]

@@ -66,7 +66,7 @@ const Sidebar = ({
 
 // СТИЛИ (чуть-чуть подправили z-index и переходы)
 const sidebarStyle = {
-  background: '#1c1e22',
+  background: 'var(--bg-sidebar)',
   display: 'flex',
   flexDirection: 'column',
   height: '100vh',
@@ -80,15 +80,15 @@ const sidebarStyle = {
   // -------------------------
   overflow: 'hidden',
   zIndex: 10000, // Поднимаем выше всех
-  transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-  borderRight: '1px solid rgba(255,255,255,0.05)',
-  boxShadow: '10px 0 30px rgba(0,0,0,0.3)',
+  transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease',
+  borderRight: '1px solid var(--border-color)',
+  boxShadow: '10px 0 30px rgba(0,0,0,0.1)',
   backdropFilter: 'blur(15px)',
 };
 
 const logoContainerStyle = { padding: '30px 20px', display: 'flex', alignItems: 'center', height: '80px', overflow: 'hidden' };
 const logoTextStyle = { color: '#61dafb', margin: 0, fontSize: '20px', fontWeight: '900', marginLeft: '10px', whiteSpace: 'nowrap' };
-const menuItemBaseStyle = { cursor: 'pointer', display: 'flex', alignItems: 'center', borderRadius: '12px', color: '#abb2bf', transition: 'all 0.2s ease', overflow: 'hidden' };
+const menuItemBaseStyle = { cursor: 'pointer', display: 'flex', alignItems: 'center', borderRadius: '12px', color: 'var(--text-secondary)', transition: 'all 0.2s ease', overflow: 'hidden' };
 const logoutButtonStyle = {
   width: '85%', // Добавь ширину, чтобы кнопка была видна
   marginBottom: '20px', // Отступ от низа

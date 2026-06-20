@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>Confusion Matrix Графиктері</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h1 { color: #1e293b; }
+        h2 { color: #3b82f6; margin-top: 40px; }
+        p { color: #64748b; margin-bottom: 20px; line-height: 1.6; }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Моделінің Confusion Matrix (Қателіктер матрицасы)</h1>
+        <p>Бұл графиктер <b>model_1_constraints.pkl</b> моделінің тест мәліметтеріндегі (Test Set) дәлдігін көрсетеді. Диагональдағы қою көк сандар — модельдің дұрыс тапқан (қателеспеген) жауаптары.</p>
+        
+        <h2>1. Impact Level (Жүктеме деңгейі)</h2>
+        <img src="impact_level_cm.png" alt="Impact Level CM" />
+        
+        <h2>2. Training Level (Дайындық деңгейі)</h2>
+        <img src="training_level_cm.png" alt="Training Level CM" />
+    </div>
+</body>
+</html>

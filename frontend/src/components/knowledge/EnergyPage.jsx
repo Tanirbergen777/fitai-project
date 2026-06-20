@@ -630,25 +630,6 @@ const EnergyPage = () => {
               </div>
             </div>
 
-            <div style={styles.futureAiBlock}>
-              <h3 style={styles.cardTitle}>
-                {tr('knowledgeModule.energy.ui.futureAiTitle', 'Что будет в будущем')}
-              </h3>
-              <p style={styles.text}>
-                {tr(
-                  'knowledgeModule.energy.ui.futureAiText',
-                  'Позже этот интерфейс будет работать через нашу собственную модель: она будет определять тип усталости, процент уверенности, уровень перегрузки и давать более точные персональные советы.'
-                )}
-              </p>
-
-              <div style={styles.futureAiList}>
-                <div style={styles.futureAiItem}>• confidence score</div>
-                <div style={styles.futureAiItem}>• fatigue type</div>
-                <div style={styles.futureAiItem}>• overload level</div>
-                <div style={styles.futureAiItem}>• personal recovery advice</div>
-              </div>
-            </div>
-
             <div style={styles.buttonRow}>
               <button style={styles.primaryButton} onClick={() => setMode('survey')}>
                 {tr('knowledgeModule.energy.ui.retakeButton', 'Пройти опрос заново')}
@@ -1065,27 +1046,6 @@ const styles = {
     color: 'var(--text-primary)',
     lineHeight: 1.65,
     fontSize: '14px',
-  },
-  futureAiBlock: {
-    marginTop: '18px',
-    padding: '18px',
-    borderRadius: '20px',
-    background: 'rgba(97,218,251,0.06)',
-    border: '1px dashed rgba(97,218,251,0.25)',
-  },
-  futureAiList: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: '8px',
-    marginTop: '14px',
-  },
-  futureAiItem: {
-    padding: '10px 12px',
-    borderRadius: '12px',
-    background: 'rgba(255,255,255,0.04)',
-    color: 'var(--text-primary)',
-    fontSize: '13px',
-    fontWeight: '600',
   },
 };
 

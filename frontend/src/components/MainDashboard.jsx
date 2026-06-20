@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from '../config/api';
+import ActivityHeatmap from './ActivityHeatmap';
+import RatingChart from './RatingChart';
+import GoalProgressCharts from './GoalProgressCharts';
 
 const MainDashboard = ({ user, aiResult, setActiveTab }) => {
   const { t } = useTranslation();
+  const [activityStats, setActivityStats] = useState(null);
+
+  useEffect(() => {
+    const uId = localStorage.getItem('userId');
+    if (uId) {
+      fetch(`${API_BASE_URL}/activity-stats/${uId}`)
+        .then(res => res.json())
+        .then(data => setActivityStats(data))
+        .catch(err => console.error("Error fetching activity stats:", err));
+    }
+  }, []);
 
   const cards = [
     {
@@ -102,25 +117,17 @@ const MainDashboard = ({ user, aiResult, setActiveTab }) => {
         ))}
       </div>
 
-      <div
-        className="main-dashboard-status"
-        style={{
-          ...styles.statusBox,
-          background: 'rgba(97, 218, 251, 0.05)',
-          borderColor: 'rgba(97, 218, 251, 0.3)'
-        }}
-      >
-        <div className="main-dashboard-status-inner">
-          <span className="main-dashboard-status-icon">🔥</span>
+      <GoalProgressCharts />
 
-          <div className="main-dashboard-status-text">
-            <span>{t('dashboard.current_status')}: </span>
-
-            <strong>
-              {aiResult?.status || t('dashboard.analyzing')}
-            </strong>
-          </div>
-        </div>
+      <div className="dashboard-stats-grid">
+        {activityStats ? (
+          <>
+            <ActivityHeatmap heatmapData={activityStats.heatmap} />
+            <RatingChart ratingData={activityStats.rating} />
+          </>
+        ) : (
+          <div className="stats-loading">Статистика жүктелуде...</div>
+        )}
       </div>
 
       <style>{`
@@ -128,6 +135,28 @@ const MainDashboard = ({ user, aiResult, setActiveTab }) => {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+}
+
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+@media (max-width: 1000px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stats-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .main-dashboard-hero {

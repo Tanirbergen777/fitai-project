@@ -175,6 +175,44 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
+    # --- PENALTY LOGIC ---
+    now = datetime.utcnow()
+    if user.last_workout_time and user.last_penalty_time:
+        if (now - user.last_workout_time).total_seconds() > 24 * 3600 and \
+           (now - user.last_penalty_time).total_seconds() > 24 * 3600:
+            user.rating = int((user.rating or 0) * 0.9)
+            user.last_penalty_time = now
+            db.commit()
+    # ---------------------
+
+    # ВАЖНО: Записываем ежедневную активность (GitHub graph)
+    today = date.today()
+    activity = db.query(models.UserActivity).filter(
+        models.UserActivity.user_id == user.id,
+        models.UserActivity.date == today
+    ).first()
+
+    if not activity:
+        new_activity = models.UserActivity(
+            user_id=user.id,
+            date=today,
+            rating_snapshot=user.rating or 0
+        )
+        db.add(new_activity)
+
+        # Обновляем streak (подряд дней)
+        if user.last_visit == today - timedelta(days=1):
+            user.streak_count = (user.streak_count or 0) + 1
+        elif user.last_visit != today:
+            user.streak_count = 1
+
+        user.last_visit = today
+        db.commit()
+    elif activity.rating_snapshot != (user.rating or 0):
+        # Обновляем рейтинг за сегодня, если он изменился
+        activity.rating_snapshot = user.rating or 0
+        db.commit()
+
     profile = db.query(models.UserProfile).filter(models.UserProfile.user_id == user_id).first()
 
     # ВАЖНО: Возвращаем данные, даже если профиля (BMI) еще нет
@@ -187,10 +225,78 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
         "bmi": profile.bmi if profile else None,
         "weight": profile.weight if profile else None,
         "height": profile.height if profile else None,
-        "goal": profile.goal if profile else "Не установлена"
+        "goal": profile.goal if profile else "Не установлена",
+        "target_weight": profile.target_weight if profile else None,
+        "target_timeframe_weeks": profile.target_timeframe_weeks if profile else None,
+        "target_workouts_per_week": profile.target_workouts_per_week if profile else None,
+        "target_calories_per_workout": profile.target_calories_per_workout if profile else None,
+        "target_duration_per_workout": profile.target_duration_per_workout if profile else None
     }
 
+@router.get("/activity-stats/{user_id}")
+def get_activity_stats(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
 
+    # Берем активность за последние 180 дней (полгода)
+    six_months_ago = date.today() - timedelta(days=180)
+    
+    activities = db.query(models.UserActivity).filter(
+        models.UserActivity.user_id == user_id,
+        models.UserActivity.date >= six_months_ago
+    ).order_by(models.UserActivity.date.asc()).all()
+    
+    heatmap_data = []
+    
+    for act in activities:
+        heatmap_data.append({
+            "date": act.date.isoformat(),
+            "active": True
+        })
+        
+    # График рейтинга только за текущую неделю (Пн-Вс)
+    today = date.today()
+    start_of_week = today - timedelta(days=today.weekday())
+    
+    # Берем последний известный рейтинг до начала этой недели
+    last_act_before_week = db.query(models.UserActivity).filter(
+        models.UserActivity.user_id == user_id,
+        models.UserActivity.date < start_of_week
+    ).order_by(models.UserActivity.date.desc()).first()
+    
+    base_rating = last_act_before_week.rating_snapshot if last_act_before_week else 0
+
+    recent_activities = [act for act in activities if act.date >= start_of_week]
+    
+    rating_data = []
+    for i in range(7):
+        d = start_of_week + timedelta(days=i)
+        
+        if d > today or (user.created_at and d < user.created_at.date()):
+            rating_data.append({
+                "date": d.isoformat(),
+                "rating": None
+            })
+            continue
+
+        act = next((a for a in recent_activities if a.date == d), None)
+        if act:
+            rating_data.append({
+                "date": d.isoformat(),
+                "rating": act.rating_snapshot
+            })
+        else:
+            prev_rating = rating_data[-1]["rating"] if rating_data and rating_data[-1]["rating"] is not None else base_rating
+            rating_data.append({
+                "date": d.isoformat(),
+                "rating": prev_rating
+            })
+            
+    return {
+        "heatmap": heatmap_data,
+        "rating": rating_data
+    }
 
 # Регистрация у тебя отличная, оставляем как есть.
 
@@ -351,6 +457,24 @@ async def complete_workout(user_id: int, data: WorkoutCompleteRequest, db: Sessi
 
     # 1. Начисляем рейтинг (опыт) ВСЕГДА
     user.rating = (user.rating or 0) + data.points
+    user.last_workout_time = datetime.utcnow()
+    user.last_penalty_time = datetime.utcnow()
+
+    # Обновляем снимок рейтинга на сегодня, чтобы график отображал актуальный рейтинг
+    activity = db.query(models.UserActivity).filter(
+        models.UserActivity.user_id == user.id,
+        models.UserActivity.date == today
+    ).first()
+    
+    if activity:
+        activity.rating_snapshot = user.rating
+    else:
+        new_activity = models.UserActivity(
+            user_id=user.id,
+            date=today,
+            rating_snapshot=user.rating
+        )
+        db.add(new_activity)
 
     # 2. Логика Стрика (Огонька)
     # Если дата последней тренировки (last_login_date) — это ВЧЕРА или раньше (None)

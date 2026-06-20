@@ -413,8 +413,8 @@ const AiAssistantPage = ({
   gap: 16px;
   padding: 16px;
   border-radius: 24px;
-  background: rgba(20, 24, 32, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   backdrop-filter: blur(10px);
   box-sizing: border-box;
   overflow: hidden;
@@ -448,7 +448,7 @@ const AiAssistantPage = ({
   text-align: center;
   opacity: 0.9;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .ai-history-list {
@@ -464,10 +464,10 @@ const AiAssistantPage = ({
 }
 
 .ai-history-empty {
-  color: rgba(255,255,255,0.6);
+  color: var(--text-secondary);
   padding: 16px;
   border-radius: 16px;
-  border: 1px dashed rgba(255,255,255,0.1);
+  border: 1px dashed var(--border-color);
   text-align: center;
   font-size: 14px;
 }
@@ -478,8 +478,8 @@ const AiAssistantPage = ({
   display: flex;
   flex-direction: column;
   border-radius: 24px;
-  background: rgba(12, 15, 22, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   overflow: hidden;
   backdrop-filter: blur(10px);
 }
@@ -523,9 +523,9 @@ const AiAssistantPage = ({
 }
 
 .ai-message-bubble.bot {
-  background: rgba(34, 39, 49, 0.9);
-  color: #eef4ff;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-sidebar);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 18px 18px 18px 6px;
 }
 
@@ -572,8 +572,8 @@ const AiAssistantPage = ({
 
 .ai-input-area {
   padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 18, 25, 0.94);
+  border-top: 1px solid var(--border-color);
+  background: var(--card-bg);
   box-sizing: border-box;
 }
 
@@ -591,10 +591,10 @@ const AiAssistantPage = ({
   resize: none;
   overflow-y: auto;
   border-radius: 16px;
-  border: 1px solid rgba(97, 218, 251, 0.2);
-  background: rgba(25, 31, 41, 0.98) !important;
-  color: #f2f7ff !important;
-  -webkit-text-fill-color: #f2f7ff !important;
+  border: 1px solid var(--border-color);
+  background: var(--bg-main) !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
   outline: none;
   padding: 14px 16px;
   font-size: 15px;
@@ -607,8 +607,8 @@ const AiAssistantPage = ({
 }
 
 .ai-input::placeholder {
-  color: rgba(229, 236, 250, 0.5);
-  -webkit-text-fill-color: rgba(229, 236, 250, 0.5);
+  color: var(--text-secondary);
+  -webkit-text-fill-color: var(--text-secondary);
 }
 
 .ai-input:focus {
@@ -620,9 +620,9 @@ const AiAssistantPage = ({
 .ai-input:-webkit-autofill:hover,
 .ai-input:-webkit-autofill:focus,
 .ai-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px rgba(25, 31, 41, 1) inset !important;
-  -webkit-text-fill-color: #f2f7ff !important;
-  caret-color: #f2f7ff !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-main) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  caret-color: var(--text-primary) !important;
   transition: background-color 9999s ease-in-out 0s;
 }
 
@@ -693,9 +693,9 @@ const AiAssistantPage = ({
     height: 44px;
     padding: 0 12px;
     border-radius: 14px;
-    background: rgba(255,255,255,0.035);
-    border: 1px solid rgba(255,255,255,0.06);
-    color: #cdd6e5;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     font-size: 13px;
@@ -730,7 +730,7 @@ const AiAssistantPage = ({
     transition: transform 0.25s ease;
     padding: 12px;
     border-radius: 20px;
-    background: rgba(20, 24, 32, 0.98);
+    background: var(--card-bg);
     box-shadow: 0 24px 80px rgba(0,0,0,0.55);
   }
 
@@ -742,7 +742,7 @@ const AiAssistantPage = ({
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: white;
+    color: var(--text-primary);
     font-size: 16px;
     padding: 4px 2px 2px;
   }
@@ -752,8 +752,8 @@ const AiAssistantPage = ({
     height: 38px;
     border: none;
     border-radius: 14px;
-    background: rgba(255,255,255,0.06);
-    color: white;
+    background: var(--bg-main);
+    color: var(--text-primary);
     font-size: 28px;
     cursor: pointer;
   }
@@ -790,7 +790,7 @@ const AiAssistantPage = ({
 
   .ai-input-area {
     padding: 8px;
-    background: rgba(15, 18, 25, 0.98);
+    background: var(--card-bg);
   }
 
   .ai-composer-box {

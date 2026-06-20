@@ -29,6 +29,19 @@ class ProfileUpdate(BaseModel):
     height: float
     activity_level: Optional[int] = None
     goal: str
+    target_weight: Optional[float] = None
+    target_timeframe_weeks: Optional[int] = None
+    target_workouts_per_week: Optional[int] = None
+    target_calories_per_workout: Optional[int] = None
+    target_duration_per_workout: Optional[int] = None
+
+class GoalTimeframePredictRequest(BaseModel):
+    age: int
+    height: float
+    weight: float
+    target_weight: float
+    goal: str
+    requested_days: int
 
 class VerifyEmail(BaseModel):
     email: str

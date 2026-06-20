@@ -495,9 +495,9 @@ const HomePage = ({ aiResult, user, userId, handleLogout, onProfileUpdate }) => 
     gap: 4px;
     padding: 6px;
     border-radius: 22px;
-    background: rgba(28, 31, 36, 0.94);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 18px 50px rgba(0,0,0,0.42);
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.1);
     backdrop-filter: blur(16px);
     box-sizing: border-box;
   }
@@ -507,7 +507,7 @@ const HomePage = ({ aiResult, user, userId, handleLogout, onProfileUpdate }) => 
     border: none;
     border-radius: 16px;
     background: transparent;
-    color: #aab3c2;
+    color: var(--text-secondary);
     display: flex;
     flex-direction: column;
     align-items: center;

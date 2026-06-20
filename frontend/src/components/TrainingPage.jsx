@@ -151,8 +151,8 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   min-width: 0;
   min-height: 100dvh;
   box-sizing: border-box;
-  color: #ffffff;
-  background: #1c1f24;
+  color: var(--text-primary);
+  background: transparent;
   padding: 52px 70px 70px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -181,7 +181,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 .tp-subtitle {
   margin: 0 auto;
   max-width: 900px;
-  color: #b8c7df;
+  color: var(--text-secondary);
   font-size: 19px;
   line-height: 1.55;
 }
@@ -199,12 +199,10 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   width: 100%;
   min-width: 0;
   height: 305px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid var(--border-color);
   border-radius: 30px;
-  background:
-    radial-gradient(circle at top left, rgba(97,218,251,0.045), transparent 34%),
-    linear-gradient(180deg, #22272f 0%, #20242c 100%);
-  color: #ffffff;
+  background: var(--card-bg);
+  color: var(--text-primary);
   padding: 34px 32px 32px;
   box-sizing: border-box;
   text-align: left;
@@ -214,7 +212,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   flex-direction: column;
   justify-content: space-between;
   gap: 24px;
-  box-shadow: 0 18px 44px rgba(0,0,0,0.18);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.1);
   transition:
     transform 0.24s ease,
     border-color 0.24s ease,
@@ -226,11 +224,8 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
 .tp-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(97,218,251,0.32);
-  box-shadow: 0 28px 70px rgba(0,0,0,0.34);
-  background:
-    radial-gradient(circle at top left, rgba(97,218,251,0.08), transparent 34%),
-    linear-gradient(180deg, #252b35 0%, #20242c 100%);
+  border-color: rgba(97,218,251,0.4);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.15);
 }
 
 .tp-card:active {
@@ -239,9 +234,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
 .tp-card--ai {
   border: 1px dashed rgba(198,120,221,0.50);
-  background:
-    radial-gradient(circle at top left, rgba(198,120,221,0.07), transparent 35%),
-    linear-gradient(180deg, #24242d 0%, #20202a 100%);
+  background: var(--card-bg);
 }
 
 .tp-card--ai:hover {
@@ -279,7 +272,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
 .tp-card-content h3 {
   margin: 0 0 16px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: clamp(24px, 1.55vw, 31px);
   line-height: 1.14;
   font-weight: 950;
@@ -291,7 +284,7 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 
 .tp-card-content p {
   margin: 0;
-  color: #b8c7df;
+  color: var(--text-secondary);
   font-size: 17px;
   line-height: 1.55;
 }
@@ -299,14 +292,12 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 .tp-ai-shell {
   width: min(1200px, 100%);
   margin: 0 auto;
-  background:
-    radial-gradient(circle at top right, rgba(198, 120, 221, 0.12), transparent 30%),
-    linear-gradient(180deg, #232833 0%, #1b2029 100%);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 28px;
   padding: 32px;
   box-sizing: border-box;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.1);
 }
 
 .tp-ai-badge {
@@ -329,10 +320,11 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   line-height: 1.08;
   margin: 0 0 10px 0;
   letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
 .tp-ai-text {
-  color: #aab3c2;
+  color: var(--text-secondary);
   line-height: 1.7;
   font-size: 15px;
   margin: 0 0 26px;
@@ -347,8 +339,8 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
 }
 
 .tp-ai-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(128,128,128,0.04);
+  border: 1px solid var(--border-color);
   border-radius: 22px;
   padding: 22px;
   min-width: 0;
@@ -371,11 +363,12 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   font-size: 20px;
   font-weight: 900;
   line-height: 1.25;
+  color: var(--text-primary);
 }
 
 .tp-ai-card p {
   margin: 0;
-  color: #c8d1df;
+  color: var(--text-secondary);
   line-height: 1.6;
   font-size: 14px;
 }
@@ -392,11 +385,12 @@ const TrainingPage = ({ onComplete, setActiveTab }) => {
   margin: 0 0 10px 0;
   font-size: 18px;
   font-weight: 900;
+  color: var(--text-primary);
 }
 
 .tp-ai-note p {
   margin: 0;
-  color: #c8d1df;
+  color: var(--text-secondary);
   line-height: 1.7;
   font-size: 14px;
 }

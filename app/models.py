@@ -44,6 +44,8 @@ class User(Base):
     avatar_url = Column(String, nullable=True)
     reset_code = Column(String, nullable=True)
     reset_code_expires_at = Column(DateTime, nullable=True)
+    last_workout_time = Column(DateTime, nullable=True)
+    last_penalty_time = Column(DateTime, nullable=True)
 class UserProfile(Base):
     __tablename__ = "user_profiles"
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
@@ -57,6 +59,12 @@ class UserProfile(Base):
     hip = Column(Float, nullable=True)
     arm = Column(Float)
     custom_goal_text = Column(String, nullable=True)
+    target_weight = Column(Float, nullable=True)
+    target_timeframe_weeks = Column(Integer, nullable=True)
+    target_workouts_per_week = Column(Integer, nullable=True)
+    target_calories_per_workout = Column(Integer, nullable=True)
+    target_duration_per_workout = Column(Integer, nullable=True)
+    goal_start_date = Column(Date, nullable=True, default=date.today)
 
 class NutritionProfile(Base):
     __tablename__ = "nutrition_profiles"
@@ -212,4 +220,15 @@ class HabitReminder(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     user = relationship("User", backref="habit_reminders")
+
+class UserActivity(Base):
+    __tablename__ = "user_activities"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    date = Column(Date, default=date.today, nullable=False)
+    rating_snapshot = Column(Integer, default=0, nullable=False)
+
+    user = relationship("User", backref="activities")
+
 

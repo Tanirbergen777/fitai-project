@@ -121,9 +121,7 @@ async def recommend_training_plan(
                 if payload.bmi is None and profile.bmi:
                     payload_data["bmi"] = float(profile.bmi)
 
-            # =====================================================
-            # HYBRID AI: RULE-BASED SAFETY LAYER (Қарқынды бақылау)
-            # =====================================================
+
             from datetime import datetime
             
             past_workouts = db.query(models.WorkoutCameraSession).filter(

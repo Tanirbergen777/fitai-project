@@ -1,0 +1,91 @@
+flowchart TB
+
+%% =====================================================
+%% CLASS DEFINITIONS
+%% =====================================================
+
+classDef frontend fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e40af,rx:10px,ry:10px;
+classDef database fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#334155,rx:10px,ry:10px;
+classDef backend fill:#f3e8ff,stroke:#a855f7,stroke-width:2px,color:#6b21a8,rx:10px,ry:10px;
+classDef output fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#065f46,rx:10px,ry:10px;
+classDef error fill:#fef2f2,stroke:#ef4444,stroke-width:2px,color:#991b1b,rx:10px,ry:10px;
+classDef decision fill:#fef3c7,stroke:#f59e0b,stroke-width:2px,color:#b45309,rx:10px,ry:10px;
+
+%% =====================================================
+%% ENTRY POINT
+%% =====================================================
+
+ENTRY{"Платформаға<br>Кіру"}:::frontend
+
+LOGIN_PAGE["Кіру беті (Login)<br>Email, Password енгізу"]:::frontend
+REG_PAGE["Тіркелу беті (Register)<br>Username, Email, Password енгізу"]:::frontend
+
+ENTRY -->|"Аккаунты бар"| LOGIN_PAGE
+ENTRY -->|"Жаңа қолданушы"| REG_PAGE
+
+%% =====================================================
+%% LOGIN FLOW
+%% =====================================================
+
+subgraph LOGIN_FLOW ["Кіру Логикасы (Login Flow)"]
+    direction TB
+    LOGIN_REQ["POST /login/access-token"]:::backend
+    CHECK_USER{"Пайдаланушы<br>базада бар ма?"}:::decision
+    ERR_NO_USER["Қате: Мұндай қолданушы<br>тіркелмеген"]:::error
+    CHECK_PASS{"Құпия сөз<br>дұрыс па?"}:::decision
+    ERR_WRONG_PASS["Қате: Құпия сөз<br>қате енгізілді"]:::error
+    LOGIN_SUCCESS["JWT Token жасау<br>және қайтару"]:::backend
+end
+
+LOGIN_PAGE -->|"Мәліметтерді жіберу"| LOGIN_REQ
+LOGIN_REQ --> CHECK_USER
+CHECK_USER -->|"Жоқ"| ERR_NO_USER
+CHECK_USER -->|"Иә"| CHECK_PASS
+CHECK_PASS -->|"Қате"| ERR_WRONG_PASS
+CHECK_PASS -->|"Дұрыс"| LOGIN_SUCCESS
+
+ERR_NO_USER --> LOGIN_PAGE
+ERR_WRONG_PASS --> LOGIN_PAGE
+
+%% =====================================================
+%% REGISTRATION FLOW
+%% =====================================================
+
+subgraph REG_FLOW ["Тіркелу Логикасы (Registration Flow)"]
+    direction TB
+    REG_REQ["POST /users/open"]:::backend
+    CHECK_EXIST{"Бұл Email не Username<br>базада бар ма?"}:::decision
+    ERR_EXIST["Қате: Бұл аккаунт<br>алдын ала тіркелген"]:::error
+    HASH_PASS["Құпия сөзді хэштеу<br>(Bcrypt алгоритмі)"]:::backend
+    SAVE_USER[("Жаңа қолданушыны<br>базаға сақтау")]:::database
+end
+
+REG_PAGE -->|"Мәліметтерді жіберу"| REG_REQ
+REG_REQ --> CHECK_EXIST
+CHECK_EXIST -->|"Иә (Бар)"| ERR_EXIST
+CHECK_EXIST -->|"Жоқ (Бос)"| HASH_PASS
+HASH_PASS --> SAVE_USER
+
+ERR_EXIST --> REG_PAGE
+SAVE_USER -->|"Автоматты түрде кіру"| LOGIN_REQ
+
+%% =====================================================
+%% POST-AUTH (PROFILE CHECK)
+%% =====================================================
+
+subgraph POST_AUTH ["Авторизациядан кейінгі тексеріс"]
+    direction TB
+    GET_ME["GET /users/me<br>Профильді тексеру"]:::backend
+    CHECK_PROFILE{"Профиль<br>толтырылған ба?"}:::decision
+    ONBOARDING["Сауалнама беті<br>(Жас, салмақ, мақсат енгізу)"]:::frontend
+    SAVE_PROF["POST /profiles/<br>Деректерді сақтау"]:::backend
+    DASHBOARD["Басты Бетке кіру<br>(Main Dashboard)"]:::output
+end
+
+LOGIN_SUCCESS -->|"Token браузерде сақталады"| GET_ME
+GET_ME --> CHECK_PROFILE
+CHECK_PROFILE -->|"Жоқ"| ONBOARDING
+CHECK_PROFILE -->|"Иә"| DASHBOARD
+
+ONBOARDING -->|"Дене параметрлерін жіберу"| SAVE_PROF
+SAVE_PROF --> DASHBOARD

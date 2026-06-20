@@ -63,9 +63,14 @@ const MASS_FOODS = [
 ];
 
 const MassGainNutrition = ({ onBack, userId, onFoodSelected }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [selectedFoodMessage, setSelectedFoodMessage] = useState('');
   const [todayHistory, setTodayHistory] = useState([]);
+
+  useEffect(() => {
+    setSelectedFoodMessage('');
+  }, [i18n.language]);
+
 
   const loadTodayHistory = useCallback(async () => {
     if (!userId) return;
