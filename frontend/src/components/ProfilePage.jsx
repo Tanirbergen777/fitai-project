@@ -19,8 +19,11 @@ const ProfilePage = ({ user, aiResult, onProfileUpdate }) => {
     const uId = localStorage.getItem('userId');
     if (uId) {
       fetch(`${API_BASE_URL}/activity-stats/${uId}`)
-        .then(res => res.json())
-        .then(data => setActivityStats(data))
+        .then(res => {
+          if (!res.ok) return null;
+          return res.json();
+        })
+        .then(data => { if (data) setActivityStats(data); })
         .catch(err => console.error("Error fetching activity stats:", err));
     }
   }, []);

@@ -37,8 +37,15 @@ const GoalProgressCharts = () => {
     if (!userId) return;
 
     fetch(`${API_BASE_URL}/user-progress-stats/${userId}`)
-      .then(res => res.json())
-      .then(data => setStats(data))
+      .then(res => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then(data => {
+        if (data && data.weeks && data.workouts_week && data.calories_today && data.duration_today) {
+          setStats(data);
+        }
+      })
       .catch(err => console.error("Error fetching progress stats:", err));
   }, []);
 
